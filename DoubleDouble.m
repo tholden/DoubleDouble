@@ -193,6 +193,19 @@ classdef DoubleDouble
             n = numArgumentsFromSubscript( v.v1, s, IndexingContext );
         end
         
+        function v = end( v, k, n )
+            if n == 1
+                v = numel( v.v1 );
+            else
+                v = size( v.v1 );
+                if k <= length( v )
+                    v = v( k );
+                else
+                    v = 1;
+                end
+            end
+        end
+        
         function v = repmat( v, varargin )
             v = DoubleDouble.Make( repmat( v.v1, varargin{:} ), repmat( v.v2, varargin{:} ) );
         end
