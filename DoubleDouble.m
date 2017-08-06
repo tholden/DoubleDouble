@@ -42,7 +42,7 @@ classdef DoubleDouble
     end
     
     properties ( Constant, GetAccess = public )
-        eps = 4.93038065763132e-32;
+        eps = DoubleDouble.Make( 4.93038065763132e-32, 0 );
         pi = DoubleDouble.Make( 3.141592653589793116e+00, 1.224646799147353207e-16 );
     end
     
@@ -690,7 +690,7 @@ classdef DoubleDouble
             % argument substantially speeds up the convergence.
             k = 512.0;
             inv_k = 1.0 / k;
-            Threshhold = inv_k .* DoubleDouble.eps;
+            Threshhold = inv_k .* DoubleDouble.eps.v1;
 
             m = floor( v.v1 ./ DoubleDouble.log_2.v1 + 0.5 );
             r = TimesPowerOf2( v - DoubleDouble.log_2 .* m, inv_k );
@@ -1842,7 +1842,7 @@ classdef DoubleDouble
         end
         
         function v = SinTaylor( v )
-            Threshhold = 0.5 .* abs( v.v1(:) ) .* DoubleDouble.eps;
+            Threshhold = 0.5 .* abs( v.v1(:) ) .* DoubleDouble.eps.v1;
             x = - v .* v;
             r = v;
             for i = 1 : 2 : DoubleDouble.NInverseFactorial
