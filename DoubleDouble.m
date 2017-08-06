@@ -1995,16 +1995,16 @@ classdef DoubleDouble
             [ q1, q2 ] = DoubleDouble.Normalize( q1, q2 );
             [ r1, r2 ] = DoubleDouble.DDPlusDD( q1, q2, q3, zeros( size( q3 ) ) );
             Select = ( b1 == 0 ) & ( b2 == 0 );
-            a1Select = a1( Select );
-            Tmp( a1Select > 0 ) = Inf;
-            Tmp( a1Select < 0 ) = -Inf;
-            if AnySolutionWillDo
-                Tmp( a1Select == 0 ) = 0;
-            else
-                Tmp( a1Select == 0 ) = NaN;
+            if any( Select(:) )
+                a1Select = a1( Select );
+                a1SelectSelect = a1Select == 0;
+                a1Select = sign( a1Select ) .* Inf;
+                if AnySolutionWillDo
+                    a1Select( a1SelectSelect ) = 0;
+                end
+                r1( Select ) = a1Select;
+                r2( Select ) = a1Select;
             end
-            r1( Select ) = Tmp;
-            r2( Select ) = Tmp;
         end
         
         function [ r1, r2 ] = DDDividedByDouble( a1, a2, b, AnySolutionWillDo )
@@ -2020,16 +2020,16 @@ classdef DoubleDouble
             r2 = t ./ b;
             [ r1, r2 ] = DoubleDouble.Normalize( r1, r2 );
             Select = b == 0;
-            a1Select = a1( Select );
-            Tmp( a1Select > 0 ) = Inf;
-            Tmp( a1Select < 0 ) = -Inf;
-            if AnySolutionWillDo
-                Tmp( a1Select == 0 ) = 0;
-            else
-                Tmp( a1Select == 0 ) = NaN;
+            if any( Select(:) )
+                a1Select = a1( Select );
+                a1SelectSelect = a1Select == 0;
+                a1Select = sign( a1Select ) .* Inf;
+                if AnySolutionWillDo
+                    a1Select( a1SelectSelect ) = 0;
+                end
+                r1( Select ) = a1Select;
+                r2( Select ) = a1Select;
             end
-            r1( Select ) = Tmp;
-            r2( Select ) = Tmp;
         end
         
         function [ r1, r2 ] = DoubleDividedByDouble( a, b, AnySolutionWillDo )
@@ -2044,16 +2044,16 @@ classdef DoubleDouble
             r2 = t ./ b;
             [ r1, r2 ] = DoubleDouble.Normalize( r1, r2 );
             Select = b == 0;
-            aSelect = a( Select );
-            Tmp( aSelect > 0 ) = Inf;
-            Tmp( aSelect < 0 ) = -Inf;
-            if AnySolutionWillDo
-                Tmp( aSelect == 0 ) = 0;
-            else
-                Tmp( aSelect == 0 ) = NaN;
+            if any( Select(:) )
+                a1Select = a1( Select );
+                a1SelectSelect = a1Select == 0;
+                a1Select = sign( a1Select ) .* Inf;
+                if AnySolutionWillDo
+                    a1Select( a1SelectSelect ) = 0;
+                end
+                r1( Select ) = a1Select;
+                r2( Select ) = a1Select;
             end
-            r1( Select ) = Tmp;
-            r2( Select ) = Tmp;
         end
         
         function [ a1, a2 ] = Split( a )
