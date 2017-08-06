@@ -1996,6 +1996,11 @@ classdef DoubleDouble
             [ r1, r2 ] = DoubleDouble.DDPlusDD( q1, q2, q3, zeros( size( q3 ) ) );
             Select = ( b1 == 0 ) & ( b2 == 0 );
             if any( Select(:) )
+                if ( numel( Select ) == 1 ) && ( numel( a1 ) > 1 )
+                    Select = repmat( Select, size( a1 ) );
+                elseif ( numel( Select ) > 1 ) && ( numel( a1 ) == 1 )
+                    a1 = repmat( a1, size( Select ) );
+                end
                 a1Select = a1( Select );
                 a1SelectSelect = a1Select == 0;
                 a1Select = sign( a1Select ) .* Inf;
@@ -2021,6 +2026,11 @@ classdef DoubleDouble
             [ r1, r2 ] = DoubleDouble.Normalize( r1, r2 );
             Select = b == 0;
             if any( Select(:) )
+                if ( numel( Select ) == 1 ) && ( numel( a1 ) > 1 )
+                    Select = repmat( Select, size( a1 ) );
+                elseif ( numel( Select ) > 1 ) && ( numel( a1 ) == 1 )
+                    a1 = repmat( a1, size( Select ) );
+                end
                 a1Select = a1( Select );
                 a1SelectSelect = a1Select == 0;
                 a1Select = sign( a1Select ) .* Inf;
@@ -2045,7 +2055,12 @@ classdef DoubleDouble
             [ r1, r2 ] = DoubleDouble.Normalize( r1, r2 );
             Select = b == 0;
             if any( Select(:) )
-                a1Select = a1( Select );
+                if ( numel( Select ) == 1 ) && ( numel( a ) > 1 )
+                    Select = repmat( Select, size( a ) );
+                elseif ( numel( Select ) > 1 ) && ( numel( a ) == 1 )
+                    a = repmat( a, size( Select ) );
+                end
+                a1Select = a( Select );
                 a1SelectSelect = a1Select == 0;
                 a1Select = sign( a1Select ) .* Inf;
                 if AnySolutionWillDo
