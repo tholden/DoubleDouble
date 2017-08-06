@@ -2010,6 +2010,20 @@ classdef DoubleDouble
                 r1( Select ) = a1Select;
                 r2( Select ) = a1Select;
             end
+            Select = isinf( b1 );
+            if any( Select(:) )
+                if ( numel( Select ) == 1 ) && ( numel( a1 ) > 1 )
+                    Select = repmat( Select, size( a1 ) );
+                elseif ( numel( Select ) > 1 ) && ( numel( a1 ) == 1 )
+                    a1 = repmat( a1, size( Select ) );
+                end
+                a1Select = a1( Select );
+                a1SelectSelect = ~isfinite( a1Select );
+                a1Select = 0;
+                a1Select( a1SelectSelect ) = NaN;
+                r1( Select ) = a1Select;
+                r2( Select ) = a1Select;
+            end
         end
         
         function [ r1, r2 ] = DDDividedByDouble( a1, a2, b, AnySolutionWillDo )
@@ -2040,6 +2054,20 @@ classdef DoubleDouble
                 r1( Select ) = a1Select;
                 r2( Select ) = a1Select;
             end
+            Select = isinf( b );
+            if any( Select(:) )
+                if ( numel( Select ) == 1 ) && ( numel( a1 ) > 1 )
+                    Select = repmat( Select, size( a1 ) );
+                elseif ( numel( Select ) > 1 ) && ( numel( a1 ) == 1 )
+                    a1 = repmat( a1, size( Select ) );
+                end
+                a1Select = a1( Select );
+                a1SelectSelect = ~isfinite( a1Select );
+                a1Select = 0;
+                a1Select( a1SelectSelect ) = NaN;
+                r1( Select ) = a1Select;
+                r2( Select ) = a1Select;
+            end
         end
         
         function [ r1, r2 ] = DoubleDividedByDouble( a, b, AnySolutionWillDo )
@@ -2066,6 +2094,20 @@ classdef DoubleDouble
                 if AnySolutionWillDo
                     a1Select( a1SelectSelect ) = 0;
                 end
+                r1( Select ) = a1Select;
+                r2( Select ) = a1Select;
+            end
+            Select = isinf( b );
+            if any( Select(:) )
+                if ( numel( Select ) == 1 ) && ( numel( a ) > 1 )
+                    Select = repmat( Select, size( a ) );
+                elseif ( numel( Select ) > 1 ) && ( numel( a ) == 1 )
+                    a = repmat( a, size( Select ) );
+                end
+                a1Select = a( Select );
+                a1SelectSelect = ~isfinite( a1Select );
+                a1Select = 0;
+                a1Select( a1SelectSelect ) = NaN;
                 r1( Select ) = a1Select;
                 r2( Select ) = a1Select;
             end
