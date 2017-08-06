@@ -483,7 +483,8 @@ classdef DoubleDouble
         end
         
         function v = subsref( v, s )
-            v = DoubleDouble.Make( subsref( v.v1, s ), subsref( v.v2, s ) );
+            v.v1 = subsref( v.v1, s );
+            v.v2 = subsref( v.v2, s );
         end
         
         function v = subsasgn( v, s, b )
