@@ -63,6 +63,7 @@ The DoubleDouble class has the following public, non-static methods:
  * max
  * min
  * cumsum
+ * diff
  * cumprod
  * cummax
  * cummin
@@ -129,6 +130,7 @@ The DoubleDouble class has the following public, static methods:
  * MRDivide
  * Sum
  * CumSum
+ * Diff
  * Prod
  * CumProd
  * Norm

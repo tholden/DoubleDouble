@@ -550,6 +550,13 @@ classdef DoubleDouble
             v = DoubleDouble.CumSum( v, dim );
         end
         
+        function v = diff( v, dim )
+            if nargin < 2
+                dim = [];
+            end
+            v = DoubleDouble.Diff( v, dim );
+        end
+        
         function v = cumprod( v, dim )
             if nargin < 2
                 dim = [];
@@ -1411,6 +1418,60 @@ classdef DoubleDouble
                     s = DoubleDouble.Plus( s, x{ i } );
                     c1{i} = s.v1;
                     c2{i} = s.v2;
+                end
+            end
+            c = DoubleDouble.Make( cell2mat( c1 ), cell2mat( c2 ) );
+        end
+        
+        function c = Diff( v, dim )
+            if isa( v, 'DoubleDouble' )
+                if nargin < 2 || isempty( dim )
+                    dim = find( size( v.v1 ) > 1, 1 );
+                    if isempty( dim )
+                        dim = 1;
+                    end
+                end
+                Size = size( v.v1 );
+                Length = Size( dim );
+                Blocks = num2cell( Size );
+                Blocks{ dim } = ones( Length, 1 );
+                x1 = mat2cell( v.v1, Blocks{:} );
+                x2 = mat2cell( v.v2, Blocks{:} );
+                s = DoubleDouble.Make( x1{ 1 }, x2{ 1 } );
+                c1 = cell( size( x1 ) );
+                c2 = cell( size( x2 ) );
+                c1{1} = [];
+                c2{1} = [];
+                for i = 2 : Length
+                    t = DoubleDouble.Make( x1{ i }, x2{ i } );
+                    d = DoubleDouble.Minus( t, s );
+                    c1{i} = d.v1;
+                    c2{i} = d.v2;
+                    s = t;
+                end
+            else
+                if nargin < 2 || isempty( dim )
+                    dim = find( size( v ) > 1, 1 );
+                    if isempty( dim )
+                        dim = 1;
+                    end
+                end
+                Size = size( v );
+                Length = Size( dim );
+                Blocks = num2cell( Size );
+                Blocks{ dim } = ones( Length, 1 );
+                x = mat2cell( v, Blocks{:} );
+                s = x{ 1 };
+                c1 = cell( size( x ) );
+                c2 = cell( size( x ) );
+                c1{1} = [];
+                c2{1} = [];
+                for i = 2 : Length
+                    t = x{ i };
+                    d = DoubleDouble.Minus( t, s );
+                    c1{i} = d.v1;
+                    c2{i} = d.v2;
+                    s = t;
                 end
             end
             c = DoubleDouble.Make( cell2mat( c1 ), cell2mat( c2 ) );
