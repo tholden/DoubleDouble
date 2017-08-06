@@ -1959,6 +1959,9 @@ classdef DoubleDouble
         end
         
         function [ s1, s2 ] = DDPlusDD( a1, a2, b1, b2 )
+            if DoubleDouble.SingletonExpansionNotSupported
+                [ a1, a2, b1, b2 ] = DoubleDouble.ExpandSingleton( a1, a2, b1, b2 );
+            end
             [ s1, s2 ] = DoubleDouble.DoublePlusDouble( a1, b1 );
             [ t1, t2 ] = DoubleDouble.DoublePlusDouble( a2, b2 );
             s2 = s2 + t1;
@@ -1968,12 +1971,18 @@ classdef DoubleDouble
         end
 
         function [ s1, s2 ] = DDPlusDouble( a1, a2, b )
+            if DoubleDouble.SingletonExpansionNotSupported
+                [ a1, a2, b ] = DoubleDouble.ExpandSingleton( a1, a2, b );
+            end
             [ s1, s2 ] = DoubleDouble.DoublePlusDouble( a1, b );
             s2 = s2 + a2;
             [ s1, s2 ] = DoubleDouble.Normalize( s1, s2 );
         end
 
         function [ s1, s2 ] = DoublePlusDouble( a, b )
+            if DoubleDouble.SingletonExpansionNotSupported
+                [ a, b ] = DoubleDouble.ExpandSingleton( a, b );
+            end
             s1 = a + b;
             bb = s1 - a;
             t11 = s1 - bb;
@@ -1983,6 +1992,9 @@ classdef DoubleDouble
         end
 
         function [ p1, p2 ] = DDTimesDD( a1, a2, b1, b2 )
+            if DoubleDouble.SingletonExpansionNotSupported
+                [ a1, a2, b1, b2 ] = DoubleDouble.ExpandSingleton( a1, a2, b1, b2 );
+            end
             [ p1, p2 ] = DoubleDouble.DoubleTimesDouble( a1, b1 );
             t = a1 .* b2 + a2 .* b1;
             p2 = p2 + t;
@@ -1990,12 +2002,18 @@ classdef DoubleDouble
         end
 
         function [ p1, p2 ] = DDTimesDouble( a1, a2, b )
+            if DoubleDouble.SingletonExpansionNotSupported
+                [ a1, a2, b ] = DoubleDouble.ExpandSingleton( a1, a2, b );
+            end
             [ p1, p2 ] = DoubleDouble.DoubleTimesDouble( a1, b );
             p2 = p2 + a2 .* b;
             [ p1, p2 ] = DoubleDouble.Normalize( p1, p2 );
         end
 
         function [ p1, p2 ] = DoubleTimesDouble( a, b )
+            if DoubleDouble.SingletonExpansionNotSupported
+                [ a, b ] = DoubleDouble.ExpandSingleton( a, b );
+            end
             p1 = a .* b;
             [ a1, a2 ] = DoubleDouble.Split( a );
             [ b1, b2 ] = DoubleDouble.Split( b );
@@ -2005,6 +2023,9 @@ classdef DoubleDouble
         end
         
         function [ r1, r2 ] = DDDividedByDD( a1, a2, b1, b2, AnySolutionWillDo )
+            if DoubleDouble.SingletonExpansionNotSupported
+                [ a1, a2, b1, b2 ] = DoubleDouble.ExpandSingleton( a1, a2, b1, b2 );
+            end
             if nargin < 5
                 AnySolutionWillDo = false;
             end
@@ -2050,6 +2071,9 @@ classdef DoubleDouble
         end
         
         function [ r1, r2 ] = DDDividedByDouble( a1, a2, b, AnySolutionWillDo )
+            if DoubleDouble.SingletonExpansionNotSupported
+                [ a1, a2, b ] = DoubleDouble.ExpandSingleton( a1, a2, b );
+            end
             if nargin < 4
                 AnySolutionWillDo = false;
             end
@@ -2094,6 +2118,9 @@ classdef DoubleDouble
         end
         
         function [ r1, r2 ] = DoubleDividedByDouble( a, b, AnySolutionWillDo )
+            if DoubleDouble.SingletonExpansionNotSupported
+                [ a, b ] = DoubleDouble.ExpandSingleton( a, b );
+            end
             if nargin < 3
                 AnySolutionWillDo = false;
             end
