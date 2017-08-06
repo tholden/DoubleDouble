@@ -4,6 +4,8 @@ A MATLAB library for extended ("double double") precision, giving close to quad 
 
 Based on the QD library available from: http://crd-legacy.lbl.gov/~dhbailey/mpdist/
 
+Note: Complex support within this class is experimental, and should not be relied upon without testing your specific use.
+
 The DoubleDouble class has the following public properties:
  * eps
  * pi
