@@ -47,7 +47,7 @@ classdef DoubleDouble
     end
     
     properties ( Constant, GetAccess = private )
-        SingletonExpansionSupported = DoubleDouble.TestSingletonExpansion( );
+        SingletonExpansionNotSupported = ~DoubleDouble.TestSingletonExpansion( );
         
         InverseFactorial = [
             1.66666666666666657e-01,  9.25185853854297066e-18;
@@ -1839,17 +1839,18 @@ classdef DoubleDouble
             v = DoubleDouble.Sum( a .* b, dim );
         end
         
-        function [ a, b ] = ExpandSingleton( a, b )
-            sa = size( a );
-            sb = size( b );
-            if length( sa ) > length( sb )
-                sb( ( end + 1 ):length( sa ) ) = 1;
-            elseif length( sb ) > length( sa )
-                sa( ( end + 1 ):length( sb ) ) = 1;
+        function [ varargout ] = ExpandSingleton( varargin )
+            l = cellfun( @( x ) length( size( x ) ), varargin, 'UniformOutput', true );
+            n = length( varargin );
+            ss = ones( n, max( l ) );
+            for i = 1 : n
+                ss( i, 1 : l( i ) ) = size( varargin{ i } );
             end
-            s = max( sa, sb );
-            a = repmat( a, s ./ sa );
-            b = repmat( b, s ./ sb );
+            s = max( ss );
+            varargout = cell( 1, n );
+            for i = 1 : n
+                varargout{ i } = repmat( varargin{ i }, s ./ ss( i, : ) );
+            end
         end
     end
     
