@@ -47,6 +47,8 @@ classdef DoubleDouble
     end
     
     properties ( Constant, GetAccess = private )
+        SingletonExpansionSupported = DoubleDouble.TestSingletonExpansion( );
+        
         InverseFactorial = [
             1.66666666666666657e-01,  9.25185853854297066e-18;
             4.16666666666666644e-02,  2.31296463463574266e-18;
@@ -92,17 +94,23 @@ classdef DoubleDouble
     end
     
     methods
-        function v = DoubleDouble( in1, in2 )
+        function v = DoubleDouble( in, varargin )
+            if nargin == 0
+                v.v1 = [];
+                v.v2 = [];
+                return
+            end
             if nargin >= 2
-                [ v.v1, v.v2 ] = DoubleDouble.Normalize( double( in1 ), double( in2 ) );
-            elseif nargin == 1
-                if isa( in1, 'DoubleDouble' )
-                    v.v1 = in1.v1;
-                    v.v2 = in1.v2;
-                else
-                    v.v1 = double( in1 );
-                    v.v2 = zeros( size( in1 ) );
+                for i = 1 : length( varargin )
+                    in = DoubleDouble.Plus( in, varargin{ i } );
                 end
+            end
+            if isa( in, 'DoubleDouble' )
+                v.v1 = in.v1;
+                v.v2 = in.v2;
+            else
+                v.v1 = double( in );
+                v.v2 = zeros( size( in ) );
             end
         end
         
@@ -2143,6 +2151,18 @@ classdef DoubleDouble
                 a1 = complex( r1, i1 );
                 a2 = complex( r2, i2 );
             end
+        end
+        
+        function Supported = TestSingletonExpansion
+            a = ones( 2, 1 );
+            b = [];
+            c = [];
+            try
+                b = a + a.';
+                c = a .* a.';
+            catch
+            end
+            Supported = all( [ size( b ), size( c ) ] == 2 );
         end
    end
 end
