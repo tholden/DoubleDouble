@@ -25,6 +25,7 @@ The DoubleDouble class has the following public, non-static methods:
  * length
  * numel
  * numArgumentsFromSubscript
+ * end
  * repmat
  * reshape
  * isequal
