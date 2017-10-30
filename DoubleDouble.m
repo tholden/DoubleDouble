@@ -314,8 +314,8 @@ classdef DoubleDouble
         function v = mpower( a, b )
             na = numel( a );
             nb = numel( b );
-            if na == 1
-                if nb == 1
+            if na <= 1
+                if nb <= 1
                     v = a .^ b;
                 else
                     [ v, d ] = eig( b );
