@@ -1368,6 +1368,11 @@ classdef DoubleDouble
                 end
                 Size = size( v.v1 );
                 Length = Size( dim );
+                if Length == 0
+                    Size = max( 1, Size );
+                    s = DoubleDouble.Make( zeros( Size ), zeros( Size ) );
+                    return
+                end
                 Blocks = num2cell( Size );
                 Blocks{ dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
@@ -1385,6 +1390,11 @@ classdef DoubleDouble
                 end
                 Size = size( v );
                 Length = Size( dim );
+                if Length == 0
+                    Size = max( 1, Size );
+                    s = DoubleDouble.Make( zeros( Size ), zeros( Size ) );
+                    return
+                end
                 Blocks = num2cell( Size );
                 Blocks{ dim } = ones( Length, 1 );
                 x = mat2cell( v, Blocks{:} );
@@ -1405,6 +1415,10 @@ classdef DoubleDouble
                 end
                 Size = size( v.v1 );
                 Length = Size( dim );
+                if Length == 0
+                    c = DoubleDouble.Make( zeros( Size ), zeros( Size ) );
+                    return
+                end
                 Blocks = num2cell( Size );
                 Blocks{ dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
@@ -1428,6 +1442,10 @@ classdef DoubleDouble
                 end
                 Size = size( v );
                 Length = Size( dim );
+                if Length == 0
+                    c = DoubleDouble.Make( zeros( Size ), zeros( Size ) );
+                    return
+                end
                 Blocks = num2cell( Size );
                 Blocks{ dim } = ones( Length, 1 );
                 x = mat2cell( v, Blocks{:} );
@@ -1455,6 +1473,10 @@ classdef DoubleDouble
                 end
                 Size = size( v.v1 );
                 Length = Size( dim );
+                if Length == 0
+                    c = DoubleDouble.Make( zeros( Size ), zeros( Size ) );
+                    return
+                end
                 Blocks = num2cell( Size );
                 Blocks{ dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
@@ -1480,6 +1502,10 @@ classdef DoubleDouble
                 end
                 Size = size( v );
                 Length = Size( dim );
+                if Length == 0
+                    c = DoubleDouble.Make( zeros( Size ), zeros( Size ) );
+                    return
+                end
                 Blocks = num2cell( Size );
                 Blocks{ dim } = ones( Length, 1 );
                 x = mat2cell( v, Blocks{:} );
@@ -1509,6 +1535,11 @@ classdef DoubleDouble
                 end
                 Size = size( v.v1 );
                 Length = Size( dim );
+                if Length == 0
+                    Size = max( 1, Size );
+                    s = DoubleDouble.Make( ones( Size ), zeros( Size ) );
+                    return
+                end
                 Blocks = num2cell( Size );
                 Blocks{ dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
@@ -1526,6 +1557,11 @@ classdef DoubleDouble
                 end
                 Size = size( v );
                 Length = Size( dim );
+                if Length == 0
+                    Size = max( 1, Size );
+                    s = DoubleDouble.Make( ones( Size ), zeros( Size ) );
+                    return
+                end
                 Blocks = num2cell( Size );
                 Blocks{ dim } = ones( Length, 1 );
                 x = mat2cell( v, Blocks{:} );
@@ -1546,6 +1582,10 @@ classdef DoubleDouble
                 end
                 Size = size( v.v1 );
                 Length = Size( dim );
+                if Length == 0
+                    c = DoubleDouble.Make( zeros( Size ), zeros( Size ) );
+                    return
+                end
                 Blocks = num2cell( Size );
                 Blocks{ dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
@@ -1569,6 +1609,10 @@ classdef DoubleDouble
                 end
                 Size = size( v );
                 Length = Size( dim );
+                if Length == 0
+                    c = DoubleDouble.Make( zeros( Size ), zeros( Size ) );
+                    return
+                end
                 Blocks = num2cell( Size );
                 Blocks{ dim } = ones( Length, 1 );
                 x = mat2cell( v, Blocks{:} );
@@ -1684,6 +1728,10 @@ classdef DoubleDouble
                 end
                 Size = size( v.v1 );
                 Length = Size( dim );
+                if Length == 0
+                    c = DoubleDouble.Make( zeros( Size ), zeros( Size ) );
+                    return
+                end
                 Blocks = num2cell( Size );
                 Blocks{ dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
@@ -1707,6 +1755,10 @@ classdef DoubleDouble
                 end
                 Size = size( v );
                 Length = Size( dim );
+                if Length == 0
+                    c = DoubleDouble.Make( zeros( Size ), zeros( Size ) );
+                    return
+                end
                 Blocks = num2cell( Size );
                 Blocks{ dim } = ones( Length, 1 );
                 x = mat2cell( v, Blocks{:} );
@@ -1788,6 +1840,10 @@ classdef DoubleDouble
                 end
                 Size = size( v.v1 );
                 Length = Size( dim );
+                if Length == 0
+                    c = DoubleDouble.Make( zeros( Size ), zeros( Size ) );
+                    return
+                end
                 Blocks = num2cell( Size );
                 Blocks{ dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
@@ -1811,6 +1867,10 @@ classdef DoubleDouble
                 end
                 Size = size( v );
                 Length = Size( dim );
+                if Length == 0
+                    c = DoubleDouble.Make( zeros( Size ), zeros( Size ) );
+                    return
+                end
                 Blocks = num2cell( Size );
                 Blocks{ dim } = ones( Length, 1 );
                 x = mat2cell( v, Blocks{:} );
