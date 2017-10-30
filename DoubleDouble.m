@@ -42,6 +42,8 @@ classdef DoubleDouble
     end
     
     properties ( Constant, GetAccess = public )
+        zero = DoubleDouble.Make( 0, 0 );
+        one = DoubleDouble.Make( 1, 0 );
         eps = DoubleDouble.Make( 4.93038065763132e-32, 0 );
         pi = DoubleDouble.Make( 3.141592653589793116e+00, 1.224646799147353207e-16 );
     end
