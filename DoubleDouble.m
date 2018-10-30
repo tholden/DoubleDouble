@@ -1908,7 +1908,7 @@ classdef DoubleDouble
             for i = 1 : n
                 ss( i, 1 : l( i ) ) = size( varargin{ i } );
             end
-            s = max( ss );
+            s = max( ss, [], 1 );
             varargout = cell( 1, n );
             for i = 1 : n
                 varargout{ i } = repmat( varargin{ i }, s ./ ss( i, : ) );
