@@ -525,6 +525,24 @@ classdef DoubleDouble
             v = v.v1;
         end
         
+        function [ v, Indices ] = sort( v, varargin )
+            DimIndex = find( cellfun( @isnumeric, varargin ), 1 );
+            if isempty( DimIndex )
+                dim = [];
+            else
+                dim = varargin{ DimIndex };
+                varargin = varargin( [ 1 : ( DimIndex - 1 ), ( DimIndex + 1 ) : end ] );
+            end
+            CMIndex = find( strcmpi( varargin, 'ComparisonMethod' ), 1 );
+            if isempty( CMIndex )
+                cm = [];
+            else
+                cm = varargin{ CMIndex + 1 };
+                varargin = varargin( [ 1 : ( CMIndex - 1 ), ( CMIndex + 2 ) : end ] );
+            end
+            [ v, Indices ] = DoubleDouble.Sort( v, dim, cm, varargin{:} );
+        end
+        
         function v = sum( v, dim )
             if nargin < 2
                 dim = [];
@@ -1358,6 +1376,63 @@ classdef DoubleDouble
         
         function v = MRDivide( v, a )
             v = DoubleDouble.MLDivide( a', v' )';
+        end
+        
+        function [ v, Indices ] = Sort( v, dim, cm, varargin )
+            if nargin < 2 || isempty( dim )
+                dim = find( size( v.v1 ) > 1, 1 );
+                if isempty( dim )
+                    dim = 1;
+                end
+            end
+            if nargin < 3 || isempty( cm )
+                cm = 'auto';
+            end
+            if isa( v, 'DoubleDouble' )
+                if strcmpi( cm( 1 ), 'r' )
+                    a = real( v );
+                    b = imag( v );
+                elseif ( length( cm ) > 1 ) && strcmpi( cm( 1 : 2 ), 'ab' )
+                    a = abs( v );
+                    b = angle( v );
+                else
+                    if isreal( v )
+                        a = real( v );
+                        b = imag( v );
+                    else
+                        a = abs( v );
+                        b = angle( v );
+                    end
+                end
+                Size = size( v.v1 );
+                if any( Size == 0 )
+                    Indices = [];
+                    return
+                end
+                Blocks = arrayfun( @( x ) ones( x, 1 ), Size, 'UniformOutput', false );
+                Blocks{ dim } = Size( dim );
+                xv1 = mat2cell( v.v1, Blocks{:} );
+                xv2 = mat2cell( v.v2, Blocks{:} );
+                xa1 = mat2cell( a.v1, Blocks{:} );
+                xa2 = mat2cell( a.v2, Blocks{:} );
+                xb1 = mat2cell( b.v1, Blocks{:} );
+                xb2 = mat2cell( b.v2, Blocks{:} );
+                Indices = cell( size( xv1 ) );
+                for i = 1 : numel( xv1 )
+                    [ ~, Indices{ i } ] = sortrows( [ xa1{ i }(:), xa2{ i }(:), xb1{ i }(:), xb2{ i }(:) ], varargin{:} );
+                    xv1{ i } = xv1{ i }( Indices{ i } );
+                    xv2{ i } = xv2{ i }( Indices{ i } );
+                end
+                Indices = cell2mat( Indices );
+                v       = DoubleDouble.Make( cell2mat( xv1 ), cell2mat( xv2 ) );
+            else
+                if nargout > 1
+                    [ v, Indices ] = sort( v, dim, 'ComparisonMethod', cm, varargin{:} );
+                else
+                    v = sort( v, dim, 'ComparisonMethod', cm, varargin{:} );
+                end
+                v = DoubleDouble( v );
+            end
         end
         
         function s = Sum( v, dim )
