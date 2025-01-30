@@ -112,6 +112,7 @@ The DoubleDouble class has the following public, non-static methods:
  * chol
  * ldl
  * eig
+ * conv
 
 The DoubleDouble class has the following public, static methods:
  * IsEqualWithExpansion

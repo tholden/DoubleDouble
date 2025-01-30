@@ -1167,6 +1167,35 @@ classdef DoubleDouble
                 d = diag( d );
             end
         end
+
+        function w = conv( u, v )
+
+            RowVector = size( u, 1 ) == 1 && size( v, 1 ) == 1;
+
+            u = u(:);
+            v = v(:);
+
+            M = size( u, 1 );
+            N = size( v, 1 );
+
+            K = M + N - 1;
+
+            w = DoubleDouble.zeros( K, 1 );
+
+            for k = 1 : K
+
+                j = max( 1, k + 1 - N ) : min( k, M );
+
+                w( k ) = DoubleDouble.Dot( u( j ), v( k - j + 1 ) );
+
+            end
+
+            if RowVector
+                w = w.';
+            end
+
+        end
+
     end
 
     methods ( Static )
@@ -2177,9 +2206,9 @@ classdef DoubleDouble
             [ r1, r2 ] = DoubleDouble.DDPlusDD( q1, q2, q3, zeros( size( q3 ) ) );
             Select = ( b1 == 0 ) & ( b2 == 0 );
             if any( Select(:) )
-                if ( numel( Select ) == 1 ) && ( numel( a1 ) > 1 )
+                if ( isscalar( Select ) ) && ( numel( a1 ) > 1 )
                     Select = repmat( Select, size( a1 ) );
-                elseif ( numel( Select ) > 1 ) && ( numel( a1 ) == 1 )
+                elseif ( numel( Select ) > 1 ) && ( isscalar( a1 ) )
                     a1 = repmat( a1, size( Select ) );
                 end
                 a1Select = a1( Select );
@@ -2193,9 +2222,9 @@ classdef DoubleDouble
             end
             Select = isinf( b1 );
             if any( Select(:) )
-                if ( numel( Select ) == 1 ) && ( numel( a1 ) > 1 )
+                if ( isscalar( Select ) ) && ( numel( a1 ) > 1 )
                     Select = repmat( Select, size( a1 ) );
-                elseif ( numel( Select ) > 1 ) && ( numel( a1 ) == 1 )
+                elseif ( numel( Select ) > 1 ) && ( isscalar( a1 ) )
                     a1 = repmat( a1, size( Select ) );
                 end
                 a1Select = a1( Select );
@@ -2224,9 +2253,9 @@ classdef DoubleDouble
             [ r1, r2 ] = DoubleDouble.Normalize( r1, r2 );
             Select = b == 0;
             if any( Select(:) )
-                if ( numel( Select ) == 1 ) && ( numel( a1 ) > 1 )
+                if ( isscalar( Select ) ) && ( numel( a1 ) > 1 )
                     Select = repmat( Select, size( a1 ) );
-                elseif ( numel( Select ) > 1 ) && ( numel( a1 ) == 1 )
+                elseif ( numel( Select ) > 1 ) && ( isscalar( a1 ) )
                     a1 = repmat( a1, size( Select ) );
                 end
                 a1Select = a1( Select );
@@ -2240,9 +2269,9 @@ classdef DoubleDouble
             end
             Select = isinf( b );
             if any( Select(:) )
-                if ( numel( Select ) == 1 ) && ( numel( a1 ) > 1 )
+                if ( isscalar( Select ) ) && ( numel( a1 ) > 1 )
                     Select = repmat( Select, size( a1 ) );
-                elseif ( numel( Select ) > 1 ) && ( numel( a1 ) == 1 )
+                elseif ( numel( Select ) > 1 ) && ( isscalar( a1 ) )
                     a1 = repmat( a1, size( Select ) );
                 end
                 a1Select = a1( Select );
@@ -2270,9 +2299,9 @@ classdef DoubleDouble
             [ r1, r2 ] = DoubleDouble.Normalize( r1, r2 );
             Select = b == 0;
             if any( Select(:) )
-                if ( numel( Select ) == 1 ) && ( numel( a ) > 1 )
+                if ( isscalar( Select ) ) && ( numel( a ) > 1 )
                     Select = repmat( Select, size( a ) );
-                elseif ( numel( Select ) > 1 ) && ( numel( a ) == 1 )
+                elseif ( numel( Select ) > 1 ) && ( isscalar( a ) )
                     a = repmat( a, size( Select ) );
                 end
                 a1Select = a( Select );
@@ -2286,9 +2315,9 @@ classdef DoubleDouble
             end
             Select = isinf( b );
             if any( Select(:) )
-                if ( numel( Select ) == 1 ) && ( numel( a ) > 1 )
+                if ( isscalar( Select ) ) && ( numel( a ) > 1 )
                     Select = repmat( Select, size( a ) );
-                elseif ( numel( Select ) > 1 ) && ( numel( a ) == 1 )
+                elseif ( numel( Select ) > 1 ) && ( isscalar( a ) )
                     a = repmat( a, size( Select ) );
                 end
                 a1Select = a( Select );
