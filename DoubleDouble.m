@@ -2002,7 +2002,7 @@ classdef DoubleDouble
                 a = a(:);
                 b = b(:);
             end
-            v = DoubleDouble.Sum( a .* b, dim );
+            v = DoubleDouble.Sum( DoubleDouble.Times( a, b ), dim );
         end
         
         function [ varargout ] = ExpandSingleton( varargin )
