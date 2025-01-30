@@ -1172,8 +1172,8 @@ classdef DoubleDouble
 
             RowVector = size( u, 1 ) == 1 && size( v, 1 ) == 1;
 
-            u = u(:);
-            v = v(:);
+            u = Vec( u );
+            v = Vec( v );
 
             M = size( u, 1 );
             N = size( v, 1 );
@@ -1185,8 +1185,11 @@ classdef DoubleDouble
             for k = 1 : K
 
                 j = max( 1, k + 1 - N ) : min( k, M );
+                i = k - j + 1;
 
-                w( k ) = DoubleDouble.Dot( u( j ), v( k - j + 1 ) );
+                wk = DoubleDouble.Dot( DoubleDouble.Make( u.v1( j ), u.v2( j ) ), DoubleDouble.Make( v.v1( i ), v.v2( i ) ) );
+                w.v1( k ) = wk.v1;
+                w.v2( k ) = wk.v2;
 
             end
 
@@ -1740,8 +1743,7 @@ classdef DoubleDouble
             if ( sum( size( v ) ~= 1 ) <= 1 ) || ( numel( p ) ~= 1 )
                 v = abs( v );
                 if ( nargin < 2 ) || ( p == 2 ) || ( numel( p ) ~= 1 )
-                    v.v1 = v.v1(:);
-                    v.v2 = v.v2(:);
+                    v = Vec( v );
                     v = sqrt( sum( v .* v ) );
                 elseif p == Inf
                     v = max( v );
@@ -1999,8 +2001,8 @@ classdef DoubleDouble
                 dim = [];
             end
             if ( length( a ) == numel( a ) ) && ( length( b ) == numel( b ) )
-                a = a(:);
-                b = b(:);
+                a = Vec( a );
+                b = Vec( b );
             end
             v = DoubleDouble.Sum( DoubleDouble.Times( a, b ), dim );
         end
@@ -2021,6 +2023,11 @@ classdef DoubleDouble
     end
     
     methods ( Access = private )
+        function v = Vec( v )
+            v.v1 = v.v1(:);
+            v.v2 = v.v2(:);
+        end
+
         function v = TimesPowerOf2( v, b )
             assert( isa( b, 'double' ) );
             v.v1 = v.v1 .* b;
