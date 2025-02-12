@@ -246,8 +246,12 @@ classdef DoubleDouble
             v = isempty( v.v1 );
         end
         
-        function v = diag( v )
-            v = DoubleDouble.Make( diag( v.v1 ), diag( v.v2 ) );
+        function v = diag( v, k )
+            if nargin < 2
+                v = DoubleDouble.Make( diag( v.v1 ), diag( v.v2 ) );
+            else
+                v = DoubleDouble.Make( diag( v.v1, k ), diag( v.v2, k ) );
+            end
         end
         
         function v = tril( v, k )
