@@ -160,6 +160,26 @@ classdef DoubleDouble
             v = isnan( v.v1 ) | isnan( v.v2 );
         end
 
+        function v = sparse( i, j, v, m, n, nz )
+            if nargin == 0
+                v = DoubleDouble.Make( sparse( [] ), sparse( [] ) );
+            elseif nargin < 3
+                assert( nargin == 1 );
+                v = i;
+                v.v1 = sparse( v.v1 );
+                v.v2 = sparse( v.v2 );
+            elseif nargin == 3
+                v.v1 = sparse( i, j, v.v1 );
+                v.v2 = sparse( i, j, v.v2 );
+            elseif nargin == 4
+                v.v1 = sparse( i, j, v.v1, m, n );
+                v.v2 = sparse( i, j, v.v2, m, n );
+            else
+                v.v1 = sparse( i, j, v.v1, m, n, nz );
+                v.v2 = sparse( i, j, v.v2, m, n, nz );
+            end
+        end
+
         function v = real( v )
             v.v1 = real( v.v1 );
             v.v2 = real( v.v2 );
