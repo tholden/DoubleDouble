@@ -180,6 +180,14 @@ classdef DoubleDouble
             end
         end
 
+        function v = any( v, varargin )
+            v = any( v ~= 0, varargin{:} );
+        end
+
+        function v = all( v, varargin )
+            v = all( v ~= 0, varargin{:} );
+        end
+
         function v = real( v )
             v.v1 = real( v.v1 );
             v.v2 = real( v.v2 );
