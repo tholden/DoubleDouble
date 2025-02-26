@@ -144,6 +144,10 @@ classdef DoubleDouble
             v = isreal( v.v1 ) && isreal( v.v2 );
         end
         
+        function v = isnumeric( v )
+            v = isnumeric( v.v1 ) && isnumeric( v.v2 );
+        end
+        
         function v = isfinite( v )
             v = isfinite( v.v1 ) & isfinite( v.v2 );
         end
@@ -155,7 +159,7 @@ classdef DoubleDouble
         function v = isnan( v )
             v = isnan( v.v1 ) | isnan( v.v2 );
         end
-        
+
         function v = real( v )
             v.v1 = real( v.v1 );
             v.v2 = real( v.v2 );
