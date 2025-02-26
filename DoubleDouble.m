@@ -188,6 +188,17 @@ classdef DoubleDouble
             v = all( v ~= 0, varargin{:} );
         end
 
+        function varargout = find( v, varargin )
+            if nargout == 1
+                varargout{ 1 } = find( v ~= 0, varargin{:} );
+            elseif nargout >= 2
+                [ varargout{ 1 }, varargout{ 2 } ] = find( v ~= 0, varargin{:} );
+                if nargout >= 3
+                    varargout{ 3 } = v( sub2ind( size( v ), varargout{ 1 }, varargout{ 2 } ) );
+                end
+            end
+        end
+
         function v = real( v )
             v.v1 = real( v.v1 );
             v.v2 = real( v.v2 );
