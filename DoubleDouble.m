@@ -194,7 +194,8 @@ classdef DoubleDouble
             elseif nargout >= 2
                 [ varargout{ 1 }, varargout{ 2 } ] = find( v ~= 0, varargin{:} );
                 if nargout >= 3
-                    varargout{ 3 } = v( sub2ind( size( v ), varargout{ 1 }, varargout{ 2 } ) );
+                    LinearIndex = sub2ind( size( v ), varargout{ 1 }, varargout{ 2 } );
+                    varargout{ 3 } = DoubleDouble.Make( v.v1( LinearIndex ), v.v2( LinearIndex ) );
                 end
             end
         end
