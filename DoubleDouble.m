@@ -772,10 +772,18 @@ classdef DoubleDouble
             v = v * diag( sqrt( d ) ) / v;
         end
         
-        function v = exp( v )
+        function v = exp( v, expm1Flag )
+            if nargin < 2
+                expm1Flag = false;
+            end
             if ~isreal( v )
                 [ sin_imag_v, cos_imag_v ] = sincos( imag( v ) );
-                v = exp( real( v ) ) .* ( cos_imag_v + 1i .* sin_imag_v );
+                Rotation = cos_imag_v + 1i .* sin_imag_v;
+                if expm1Flag
+                    v = expm1( real( v ) ) .* Rotation + Rotation;
+                else
+                    v = exp( real( v ) ) .* Rotation;
+                end
                 return
             end
             
@@ -816,9 +824,18 @@ classdef DoubleDouble
             s = TimesPowerOf2( s, 2.0 ) + s .* s;
             s = TimesPowerOf2( s, 2.0 ) + s .* s;
             s = TimesPowerOf2( s, 2.0 ) + s .* s;
-            s = s + 1.0;
+            if ( ~expm1Flag ) || ( m ~= 0 )
+                s = s + 1.0;
+            end
             
             v = DoubleDouble.Make( pow2( s.v1, m ), pow2( s.v2, m ) );
+            if expm1Flag && m ~= 0
+                v = v - 1;
+            end
+        end
+
+        function v = expm1( v )
+            v = exp( v, true );
         end
         
         function v = expm( v )
