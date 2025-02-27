@@ -824,13 +824,16 @@ classdef DoubleDouble
             s = TimesPowerOf2( s, 2.0 ) + s .* s;
             s = TimesPowerOf2( s, 2.0 ) + s .* s;
             s = TimesPowerOf2( s, 2.0 ) + s .* s;
-            if ( ~expm1Flag ) || ( m ~= 0 )
+            if expm1Flag
+                Select = m ~= 0;
+                [ s.v1( Select ), s.v2( Select ) ] = DoubleDouble.DDPlusDouble( s.v1( Select ), s.v2( Select ), 1.0 );
+            else
                 s = s + 1.0;
             end
             
             v = DoubleDouble.Make( pow2( s.v1, m ), pow2( s.v2, m ) );
-            if expm1Flag && m ~= 0
-                v = v - 1;
+            if expm1Flag
+                [ v.v1( Select ), v.v2( Select ) ] = DoubleDouble.DDPlusDouble( v.v1( Select ), v.v2( Select ), -1.0 );
             end
         end
 
