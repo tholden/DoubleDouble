@@ -139,6 +139,10 @@ classdef DoubleDouble
         function v = double( v )
             v = v.v1;
         end
+
+        function v = isscalar( v )
+            v = isscalar( v.v1 );
+        end
         
         function v = isreal( v )
             v = isreal( v.v1 ) && isreal( v.v2 );
@@ -358,7 +362,24 @@ classdef DoubleDouble
             if ~isa( a, 'DoubleDouble' )
                 a = DoubleDouble( a );
             end
-            v = exp( b .* log( a ) );
+            if isscalar( b ) && ( b >= 0 ) && ( floor( b ) == b )
+                Binary = dec2bin( b );
+                N = numel( Binary );
+                Power = a;
+                if Binary( end ) == '1'
+                    v = a;
+                else
+                    v = DoubleDouble.ones( size( a ) );
+                end
+                for n = 2 : N
+                    Power = Power .* Power;
+                    if Binary( end + 1 - n ) == '1'
+                        v = v .* Power;
+                    end
+                end
+            else
+                v = exp( b .* log( a ) );
+            end
         end
         
         function v = mpower( a, b )
