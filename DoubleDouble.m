@@ -362,23 +362,39 @@ classdef DoubleDouble
             if ~isa( a, 'DoubleDouble' )
                 a = DoubleDouble( a );
             end
-            if isscalar( b ) && ( b >= 0 ) && ( floor( b ) == b )
-                Binary = dec2bin( b );
-                N = numel( Binary );
+            if isa( b, 'DoubleDouble' )
+                b2 = TimesPowerOf2( b, 2 );
+            else
+                b2 = 2 * b;
+            end
+            bHalfInteger = ( double( b2 ) == b2 ) & ( floor( b2 ) == b2 );
+            if ~any( bHalfInteger )
+                v = exp( b .* log( a ) );
+            else
+                [ a, b, bHalfInteger ] = DoubleDouble.ExpandSingleton( a, b, bHalfInteger );
+                v = DoubleDouble.ones( size( a ) );
+                bNonHalfInteger = find( ~bHalfInteger );
+                bHalfInteger = find( bHalfInteger );
+                v = DoubleDouble.Assign( v, bNonHalfInteger, exp( DoubleDouble.Index( b, bNonHalfInteger ) .* log( DoubleDouble.Index( a, bNonHalfInteger ) ) ) );
+                a = DoubleDouble.Index( a, bHalfInteger );
+                b = double( DoubleDouble.Index( b, bHalfInteger ) );
+                Select = find( b < 0 );
+                a = DoubleDouble.Assign( a, Select, 1 ./ DoubleDouble.Index( a, Select ) );
+                b = DoubleDouble.Assign( b, Select, -b( Select ) );
+                vv =  DoubleDouble.Index( v, bHalfInteger );
+                Select = find( b ~= floor( b ) );
+                vv = DoubleDouble.Assign( vv, Select, sqrt( DoubleDouble.Index( a, Select ) ) );
+                Binary = dec2bin( floor( b ) );
+                N = size( Binary, 2 );
                 Power = a;
-                if Binary( end ) == '1'
-                    v = a;
-                else
-                    v = DoubleDouble.ones( size( a ) );
-                end
+                Select = find( Binary( :, end ) == '1' );
+                vv = DoubleDouble.Assign( vv, Select, DoubleDouble.Index( a, Select ) );
                 for n = 2 : N
                     Power = Power .* Power;
-                    if Binary( end + 1 - n ) == '1'
-                        v = v .* Power;
-                    end
+                    Select = find( Binary( :, end + 1 - n ) == '1' );
+                    vv = DoubleDouble.Assign( vv, Select, DoubleDouble.Index( vv, Select ) .* DoubleDouble.Index( Power, Select ) );
                 end
-            else
-                v = exp( b .* log( a ) );
+                v = DoubleDouble.Assign( v, bHalfInteger, vv );
             end
         end
         
@@ -2440,6 +2456,25 @@ classdef DoubleDouble
                 [ i1, i2 ] = DoubleDouble.Split( imag( a ) );
                 a1 = complex( r1, i1 );
                 a2 = complex( r2, i2 );
+            end
+        end
+
+        function v = Index( v, s )
+            if isa( v, 'DoubleDouble' )
+                v = DoubleDouble.Make( v.v1( s ), v.v2( s ) );
+            else
+                v = v( s );
+            end
+        end
+        
+        function v = Assign( v, s, x )
+            if isa( v, 'DoubleDouble' ) || isa( x, 'DoubleDouble' )
+                v = DoubleDouble( v );
+                x = DoubleDouble( x );
+                v.v1( s ) = x.v1;
+                v.v2( s ) = x.v2;
+            else
+                v( s ) = x;
             end
         end
         
