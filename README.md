@@ -15,7 +15,9 @@ The DoubleDouble class has the following public, non-static methods:
  * disp
  * ToSumOfDoubles
  * double
+ * isscalar
  * isreal
+ * isnumeric
  * isfinite
  * isinf
  * isnan
@@ -61,6 +63,10 @@ The DoubleDouble class has the following public, non-static methods:
  * subsref
  * subsasgn
  * subsindex
+ * sparse
+ * any
+ * all
+ * find
  * sum
  * prod
  * max
@@ -82,6 +88,7 @@ The DoubleDouble class has the following public, non-static methods:
  * sqrt
  * sqrtm
  * exp
+ * expm1
  * expm
  * log
  * log2
@@ -113,6 +120,14 @@ The DoubleDouble class has the following public, non-static methods:
  * ldl
  * eig
  * conv
+ * sort
+ * unique
+ * mean
+ * median
+ * std
+ * var
+ * meshgrid
+ * linspace
 
 The DoubleDouble class has the following public, static methods:
  * IsEqualWithExpansion

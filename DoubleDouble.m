@@ -1303,6 +1303,239 @@ classdef DoubleDouble
             end
 
         end
+        
+        function [ v, Idx, N ] = unique( v, varargin )
+            Rows = true;
+            First = true;
+            Direction = 'ascend';
+            Flag = 'sorted';
+            
+            for i = 1 : length( varargin )
+                Arg = varargin{ i };
+                if ischar( Arg ) || isstring( Arg )
+                    Arg = lower( char( Arg ) );
+                    switch Arg
+                        case { 'rows' }
+                            Rows = true;
+                        case { 'first', 'last' }
+                            First = strcmp( Arg, 'first' );
+                        case { 'ascend', 'descend' }
+                            Direction = Arg;
+                        case { 'sorted', 'stable' }
+                            Flag = Arg;
+                    end
+                end
+            end
+            
+            if ~Rows
+                Size = size( v );
+                v = v(:);
+            end
+            
+            if strcmp( Flag, 'sorted' )
+                if strcmp( Direction, 'ascend' )
+                    [ Sorted, SortIdx ] = sort( v );
+                else
+                    [ Sorted, SortIdx ] = sort( v, 'descend' );
+                end
+            else
+                if strcmp( Direction, 'ascend' )
+                    [ Sorted, SortIdx ] = sort( v );
+                else
+                    [ Sorted, SortIdx ] = sort( v, 'descend' );
+                end
+            end
+            
+            Idx = find( [ true; Sorted( 1 : end - 1 ) ~= Sorted( 2 : end ) ] );
+            v = Sorted( Idx );
+            
+            if nargout > 1
+                if First
+                    [ ~, IdxFirst ] = sort( SortIdx );
+                    Idx = IdxFirst( Idx );
+                else
+                    Idx = SortIdx( Idx );
+                end
+            end
+            
+            if nargout > 2
+                if Rows
+                    N = diff( [ 0; find( [ Sorted( 1 : end - 1 ) ~= Sorted( 2 : end ); true ] ) ] );
+                else
+                    N = diff( [ 0; find( [ Sorted( 1 : end - 1 ) ~= Sorted( 2 : end ); true ] ) ] );
+                    N = reshape( N, Size );
+                end
+            end
+            
+            if ~Rows && numel( Size ) > 1
+                v = reshape( v, Size );
+            end
+        end
+        
+        function m = mean( v, dim )
+            if nargin < 2
+                dim = [];
+            end
+            
+            Sum = sum( v, dim );
+            if isempty( dim )
+                dim = find( size( v.v1 ) > 1, 1 );
+                if isempty( dim )
+                    dim = 1;
+                end
+            end
+            n = size( v.v1, dim );
+            
+            m = Sum ./ n;
+        end
+        
+        function m = median( v, dim )
+            if nargin < 2
+                dim = [];
+            end
+            
+            if isempty( dim )
+                dim = find( size( v.v1 ) > 1, 1 );
+                if isempty( dim )
+                    dim = 1;
+                end
+            end
+            
+            Size = size( v.v1 );
+            n = Size( dim );
+            
+            if n == 0
+                Size( dim ) = 0;
+                m = DoubleDouble.Make( NaN( Size ), NaN( Size ) );
+                return;
+            end
+            
+            [ SortedV, ~ ] = sort( v, dim );
+            
+            if mod( n, 2 ) == 1
+                Middle = ceil( n / 2 );
+                IdxList = repmat( { ':' }, 1, length( Size ) );
+                IdxList{ dim } = Middle;
+                m = SortedV( IdxList{ : } );
+            else
+                Middle1 = n / 2;
+                Middle2 = Middle1 + 1;
+                IdxList1 = repmat( { ':' }, 1, length( Size ) );
+                IdxList1{ dim } = Middle1;
+                IdxList2 = repmat( { ':' }, 1, length( Size ) );
+                IdxList2{ dim } = Middle2;
+                m = ( SortedV( IdxList1{ : } ) + SortedV( IdxList2{ : } ) ) ./ 2;
+            end
+        end
+        
+        function s = std( v, Flag, dim )
+            if nargin < 3
+                dim = [];
+                if nargin < 2
+                    Flag = 0;
+                end
+            end
+            
+            if ischar( Flag )
+                if strcmpi( Flag, 'includenan' )
+                    Flag = 0;
+                elseif strcmpi( Flag, 'omitnan' )
+                    Flag = 0;
+                    v = v( ~isnan( v ) );
+                end
+            end
+            
+            Var = var( v, Flag, dim );
+            s = sqrt( Var );
+        end
+        
+        function Var = var( v, Flag, dim )
+            if nargin < 3
+                dim = [];
+                if nargin < 2
+                    Flag = 0;
+                end
+            end
+            
+            if isempty( dim )
+                dim = find( size( v.v1 ) > 1, 1 );
+                if isempty( dim )
+                    dim = 1;
+                end
+            end
+            
+            Size = size( v.v1 );
+            n = Size( dim );
+            
+            if n == 0
+                Size( dim ) = 1;
+                Var = DoubleDouble.Make( NaN( Size ), NaN( Size ) );
+                return;
+            end
+            
+            Mu = mean( v, dim );
+            Dev = v - Mu;
+            SqDev = Dev .* Dev;
+            SumSqDev = sum( SqDev, dim );
+            
+            if Flag == 1
+                Var = SumSqDev ./ n;
+            else
+                if n > 1
+                    Var = SumSqDev ./ ( n - 1 );
+                else
+                    Var = DoubleDouble.Make( NaN( size( SumSqDev.v1 ) ), NaN( size( SumSqDev.v2 ) ) );
+                end
+            end
+        end
+        
+        function [ X, Y ] = meshgrid( x, y )
+            if nargin < 2
+                y = x;
+            end
+            
+            XRow = x(:).';
+            YCol = y(:);
+            
+            nx = numel( x );
+            ny = numel( y );
+            
+            X = DoubleDouble.Make( repmat( XRow.v1, ny, 1 ), repmat( XRow.v2, ny, 1 ) );
+            Y = DoubleDouble.Make( repmat( YCol.v1, 1, nx ), repmat( YCol.v2, 1, nx ) );
+        end
+        
+        function y = linspace( a, b, n )
+            if nargin < 3
+                n = 100;
+            end
+            
+            if ~isa( a, 'DoubleDouble' )
+                a = DoubleDouble( a );
+            end
+            
+            if ~isa( b, 'DoubleDouble' )
+                b = DoubleDouble( b );
+            end
+            
+            if n < 1
+                y = DoubleDouble.zeros( 0, 1 );
+                return;
+            end
+            
+            if n == 1
+                y = b;
+                return;
+            end
+            
+            Step = ( b - a ) ./ ( n - 1 );
+            Indices = 0 : ( n - 1 );
+            y = a + Step .* Indices;
+            
+            if n > 1
+                y.v1( end ) = b.v1;
+                y.v2( end ) = b.v2;
+            end
+        end
 
     end
 
