@@ -18,3 +18,4 @@ codegen/
 
 .DS_Store
 checksum
+*.tap

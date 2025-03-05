@@ -1318,13 +1318,18 @@ classdef DoubleDouble
             Rows = strcmpi( varargin, 'rows');
             if any( Rows )
                 varargin( Rows ) = [];
+                RowFlag = 0;
             else
-                A = A(:);
+                RowFlag = size( A, 1 ) == 1;
+                A = Vec( A );
             end
             Size = size( A );
             A = [ reshape( A.v1, [ Size( 1 ), 1, Size( 2 : end ) ] ), reshape( A.v2, [ Size( 1 ), 1, Size( 2 : end ) ] ) ];
             [ C, ia, ic ] = unique( A, 'rows', varargin{:} );
-            C = DoubleDouble.Make( reshape( C( :, 1, : ), Size ), reshape( C( :, 2, : ), Size ) );
+            C = DoubleDouble.Make( reshape( C( :, 1, : ), [ numel( ia ), Size( 2 : end ) ] ), reshape( C( :, 2, : ), [ numel( ia ), Size( 2 : end ) ] ) );
+            if RowFlag
+                C = C.';
+            end
         end
         
         function v = mean( v, Dim )
@@ -1334,13 +1339,12 @@ classdef DoubleDouble
                     Dim = 1;
                 end
             elseif strcmpi( Dim, 'all' )
-                v = v(:);
+                v = Vec( v );
                 Dim = 1;
             end
-            v = sum( v, Dim );
             Size = size( v.v1 );
             n = prod( Size( Dim ) );
-            v = v ./ n;
+            v = sum( v, Dim ) ./ n;
         end
         
         function v = median( v, Dim )
@@ -1350,7 +1354,7 @@ classdef DoubleDouble
                     Dim = 1;
                 end
             elseif strcmpi( Dim, 'all' )
-                v = v(:);
+                v = Vec( v );
                 Dim = 1;
             end
             Size = size( v.v1 );
@@ -1421,18 +1425,10 @@ classdef DoubleDouble
         end
         
         function [ X, Y ] = meshgrid( x, y )
-            if nargin < 2
-                y = x;
-            end
-            
-            XRow = x(:).';
-            YCol = y(:);
-            
-            nx = numel( x );
-            ny = numel( y );
-            
-            X = DoubleDouble.Make( repmat( XRow.v1, ny, 1 ), repmat( XRow.v2, ny, 1 ) );
-            Y = DoubleDouble.Make( repmat( YCol.v1, 1, nx ), repmat( YCol.v2, 1, nx ) );
+            [ X1, Y1 ] = meshgrid( x.v1, y.v1 );
+            [ X2, Y2 ] = meshgrid( x.v2, y.v2 );
+            X = DoubleDouble.Make( X1, X2 );
+            Y = DoubleDouble.Make( Y1, Y2 );
         end
         
         function y = linspace( a, b, n )
