@@ -558,6 +558,16 @@ classdef DoubleDouble
             v.v2 = v.v2.';
         end
         
+        function v = permute( v, DimOrder )
+            v.v1 = permute( v.v1, DimOrder );
+            v.v2 = permute( v.v2, DimOrder );
+        end
+        
+        function v = ipermute( v, DimOrder )
+            v.v1 = ipermute( v.v1, DimOrder );
+            v.v2 = ipermute( v.v2, DimOrder );
+        end
+        
         function v = horzcat( a, b, varargin )
             if nargin > 2
                 v = horzcat( horzcat( a, b ), varargin{:} );
@@ -613,9 +623,9 @@ classdef DoubleDouble
         function [ v, Indices ] = sort( v, varargin )
             DimIndex = find( cellfun( @isnumeric, varargin ), 1 );
             if isempty( DimIndex )
-                dim = [];
+                Dim = [];
             else
-                dim = varargin{ DimIndex };
+                Dim = varargin{ DimIndex };
                 varargin = varargin( [ 1 : ( DimIndex - 1 ), ( DimIndex + 1 ) : end ] );
             end
             CMIndex = find( strcmpi( varargin, 'ComparisonMethod' ), 1 );
@@ -625,91 +635,91 @@ classdef DoubleDouble
                 cm = varargin{ CMIndex + 1 };
                 varargin = varargin( [ 1 : ( CMIndex - 1 ), ( CMIndex + 2 ) : end ] );
             end
-            [ v, Indices ] = DoubleDouble.Sort( v, dim, cm, varargin{:} );
+            [ v, Indices ] = DoubleDouble.Sort( v, Dim, cm, varargin{:} );
         end
         
-        function v = sum( v, dim )
+        function v = sum( v, Dim )
             if nargin < 2
-                dim = [];
+                Dim = [];
             end
-            v = DoubleDouble.Sum( v, dim );
+            v = DoubleDouble.Sum( v, Dim );
         end
         
-        function v = prod( v, dim )
+        function v = prod( v, Dim )
             if nargin < 2
-                dim = [];
+                Dim = [];
             end
-            v = DoubleDouble.Prod( v, dim );
+            v = DoubleDouble.Prod( v, Dim );
         end
         
-        function [ v, i ] = max( a, b, dim )
+        function [ v, i ] = max( a, b, Dim )
             if nargin < 3
-                dim = [];
+                Dim = [];
                 if nargin < 2
                     b = [];
                 end
             end
             if nargout < 2
-                v = DoubleDouble.Max( a, b, dim );
+                v = DoubleDouble.Max( a, b, Dim );
             else
-                [ v, i ] = DoubleDouble.Max( a, b, dim );
+                [ v, i ] = DoubleDouble.Max( a, b, Dim );
             end
         end
         
-        function [ v, i ] = min( a, b, dim )
+        function [ v, i ] = min( a, b, Dim )
             if nargin < 3
-                dim = [];
+                Dim = [];
                 if nargin < 2
                     b = [];
                 end
             end
             if nargout < 2
-                v = DoubleDouble.Min( a, b, dim );
+                v = DoubleDouble.Min( a, b, Dim );
             else
-                [ v, i ] = DoubleDouble.Min( a, b, dim );
+                [ v, i ] = DoubleDouble.Min( a, b, Dim );
             end
         end
         
-        function v = cumsum( v, dim )
+        function v = cumsum( v, Dim )
             if nargin < 2
-                dim = [];
+                Dim = [];
             end
-            v = DoubleDouble.CumSum( v, dim );
+            v = DoubleDouble.CumSum( v, Dim );
         end
         
-        function v = diff( v, dim )
+        function v = diff( v, Dim )
             if nargin < 2
-                dim = [];
+                Dim = [];
             end
-            v = DoubleDouble.Diff( v, dim );
+            v = DoubleDouble.Diff( v, Dim );
         end
         
-        function v = cumprod( v, dim )
+        function v = cumprod( v, Dim )
             if nargin < 2
-                dim = [];
+                Dim = [];
             end
-            v = DoubleDouble.CumProd( v, dim );
+            v = DoubleDouble.CumProd( v, Dim );
         end
         
-        function v = cummax( v, dim )
+        function v = cummax( v, Dim )
             if nargin < 3
-                dim = [];
+                Dim = [];
             end
-            v = DoubleDouble.CumMax( v, dim );
+            v = DoubleDouble.CumMax( v, Dim );
         end
         
-        function v = cummin( v, dim )
+        function v = cummin( v, Dim )
             if nargin < 3
-                dim = [];
+                Dim = [];
             end
-            v = DoubleDouble.CumMin( v, dim );
+            v = DoubleDouble.CumMin( v, Dim );
         end
         
-        function v = dot( a, b, dim )
+        function v = dot( a, b, Dim )
             if nargin < 3
-                dim = [];
+                Dim = [];
             end
-            v = DoubleDouble.Dot( a, b, dim );
+            v = DoubleDouble.Dot( a, b, Dim );
         end
         
         function v = norm( v, p )
@@ -1304,188 +1314,109 @@ classdef DoubleDouble
 
         end
         
-        function [ v, Idx, N ] = unique( v, varargin )
-            Rows = true;
-            First = true;
-            Direction = 'ascend';
-            Flag = 'sorted';
-            
-            for i = 1 : length( varargin )
-                Arg = varargin{ i };
-                if ischar( Arg ) || isstring( Arg )
-                    Arg = lower( char( Arg ) );
-                    switch Arg
-                        case { 'rows' }
-                            Rows = true;
-                        case { 'first', 'last' }
-                            First = strcmp( Arg, 'first' );
-                        case { 'ascend', 'descend' }
-                            Direction = Arg;
-                        case { 'sorted', 'stable' }
-                            Flag = Arg;
-                    end
-                end
-            end
-            
-            if ~Rows
-                Size = size( v );
-                v = v(:);
-            end
-            
-            if strcmp( Flag, 'sorted' )
-                if strcmp( Direction, 'ascend' )
-                    [ Sorted, SortIdx ] = sort( v );
-                else
-                    [ Sorted, SortIdx ] = sort( v, 'descend' );
-                end
+        function [ C, ia, ic ] = unique( A, varargin )
+            Rows = strcmpi( varargin, 'rows');
+            if any( Rows )
+                varargin( Rows ) = [];
             else
-                if strcmp( Direction, 'ascend' )
-                    [ Sorted, SortIdx ] = sort( v );
-                else
-                    [ Sorted, SortIdx ] = sort( v, 'descend' );
-                end
+                A = A(:);
             end
-            
-            Idx = find( [ true; Sorted( 1 : end - 1 ) ~= Sorted( 2 : end ) ] );
-            v = Sorted( Idx );
-            
-            if nargout > 1
-                if First
-                    [ ~, IdxFirst ] = sort( SortIdx );
-                    Idx = IdxFirst( Idx );
-                else
-                    Idx = SortIdx( Idx );
-                end
-            end
-            
-            if nargout > 2
-                if Rows
-                    N = diff( [ 0; find( [ Sorted( 1 : end - 1 ) ~= Sorted( 2 : end ); true ] ) ] );
-                else
-                    N = diff( [ 0; find( [ Sorted( 1 : end - 1 ) ~= Sorted( 2 : end ); true ] ) ] );
-                    N = reshape( N, Size );
-                end
-            end
-            
-            if ~Rows && numel( Size ) > 1
-                v = reshape( v, Size );
-            end
+            Size = size( A );
+            A = [ reshape( A.v1, [ Size( 1 ), 1, Size( 2 : end ) ] ), reshape( A.v2, [ Size( 1 ), 1, Size( 2 : end ) ] ) ];
+            [ C, ia, ic ] = unique( A, 'rows', varargin{:} );
+            C = DoubleDouble.Make( reshape( C( :, 1, : ), Size ), reshape( C( :, 2, : ), Size ) );
         end
         
-        function m = mean( v, dim )
-            if nargin < 2
-                dim = [];
-            end
-            
-            Sum = sum( v, dim );
-            if isempty( dim )
-                dim = find( size( v.v1 ) > 1, 1 );
-                if isempty( dim )
-                    dim = 1;
+        function v = mean( v, Dim )
+            if ( nargin < 2 ) || isempty( Dim )
+                Dim = find( size( v.v1 ) > 1, 1 );
+                if isempty( Dim )
+                    Dim = 1;
                 end
+            elseif strcmpi( Dim, 'all' )
+                v = v(:);
+                Dim = 1;
             end
-            n = size( v.v1, dim );
-            
-            m = Sum ./ n;
-        end
-        
-        function m = median( v, dim )
-            if nargin < 2
-                dim = [];
-            end
-            
-            if isempty( dim )
-                dim = find( size( v.v1 ) > 1, 1 );
-                if isempty( dim )
-                    dim = 1;
-                end
-            end
-            
+            v = sum( v, Dim );
             Size = size( v.v1 );
-            n = Size( dim );
+            n = prod( Size( Dim ) );
+            v = v ./ n;
+        end
+        
+        function v = median( v, Dim )
+            if ( nargin < 2 ) || isempty( Dim )
+                Dim = find( size( v.v1 ) > 1, 1 );
+                if isempty( Dim )
+                    Dim = 1;
+                end
+            elseif strcmpi( Dim, 'all' )
+                v = v(:);
+                Dim = 1;
+            end
+            Size = size( v.v1 );
+            n = prod( Size( Dim ) );
             
             if n == 0
-                Size( dim ) = 0;
-                m = DoubleDouble.Make( NaN( Size ), NaN( Size ) );
+                Size( Dim ) = 0;
+                v = DoubleDouble.Make( NaN( Size ), NaN( Size ) );
                 return;
             end
             
-            [ SortedV, ~ ] = sort( v, dim );
+            NotDim = setdiff( 1 : numel( Size ), Dim );
+            v = reshape( permute( v, [ Dim, NotDim ] ), [ n, Size( NotDim ) ] );
+
+            v = sort( v, 1 );
             
             if mod( n, 2 ) == 1
-                Middle = ceil( n / 2 );
-                IdxList = repmat( { ':' }, 1, length( Size ) );
-                IdxList{ dim } = Middle;
-                m = SortedV( IdxList{ : } );
+                Middle = ( n + 1 ) * 0.5;
+                v = DoubleDouble.Make( v.v1( Middle, : ), v.v2( Middle, : ) );
             else
-                Middle1 = n / 2;
+                Middle1 = n * 0.5;
                 Middle2 = Middle1 + 1;
-                IdxList1 = repmat( { ':' }, 1, length( Size ) );
-                IdxList1{ dim } = Middle1;
-                IdxList2 = repmat( { ':' }, 1, length( Size ) );
-                IdxList2{ dim } = Middle2;
-                m = ( SortedV( IdxList1{ : } ) + SortedV( IdxList2{ : } ) ) ./ 2;
+                m1 = DoubleDouble.Make( v.v1( Middle1, : ), v.v2( Middle1, : ) );
+                m2 = DoubleDouble.Make( v.v1( Middle2, : ), v.v2( Middle2, : ) );
+                v = 0.5 * ( m1 + m2 );
             end
+            v = ipermute( reshape( v, [ ones( 1, numel( Dim ) ), Size( NotDim ) ] ), [ Dim, NotDim ] );
         end
         
-        function s = std( v, Flag, dim )
+        function v = std( v, varargin )
+            v = sqrt( var( v, varargin{:} ) );
+        end
+        
+        function v = var( v, Flag, Dim )
             if nargin < 3
-                dim = [];
+                Dim = [];
                 if nargin < 2
                     Flag = 0;
                 end
             end
             
-            if ischar( Flag )
-                if strcmpi( Flag, 'includenan' )
-                    Flag = 0;
-                elseif strcmpi( Flag, 'omitnan' )
-                    Flag = 0;
-                    v = v( ~isnan( v ) );
-                end
-            end
-            
-            Var = var( v, Flag, dim );
-            s = sqrt( Var );
-        end
-        
-        function Var = var( v, Flag, dim )
-            if nargin < 3
-                dim = [];
-                if nargin < 2
-                    Flag = 0;
-                end
-            end
-            
-            if isempty( dim )
-                dim = find( size( v.v1 ) > 1, 1 );
-                if isempty( dim )
-                    dim = 1;
+            if isempty( Dim )
+                Dim = find( size( v.v1 ) > 1, 1 );
+                if isempty( Dim )
+                    Dim = 1;
                 end
             end
             
             Size = size( v.v1 );
-            n = Size( dim );
+            n = prod( Size( Dim ) );
             
-            if n == 0
-                Size( dim ) = 1;
-                Var = DoubleDouble.Make( NaN( Size ), NaN( Size ) );
+            if ( n == 0 ) || ( ( n == 1 ) && ( Flag == 0 ) )
+                Size( Dim ) = 1;
+                v = DoubleDouble.Make( NaN( Size ), NaN( Size ) );
                 return;
             end
             
-            Mu = mean( v, dim );
-            Dev = v - Mu;
-            SqDev = Dev .* Dev;
-            SumSqDev = sum( SqDev, dim );
+            Mu = mean( v, Dim );
+            v = v - Mu;
+            v = v .* v;
+            v = sum( v, Dim );
             
             if Flag == 1
-                Var = SumSqDev ./ n;
+                v = v ./ n;
             else
-                if n > 1
-                    Var = SumSqDev ./ ( n - 1 );
-                else
-                    Var = DoubleDouble.Make( NaN( size( SumSqDev.v1 ) ), NaN( size( SumSqDev.v2 ) ) );
-                end
+                v = v ./ ( n - 1 );
             end
         end
         
@@ -1748,11 +1679,11 @@ classdef DoubleDouble
             v = DoubleDouble.MLDivide( a', v' )';
         end
         
-        function [ v, Indices ] = Sort( v, dim, cm, varargin )
-            if nargin < 2 || isempty( dim )
-                dim = find( size( v.v1 ) > 1, 1 );
-                if isempty( dim )
-                    dim = 1;
+        function [ v, Indices ] = Sort( v, Dim, cm, varargin )
+            if nargin < 2 || isempty( Dim )
+                Dim = find( size( v.v1 ) > 1, 1 );
+                if isempty( Dim )
+                    Dim = 1;
                 end
             end
             if nargin < 3 || isempty( cm )
@@ -1780,7 +1711,7 @@ classdef DoubleDouble
                     return
                 end
                 Blocks = arrayfun( @( x ) ones( x, 1 ), Size, 'UniformOutput', false );
-                Blocks{ dim } = Size( dim );
+                Blocks{ Dim } = Size( Dim );
                 xv1 = mat2cell( v.v1, Blocks{:} );
                 xv2 = mat2cell( v.v2, Blocks{:} );
                 xa1 = mat2cell( a.v1, Blocks{:} );
@@ -1797,31 +1728,31 @@ classdef DoubleDouble
                 v       = DoubleDouble.Make( cell2mat( xv1 ), cell2mat( xv2 ) );
             else
                 if nargout > 1
-                    [ v, Indices ] = sort( v, dim, 'ComparisonMethod', cm, varargin{:} );
+                    [ v, Indices ] = sort( v, Dim, 'ComparisonMethod', cm, varargin{:} );
                 else
-                    v = sort( v, dim, 'ComparisonMethod', cm, varargin{:} );
+                    v = sort( v, Dim, 'ComparisonMethod', cm, varargin{:} );
                 end
                 v = DoubleDouble( v );
             end
         end
         
-        function s = Sum( v, dim )
+        function s = Sum( v, Dim )
             if isa( v, 'DoubleDouble' )
-                if nargin < 2 || isempty( dim )
-                    dim = find( size( v.v1 ) > 1, 1 );
-                    if isempty( dim )
-                        dim = 1;
+                if nargin < 2 || isempty( Dim )
+                    Dim = find( size( v.v1 ) > 1, 1 );
+                    if isempty( Dim )
+                        Dim = 1;
                     end
                 end
                 Size = size( v.v1 );
-                Length = Size( dim );
+                Length = Size( Dim );
                 if Length == 0
                     Size = max( 1, Size );
                     s = DoubleDouble.Make( zeros( Size ), zeros( Size ) );
                     return
                 end
                 Blocks = num2cell( Size );
-                Blocks{ dim } = ones( Length, 1 );
+                Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
                 x2 = mat2cell( v.v2, Blocks{:} );
                 s = DoubleDouble.Make( x1{ 1 }, x2{ 1 } );
@@ -1829,21 +1760,21 @@ classdef DoubleDouble
                     s = DoubleDouble.Plus( s, DoubleDouble.Make( x1{ i }, x2{ i } ) );
                 end
             else
-                if nargin < 2 || isempty( dim )
-                    dim = find( size( v ) > 1, 1 );
-                    if isempty( dim )
-                        dim = 1;
+                if nargin < 2 || isempty( Dim )
+                    Dim = find( size( v ) > 1, 1 );
+                    if isempty( Dim )
+                        Dim = 1;
                     end
                 end
                 Size = size( v );
-                Length = Size( dim );
+                Length = Size( Dim );
                 if Length == 0
                     Size = max( 1, Size );
                     s = DoubleDouble.Make( zeros( Size ), zeros( Size ) );
                     return
                 end
                 Blocks = num2cell( Size );
-                Blocks{ dim } = ones( Length, 1 );
+                Blocks{ Dim } = ones( Length, 1 );
                 x = mat2cell( v, Blocks{:} );
                 s = x{ 1 };
                 for i = 2 : Length
@@ -1852,22 +1783,22 @@ classdef DoubleDouble
             end
         end
         
-        function c = CumSum( v, dim )
+        function c = CumSum( v, Dim )
             if isa( v, 'DoubleDouble' )
-                if nargin < 2 || isempty( dim )
-                    dim = find( size( v.v1 ) > 1, 1 );
-                    if isempty( dim )
-                        dim = 1;
+                if nargin < 2 || isempty( Dim )
+                    Dim = find( size( v.v1 ) > 1, 1 );
+                    if isempty( Dim )
+                        Dim = 1;
                     end
                 end
                 Size = size( v.v1 );
-                Length = Size( dim );
+                Length = Size( Dim );
                 if Length == 0
                     c = DoubleDouble.Make( zeros( Size ), zeros( Size ) );
                     return
                 end
                 Blocks = num2cell( Size );
-                Blocks{ dim } = ones( Length, 1 );
+                Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
                 x2 = mat2cell( v.v2, Blocks{:} );
                 s = DoubleDouble.Make( x1{ 1 }, x2{ 1 } );
@@ -1881,20 +1812,20 @@ classdef DoubleDouble
                     c2{i} = s.v2;
                 end
             else
-                if nargin < 2 || isempty( dim )
-                    dim = find( size( v ) > 1, 1 );
-                    if isempty( dim )
-                        dim = 1;
+                if nargin < 2 || isempty( Dim )
+                    Dim = find( size( v ) > 1, 1 );
+                    if isempty( Dim )
+                        Dim = 1;
                     end
                 end
                 Size = size( v );
-                Length = Size( dim );
+                Length = Size( Dim );
                 if Length == 0
                     c = DoubleDouble.Make( zeros( Size ), zeros( Size ) );
                     return
                 end
                 Blocks = num2cell( Size );
-                Blocks{ dim } = ones( Length, 1 );
+                Blocks{ Dim } = ones( Length, 1 );
                 x = mat2cell( v, Blocks{:} );
                 s = x{ 1 };
                 c1 = cell( size( x ) );
@@ -1910,22 +1841,22 @@ classdef DoubleDouble
             c = DoubleDouble.Make( cell2mat( c1 ), cell2mat( c2 ) );
         end
         
-        function c = Diff( v, dim )
+        function c = Diff( v, Dim )
             if isa( v, 'DoubleDouble' )
-                if nargin < 2 || isempty( dim )
-                    dim = find( size( v.v1 ) > 1, 1 );
-                    if isempty( dim )
-                        dim = 1;
+                if nargin < 2 || isempty( Dim )
+                    Dim = find( size( v.v1 ) > 1, 1 );
+                    if isempty( Dim )
+                        Dim = 1;
                     end
                 end
                 Size = size( v.v1 );
-                Length = Size( dim );
+                Length = Size( Dim );
                 if Length == 0
                     c = DoubleDouble.Make( zeros( Size ), zeros( Size ) );
                     return
                 end
                 Blocks = num2cell( Size );
-                Blocks{ dim } = ones( Length, 1 );
+                Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
                 x2 = mat2cell( v.v2, Blocks{:} );
                 s = DoubleDouble.Make( x1{ 1 }, x2{ 1 } );
@@ -1941,20 +1872,20 @@ classdef DoubleDouble
                     s = t;
                 end
             else
-                if nargin < 2 || isempty( dim )
-                    dim = find( size( v ) > 1, 1 );
-                    if isempty( dim )
-                        dim = 1;
+                if nargin < 2 || isempty( Dim )
+                    Dim = find( size( v ) > 1, 1 );
+                    if isempty( Dim )
+                        Dim = 1;
                     end
                 end
                 Size = size( v );
-                Length = Size( dim );
+                Length = Size( Dim );
                 if Length == 0
                     c = DoubleDouble.Make( zeros( Size ), zeros( Size ) );
                     return
                 end
                 Blocks = num2cell( Size );
-                Blocks{ dim } = ones( Length, 1 );
+                Blocks{ Dim } = ones( Length, 1 );
                 x = mat2cell( v, Blocks{:} );
                 s = x{ 1 };
                 c1 = cell( size( x ) );
@@ -1972,23 +1903,23 @@ classdef DoubleDouble
             c = DoubleDouble.Make( cell2mat( c1 ), cell2mat( c2 ) );
         end
         
-        function s = Prod( v, dim )
+        function s = Prod( v, Dim )
             if isa( v, 'DoubleDouble' )
-                if nargin < 2 || isempty( dim )
-                    dim = find( size( v.v1 ) > 1, 1 );
-                    if isempty( dim )
-                        dim = 1;
+                if nargin < 2 || isempty( Dim )
+                    Dim = find( size( v.v1 ) > 1, 1 );
+                    if isempty( Dim )
+                        Dim = 1;
                     end
                 end
                 Size = size( v.v1 );
-                Length = Size( dim );
+                Length = Size( Dim );
                 if Length == 0
                     Size = max( 1, Size );
                     s = DoubleDouble.Make( ones( Size ), zeros( Size ) );
                     return
                 end
                 Blocks = num2cell( Size );
-                Blocks{ dim } = ones( Length, 1 );
+                Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
                 x2 = mat2cell( v.v2, Blocks{:} );
                 s = DoubleDouble.Make( x1{ 1 }, x2{ 1 } );
@@ -1996,21 +1927,21 @@ classdef DoubleDouble
                     s = DoubleDouble.Times( s, DoubleDouble.Make( x1{ i }, x2{ i } ) );
                 end
             else
-                if nargin < 2 || isempty( dim )
-                    dim = find( size( v ) > 1, 1 );
-                    if isempty( dim )
-                        dim = 1;
+                if nargin < 2 || isempty( Dim )
+                    Dim = find( size( v ) > 1, 1 );
+                    if isempty( Dim )
+                        Dim = 1;
                     end
                 end
                 Size = size( v );
-                Length = Size( dim );
+                Length = Size( Dim );
                 if Length == 0
                     Size = max( 1, Size );
                     s = DoubleDouble.Make( ones( Size ), zeros( Size ) );
                     return
                 end
                 Blocks = num2cell( Size );
-                Blocks{ dim } = ones( Length, 1 );
+                Blocks{ Dim } = ones( Length, 1 );
                 x = mat2cell( v, Blocks{:} );
                 s = x{ 1 };
                 for i = 2 : Length
@@ -2019,22 +1950,22 @@ classdef DoubleDouble
             end
         end
         
-        function c = CumProd( v, dim )
+        function c = CumProd( v, Dim )
             if isa( v, 'DoubleDouble' )
-                if nargin < 2 || isempty( dim )
-                    dim = find( size( v.v1 ) > 1, 1 );
-                    if isempty( dim )
-                        dim = 1;
+                if nargin < 2 || isempty( Dim )
+                    Dim = find( size( v.v1 ) > 1, 1 );
+                    if isempty( Dim )
+                        Dim = 1;
                     end
                 end
                 Size = size( v.v1 );
-                Length = Size( dim );
+                Length = Size( Dim );
                 if Length == 0
                     c = DoubleDouble.Make( zeros( Size ), zeros( Size ) );
                     return
                 end
                 Blocks = num2cell( Size );
-                Blocks{ dim } = ones( Length, 1 );
+                Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
                 x2 = mat2cell( v.v2, Blocks{:} );
                 s = DoubleDouble.Make( x1{ 1 }, x2{ 1 } );
@@ -2048,20 +1979,20 @@ classdef DoubleDouble
                     c2{i} = s.v2;
                 end
             else
-                if nargin < 2 || isempty( dim )
-                    dim = find( size( v ) > 1, 1 );
-                    if isempty( dim )
-                        dim = 1;
+                if nargin < 2 || isempty( Dim )
+                    Dim = find( size( v ) > 1, 1 );
+                    if isempty( Dim )
+                        Dim = 1;
                     end
                 end
                 Size = size( v );
-                Length = Size( dim );
+                Length = Size( Dim );
                 if Length == 0
                     c = DoubleDouble.Make( zeros( Size ), zeros( Size ) );
                     return
                 end
                 Blocks = num2cell( Size );
-                Blocks{ dim } = ones( Length, 1 );
+                Blocks{ Dim } = ones( Length, 1 );
                 x = mat2cell( v, Blocks{:} );
                 s = x{ 1 };
                 c1 = cell( size( x ) );
@@ -2105,7 +2036,7 @@ classdef DoubleDouble
             end
         end
         
-        function [ s, i ] = Max( a, b, dim )
+        function [ s, i ] = Max( a, b, Dim )
             if isempty( b )
                 if isempty( a )
                     s = DoubleDouble;
@@ -2113,36 +2044,36 @@ classdef DoubleDouble
                     return
                 end
                 if isa( a, 'DoubleDouble' )
-                    if nargin < 3 || isempty( dim )
-                        dim = find( size( a.v1 ) > 1, 1 );
-                        if isempty( dim )
-                            dim = 1;
+                    if nargin < 3 || isempty( Dim )
+                        Dim = find( size( a.v1 ) > 1, 1 );
+                        if isempty( Dim )
+                            Dim = 1;
                         end
                     end
                     Size = size( a.v1 );
-                    Length = Size( dim );
+                    Length = Size( Dim );
                     Blocks = num2cell( Size );
-                    Blocks{ dim } = ones( Length, 1 );
+                    Blocks{ Dim } = ones( Length, 1 );
                     x1 = mat2cell( a.v1, Blocks{:} );
                     x2 = mat2cell( a.v2, Blocks{:} );
                     s = DoubleDouble.Make( x1{ 1 }, x2{ 1 } );
-                    Size( dim ) = 1;
+                    Size( Dim ) = 1;
                     i = ones( Size );
                     for j = 2 : Length
                         [ s, ii ] = DoubleDouble.Max( DoubleDouble.Make( x1{ j }, x2{ j } ), s );
                         i( ii ) = j;
                     end
                 else
-                    if nargin < 3 || isempty( dim )
-                        dim = find( size( a ) > 1, 1 );
-                        if isempty( dim )
-                            dim = 1;
+                    if nargin < 3 || isempty( Dim )
+                        Dim = find( size( a ) > 1, 1 );
+                        if isempty( Dim )
+                            Dim = 1;
                         end
                     end
                     Size = size( a );
-                    Length = Size( dim );
+                    Length = Size( Dim );
                     Blocks = num2cell( Size );
-                    Blocks{ dim } = ones( Length, 1 );
+                    Blocks{ Dim } = ones( Length, 1 );
                     x = mat2cell( a, Blocks{:} );
                     s = x{ 1 };
                     for j = 2 : Length
@@ -2164,22 +2095,22 @@ classdef DoubleDouble
             end
         end
         
-        function c = CumMax( v, dim )
+        function c = CumMax( v, Dim )
             if isa( v, 'DoubleDouble' )
-                if nargin < 3 || isempty( dim )
-                    dim = find( size( v.v1 ) > 1, 1 );
-                    if isempty( dim )
-                        dim = 1;
+                if nargin < 3 || isempty( Dim )
+                    Dim = find( size( v.v1 ) > 1, 1 );
+                    if isempty( Dim )
+                        Dim = 1;
                     end
                 end
                 Size = size( v.v1 );
-                Length = Size( dim );
+                Length = Size( Dim );
                 if Length == 0
                     c = DoubleDouble.Make( zeros( Size ), zeros( Size ) );
                     return
                 end
                 Blocks = num2cell( Size );
-                Blocks{ dim } = ones( Length, 1 );
+                Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
                 x2 = mat2cell( v.v2, Blocks{:} );
                 s = DoubleDouble.Make( x1{ 1 }, x2{ 1 } );
@@ -2193,20 +2124,20 @@ classdef DoubleDouble
                     c2{i} = s.v2;
                 end
             else
-                if nargin < 3 || isempty( dim )
-                    dim = find( size( v ) > 1, 1 );
-                    if isempty( dim )
-                        dim = 1;
+                if nargin < 3 || isempty( Dim )
+                    Dim = find( size( v ) > 1, 1 );
+                    if isempty( Dim )
+                        Dim = 1;
                     end
                 end
                 Size = size( v );
-                Length = Size( dim );
+                Length = Size( Dim );
                 if Length == 0
                     c = DoubleDouble.Make( zeros( Size ), zeros( Size ) );
                     return
                 end
                 Blocks = num2cell( Size );
-                Blocks{ dim } = ones( Length, 1 );
+                Blocks{ Dim } = ones( Length, 1 );
                 x = mat2cell( v, Blocks{:} );
                 s = x{ 1 };
                 c1 = cell( size( x ) );
@@ -2222,39 +2153,39 @@ classdef DoubleDouble
             c = DoubleDouble.Make( cell2mat( c1 ), cell2mat( c2 ) );
         end
         
-        function [ s, i ] = Min( a, b, dim )
+        function [ s, i ] = Min( a, b, Dim )
             if isempty( b )
                 if isa( a, 'DoubleDouble' )
-                    if nargin < 3 || isempty( dim )
-                        dim = find( size( a.v1 ) > 1, 1 );
-                        if isempty( dim )
-                            dim = 1;
+                    if nargin < 3 || isempty( Dim )
+                        Dim = find( size( a.v1 ) > 1, 1 );
+                        if isempty( Dim )
+                            Dim = 1;
                         end
                     end
                     Size = size( a.v1 );
-                    Length = Size( dim );
+                    Length = Size( Dim );
                     Blocks = num2cell( Size );
-                    Blocks{ dim } = ones( Length, 1 );
+                    Blocks{ Dim } = ones( Length, 1 );
                     x1 = mat2cell( a.v1, Blocks{:} );
                     x2 = mat2cell( a.v2, Blocks{:} );
                     s = DoubleDouble.Make( x1{ 1 }, x2{ 1 } );
-                    Size( dim ) = 1;
+                    Size( Dim ) = 1;
                     i = ones( Size );
                     for j = 2 : Length
                         [ s, ii ] = DoubleDouble.Min( DoubleDouble.Make( x1{ j }, x2{ j } ), s );
                         i( ii ) = j;
                     end
                 else
-                    if nargin < 3 || isempty( dim )
-                        dim = find( size( a ) > 1, 1 );
-                        if isempty( dim )
-                            dim = 1;
+                    if nargin < 3 || isempty( Dim )
+                        Dim = find( size( a ) > 1, 1 );
+                        if isempty( Dim )
+                            Dim = 1;
                         end
                     end
                     Size = size( a );
-                    Length = Size( dim );
+                    Length = Size( Dim );
                     Blocks = num2cell( Size );
-                    Blocks{ dim } = ones( Length, 1 );
+                    Blocks{ Dim } = ones( Length, 1 );
                     x = mat2cell( a, Blocks{:} );
                     s = x{ 1 };
                     for j = 2 : Length
@@ -2276,22 +2207,22 @@ classdef DoubleDouble
             end
         end
         
-        function c = CumMin( v, dim )
+        function c = CumMin( v, Dim )
             if isa( v, 'DoubleDouble' )
-                if nargin < 3 || isempty( dim )
-                    dim = find( size( v.v1 ) > 1, 1 );
-                    if isempty( dim )
-                        dim = 1;
+                if nargin < 3 || isempty( Dim )
+                    Dim = find( size( v.v1 ) > 1, 1 );
+                    if isempty( Dim )
+                        Dim = 1;
                     end
                 end
                 Size = size( v.v1 );
-                Length = Size( dim );
+                Length = Size( Dim );
                 if Length == 0
                     c = DoubleDouble.Make( zeros( Size ), zeros( Size ) );
                     return
                 end
                 Blocks = num2cell( Size );
-                Blocks{ dim } = ones( Length, 1 );
+                Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
                 x2 = mat2cell( v.v2, Blocks{:} );
                 s = DoubleDouble.Make( x1{ 1 }, x2{ 1 } );
@@ -2305,20 +2236,20 @@ classdef DoubleDouble
                     c2{i} = s.v2;
                 end
             else
-                if nargin < 3 || isempty( dim )
-                    dim = find( size( v ) > 1, 1 );
-                    if isempty( dim )
-                        dim = 1;
+                if nargin < 3 || isempty( Dim )
+                    Dim = find( size( v ) > 1, 1 );
+                    if isempty( Dim )
+                        Dim = 1;
                     end
                 end
                 Size = size( v );
-                Length = Size( dim );
+                Length = Size( Dim );
                 if Length == 0
                     c = DoubleDouble.Make( zeros( Size ), zeros( Size ) );
                     return
                 end
                 Blocks = num2cell( Size );
-                Blocks{ dim } = ones( Length, 1 );
+                Blocks{ Dim } = ones( Length, 1 );
                 x = mat2cell( v, Blocks{:} );
                 s = x{ 1 };
                 c1 = cell( size( x ) );
@@ -2334,15 +2265,15 @@ classdef DoubleDouble
             c = DoubleDouble.Make( cell2mat( c1 ), cell2mat( c2 ) );
         end
                 
-        function v = Dot( a, b, dim )
+        function v = Dot( a, b, Dim )
             if nargin < 3
-                dim = [];
+                Dim = [];
             end
             if ( length( a ) == numel( a ) ) && ( length( b ) == numel( b ) )
                 a = Vec( a );
                 b = Vec( b );
             end
-            v = DoubleDouble.Sum( DoubleDouble.Times( a, b ), dim );
+            v = DoubleDouble.Sum( DoubleDouble.Times( a, b ), Dim );
         end
         
         function [ varargout ] = ExpandSingleton( varargin )
