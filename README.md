@@ -128,7 +128,14 @@ The DoubleDouble class has the following public, non-static methods:
  * var
  * meshgrid
  * linspace
-
+ * unique
+ * mean
+ * median
+ * std
+ * var
+ * meshgrid
+ * linspace
+ 
 The DoubleDouble class has the following public, static methods:
  * IsEqualWithExpansion
  * ones
