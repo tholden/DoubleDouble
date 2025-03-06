@@ -43,14 +43,14 @@ function Results = RunTests()
         disp( 'Failed Tests:' );
         FailedIdx = find( [ Results.Failed ] );
         for i = 1 : length( FailedIdx )
-            testIdx = FailedIdx( i );
-            disp( [ '  ' Results( testIdx ).Name ] );
+            TestIdx = FailedIdx( i );
+            disp( [ '  ' Results( TestIdx ).Name ] );
             % Get error message - access structure varies by MATLAB version
             try
-                ErrorMsg = Results( testIdx ).Details.Exception.message;
+                ErrorMsg = Results( TestIdx ).Details.Exception.message;
             catch
                 try
-                    ErrorMsg = Results( testIdx ).Exception.message;
+                    ErrorMsg = Results( TestIdx ).Exception.message;
                 catch
                     ErrorMsg = '';
                 end

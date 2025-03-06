@@ -19,7 +19,7 @@ classdef DoubleDoubleTest < matlab.unittest.TestCase
             TestCase.SmallValues = DoubleDouble( [ 1e-10, 2e-10, 3e-10 ] );
             TestCase.MediumValues = DoubleDouble( [ 1, 2, 3 ] );
             TestCase.LargeValues = DoubleDouble( [ 1e10, 2e10, 3e10 ] );
-            TestCase.ComplexValues = DoubleDouble( [ 1+1i, 2+2i, 3+3i ] );
+            TestCase.ComplexValues = DoubleDouble( [ 1 + 1i, 2 + 2i, 3 + 3i ] );
             
             % Create matrix test data
             TestCase.MatrixValues = DoubleDouble( [ 1, 2, 3; 4, 5, 6; 7, 8, 9 ] );
@@ -49,9 +49,9 @@ classdef DoubleDoubleTest < matlab.unittest.TestCase
         end
         
         function TestConstructorComplex( TestCase )
-            A = DoubleDouble( 1+2i );
+            A = DoubleDouble( 1 + 2i );
             [ V1, ~ ] = ToSumOfDoubles( A );
-            TestCase.verifyEqual( V1, 1+2i );
+            TestCase.verifyEqual( V1, 1 + 2i );
         end
         
         function TestConstructorFromDoubleDouble( TestCase )
@@ -121,9 +121,9 @@ classdef DoubleDoubleTest < matlab.unittest.TestCase
         end
         
         function TestAngle( TestCase )
-            A = DoubleDouble( 1+1i );
+            A = DoubleDouble( 1 + 1i );
             Ang = angle( A );
-            TestCase.verifyEqual( double( Ang ), pi/4, 'RelTol', TestCase.RelTol );
+            TestCase.verifyEqual( double( Ang ), pi / 4, 'RelTol', TestCase.RelTol );
         end
         
         % Array manipulation tests
@@ -248,8 +248,8 @@ classdef DoubleDoubleTest < matlab.unittest.TestCase
             TestCase.verifyEqual( double( B ), Expected );
             
             % Test with negative powers
-            C = A .^ (-1);
-            Expected = [ 0.5, 1/3, 0.25 ];
+            C = A .^ ( -1 );
+            Expected = [ 0.5, 1 / 3, 0.25 ];
             TestCase.verifyEqual( double( C ), Expected, 'RelTol', TestCase.RelTol );
             
             % Test with fractional powers
@@ -273,11 +273,11 @@ classdef DoubleDoubleTest < matlab.unittest.TestCase
         
         % Array construction tests
         function TestColon( TestCase )
-            A = DoubleDouble( 1 ):DoubleDouble( 5 );
-            TestCase.verifyEqual( double( A ), 1:5 );
+            A = DoubleDouble( 1 ) : DoubleDouble( 5 );
+            TestCase.verifyEqual( double( A ), 1 : 5 );
             
-            B = DoubleDouble( 1 ):DoubleDouble( 0.5 ):DoubleDouble( 3 );
-            TestCase.verifyEqual( double( B ), 1:0.5:3 );
+            B = DoubleDouble( 1 ) : DoubleDouble( 0.5 ) : DoubleDouble( 3 );
+            TestCase.verifyEqual( double( B ), 1 : 0.5 : 3 );
         end
         
         function TestConcatenation( TestCase )
@@ -395,9 +395,9 @@ classdef DoubleDoubleTest < matlab.unittest.TestCase
         end
         
         function TestExp( TestCase )
-            A = DoubleDouble( [ 0, 1, log(10) ] );
+            A = DoubleDouble( [ 0, 1, log( 10 ) ] );
             E = exp( A );
-            Expected = [ 1, exp(1), 10 ];
+            Expected = [ 1, exp( 1 ), 10 ];
             TestCase.verifyEqual( double( E ), Expected, 'RelTol', TestCase.RelTol );
         end
         
@@ -409,9 +409,9 @@ classdef DoubleDoubleTest < matlab.unittest.TestCase
         end
         
         function TestLog( TestCase )
-            A = DoubleDouble( [ 1, exp(1), 10 ] );
+            A = DoubleDouble( [ 1, exp( 1 ), 10 ] );
             L = log( A );
-            Expected = [ 0, 1, log(10) ];
+            Expected = [ 0, 1, log( 10 ) ];
             TestCase.verifyEqual( double( L ), Expected, 'RelTol', TestCase.RelTol );
         end
         
@@ -429,52 +429,52 @@ classdef DoubleDoubleTest < matlab.unittest.TestCase
         
         % Trigonometric functions tests
         function TestSin( TestCase )
-            A = [ 0, DoubleDouble.pi/6, DoubleDouble.pi/4, DoubleDouble.pi/3, DoubleDouble.pi/2 ];
+            A = [ 0, DoubleDouble.pi / 6, DoubleDouble.pi / 4, DoubleDouble.pi / 3, DoubleDouble.pi / 2 ];
             S = sin( A );
-            Expected = [ 0, 0.5, 1/sqrt(DoubleDouble(2)), sqrt(DoubleDouble(3))/2, 1 ];
+            Expected = [ 0, 0.5, 1 / sqrt( DoubleDouble( 2 ) ), sqrt( DoubleDouble( 3 ) ) / 2, 1 ];
             TestCase.verifyEqual( double( S ), double( Expected ), 'RelTol', TestCase.RelTol );
         end
         
         function TestCos( TestCase )
-            A = [ 0, DoubleDouble.pi/6, DoubleDouble.pi/4, DoubleDouble.pi/3, DoubleDouble.pi/2 ];
+            A = [ 0, DoubleDouble.pi / 6, DoubleDouble.pi / 4, DoubleDouble.pi / 3, DoubleDouble.pi / 2 ];
             C = cos( A );
-            Expected = [ 1, sqrt(DoubleDouble(3))/2, 1/sqrt(DoubleDouble(2)), 0.5, 0 ];
+            Expected = [ 1, sqrt( DoubleDouble( 3 ) ) / 2, 1 / sqrt( DoubleDouble( 2 ) ), 0.5, 0 ];
             TestCase.verifyEqual( double( C ), double( Expected ), 'RelTol', TestCase.RelTol );
         end
         
         function TestTan( TestCase )
-            A = [ 0, DoubleDouble.pi/6, DoubleDouble.pi/4, DoubleDouble.pi/3 ];
+            A = [ 0, DoubleDouble.pi / 6, DoubleDouble.pi / 4, DoubleDouble.pi / 3 ];
             T = tan( A );
-            Expected = [ 0, 1/sqrt(DoubleDouble(3)), 1, sqrt(DoubleDouble(3)) ];
+            Expected = [ 0, 1 / sqrt( DoubleDouble( 3 ) ), 1, sqrt( DoubleDouble( 3 ) ) ];
             TestCase.verifyEqual( double( T ), double( Expected ), 'RelTol', TestCase.RelTol );
         end
         
         function TestAsin( TestCase )
-            A = [ 0, 0.5, 1/sqrt(DoubleDouble(2)), sqrt(DoubleDouble(3))/2, 1 ];
+            A = [ 0, 0.5, 1 / sqrt( DoubleDouble( 2 ) ), sqrt( DoubleDouble( 3 ) ) / 2, 1 ];
             As = asin( A );
-            Expected = [ 0, DoubleDouble.pi/6, DoubleDouble.pi/4, DoubleDouble.pi/3, DoubleDouble.pi/2 ];
+            Expected = [ 0, DoubleDouble.pi / 6, DoubleDouble.pi / 4, DoubleDouble.pi / 3, DoubleDouble.pi / 2 ];
             TestCase.verifyEqual( double( As ), double( Expected ), 'RelTol', TestCase.RelTol );
         end
         
         function TestAcos( TestCase )
-            A = [ 1, sqrt(DoubleDouble(3))/2, 1/sqrt(DoubleDouble(2)), 0.5, 0 ];
+            A = [ 1, sqrt( DoubleDouble( 3 ) ) / 2, 1 / sqrt( DoubleDouble( 2 ) ), 0.5, 0 ];
             Ac = acos( A );
-            Expected = [ 0, DoubleDouble.pi/6, DoubleDouble.pi/4, DoubleDouble.pi/3, DoubleDouble.pi/2 ];
+            Expected = [ 0, DoubleDouble.pi / 6, DoubleDouble.pi / 4, DoubleDouble.pi / 3, DoubleDouble.pi / 2 ];
             TestCase.verifyEqual( double( Ac ), double( Expected ), 'RelTol', TestCase.RelTol );
         end
         
         function TestAtan( TestCase )
-            A = [ 0, 1/sqrt(DoubleDouble(3)), 1, sqrt(DoubleDouble(3)) ];
+            A = [ 0, 1 / sqrt( DoubleDouble( 3 ) ), 1, sqrt( DoubleDouble( 3 ) ) ];
             At = atan( A );
-            Expected = [ 0, DoubleDouble.pi/6, DoubleDouble.pi/4, DoubleDouble.pi/3 ];
+            Expected = [ 0, DoubleDouble.pi / 6, DoubleDouble.pi / 4, DoubleDouble.pi / 3 ];
             TestCase.verifyEqual( double( At ), double( Expected ), 'RelTol', TestCase.RelTol );
         end
         
         function TestAtan2( TestCase )
             Y = DoubleDouble( [ 0, 1, 1, 1 ] );
-            X = [ 1, sqrt(DoubleDouble(3)), 1, 1/sqrt(DoubleDouble(3)) ];
+            X = [ 1, sqrt( DoubleDouble( 3 ) ), 1, 1 / sqrt( DoubleDouble( 3 ) ) ];
             A = atan2( Y, X );
-            Expected = [ 0, DoubleDouble.pi/6, DoubleDouble.pi/4, DoubleDouble.pi/3 ];
+            Expected = [ 0, DoubleDouble.pi / 6, DoubleDouble.pi / 4, DoubleDouble.pi / 3 ];
             TestCase.verifyEqual( double( A ), double( Expected ), 'RelTol', TestCase.RelTol );
         end
         
@@ -482,42 +482,42 @@ classdef DoubleDoubleTest < matlab.unittest.TestCase
         function TestSinh( TestCase )
             A = DoubleDouble( [ 0, 1, 2 ] );
             S = sinh( A );
-            Expected = [ 0, sinh(1), sinh(2) ];
+            Expected = [ 0, sinh( 1 ), sinh( 2 ) ];
             TestCase.verifyEqual( double( S ), Expected, 'RelTol', TestCase.RelTol );
         end
         
         function TestCosh( TestCase )
             A = DoubleDouble( [ 0, 1, 2 ] );
             C = cosh( A );
-            Expected = [ 1, cosh(1), cosh(2) ];
+            Expected = [ 1, cosh( 1 ), cosh( 2 ) ];
             TestCase.verifyEqual( double( C ), Expected, 'RelTol', TestCase.RelTol );
         end
         
         function TestTanh( TestCase )
             A = DoubleDouble( [ 0, 1, 2 ] );
             T = tanh( A );
-            Expected = [ 0, tanh(1), tanh(2) ];
+            Expected = [ 0, tanh( 1 ), tanh( 2 ) ];
             TestCase.verifyEqual( double( T ), Expected, 'RelTol', TestCase.RelTol );
         end
         
         function TestAsinh( TestCase )
             A = DoubleDouble( [ 0, 1, 2 ] );
             As = asinh( A );
-            Expected = [ 0, asinh(1), asinh(2) ];
+            Expected = [ 0, asinh( 1 ), asinh( 2 ) ];
             TestCase.verifyEqual( double( As ), Expected, 'RelTol', TestCase.RelTol );
         end
         
         function TestAcosh( TestCase )
             A = DoubleDouble( [ 1, 2, 3 ] );
             Ac = acosh( A );
-            Expected = [ 0, acosh(2), acosh(3) ];
+            Expected = [ 0, acosh( 2 ), acosh( 3 ) ];
             TestCase.verifyEqual( double( Ac ), Expected, 'RelTol', TestCase.RelTol );
         end
         
         function TestAtanh( TestCase )
             A = DoubleDouble( [ 0, 0.5, 0.75 ] );
             At = atanh( A );
-            Expected = [ 0, atanh(0.5), atanh(0.75) ];
+            Expected = [ 0, atanh( 0.5 ), atanh( 0.75 ) ];
             TestCase.verifyEqual( double( At ), Expected, 'RelTol', TestCase.RelTol );
         end
         
@@ -628,7 +628,7 @@ classdef DoubleDoubleTest < matlab.unittest.TestCase
         
         function TestStd( TestCase )
             A = DoubleDouble( [ 1, 2, 3, 4, 5 ] );
-            S0 = std( A, 0 );  % Normalize by N-1
+            S0 = std( A, 0 );  % Normalize by N - 1
             S1 = std( A, 1 );  % Normalize by N
             
             Expected0 = std( [ 1, 2, 3, 4, 5 ], 0 );
@@ -640,7 +640,7 @@ classdef DoubleDoubleTest < matlab.unittest.TestCase
         
         function TestVar( TestCase )
             A = DoubleDouble( [ 1, 2, 3, 4, 5 ] );
-            V0 = var( A, 0 );  % Normalize by N-1
+            V0 = var( A, 0 );  % Normalize by N - 1
             V1 = var( A, 1 );  % Normalize by N
             
             Expected0 = var( [ 1, 2, 3, 4, 5 ], 0 );
