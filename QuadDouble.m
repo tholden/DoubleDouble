@@ -35,7 +35,7 @@
 % ( 3 ) Neither the name of the New Mexico Inst of Mining & Tech nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 % 2. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES ( INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION ) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT ( INCLUDING NEGLIGENCE OR OTHERWISE ) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-% WARNING: This code was primarily written by AI. Having not gone through it line by line, I cannot 100% guarantee its correctness.
+% WARNING: This code was primarily written by AI, based on my DoubleDouble class. Having not gone through it line by line, I cannot 100% guarantee its correctness.
 
 classdef QuadDouble
     properties ( SetAccess = private, GetAccess = private )
@@ -327,8 +327,8 @@ classdef QuadDouble
             v = numel( v.v1 );
         end
 
-        function n = numArgumentsFromSubscript( v, s, IndexingContext )
-            n = numArgumentsFromSubscript( v.v1, s, IndexingContext );
+        function n = numArgumentsFromSubscript( ~, ~, ~ )
+            n = 1;
         end
 
         function v = end( v, k, n )
@@ -637,7 +637,9 @@ classdef QuadDouble
         end
 
         function v = horzcat( a, b, varargin )
-            if nargin > 2
+            if nargin == 1
+                v = a;
+            elseif nargin > 2
                 v = horzcat( horzcat( a, b ), varargin{:} );
             else
                 if ~isa( a, 'QuadDouble' )
@@ -646,16 +648,18 @@ classdef QuadDouble
                 if ~isa( b, 'QuadDouble' )
                     b = QuadDouble( b );
                 end
-                x1 = horzcat( [ a.v1, b.v1 ] );
-                x2 = horzcat( [ a.v2, b.v2 ] );
-                x3 = horzcat( [ a.v3, b.v3 ] );
-                x4 = horzcat( [ a.v4, b.v4 ] );
+                x1 = [ a.v1, b.v1 ];
+                x2 = [ a.v2, b.v2 ];
+                x3 = [ a.v3, b.v3 ];
+                x4 = [ a.v4, b.v4 ];
                 v = QuadDouble.Make( x1, x2, x3, x4 );
             end
         end
 
         function v = vertcat( a, b, varargin )
-            if nargin > 2
+            if nargin == 1
+                v = a;
+            elseif nargin > 2
                 v = vertcat( vertcat( a, b ), varargin{:} );
             else
                 if ~isa( a, 'QuadDouble' )
@@ -664,22 +668,52 @@ classdef QuadDouble
                 if ~isa( b, 'QuadDouble' )
                     b = QuadDouble( b );
                 end
-                x1 = vertcat( [ a.v1; b.v1 ] );
-                x2 = vertcat( [ a.v2; b.v2 ] );
-                x3 = vertcat( [ a.v3; b.v3 ] );
-                x4 = vertcat( [ a.v4; b.v4 ] );
+                x1 = [ a.v1; b.v1 ];
+                x2 = [ a.v2; b.v2 ];
+                x3 = [ a.v3; b.v3 ];
+                x4 = [ a.v4; b.v4 ];
                 v = QuadDouble.Make( x1, x2, x3, x4 );
             end
         end
 
+        function v = cat( Dim, varargin )
+            if Dim == 1
+                v = vertcat( varargin{:} );
+            elseif Dim == 2
+                v = horzcat( varargin{:} );
+            else
+                % For higher dimensions, convert each to doubles, cat, then rebuild
+                x1 = cellfun( @(x) x.v1, varargin, 'UniformOutput', false );
+                x2 = cellfun( @(x) x.v2, varargin, 'UniformOutput', false );
+                x3 = cellfun( @(x) x.v3, varargin, 'UniformOutput', false );
+                x4 = cellfun( @(x) x.v4, varargin, 'UniformOutput', false );
+                v = QuadDouble.Make( cat( Dim, x1{:} ), cat( Dim, x2{:} ), cat( Dim, x3{:} ), cat( Dim, x4{:} ) );
+            end
+        end
+
         function v = subsref( v, s )
-            v.v1 = subsref( v.v1, s );
-            v.v2 = subsref( v.v2, s );
-            v.v3 = subsref( v.v3, s );
-            v.v4 = subsref( v.v4, s );
+            if strcmp( s(1).type, '.' )
+                v = builtin( 'subsref', v, s );
+            else
+                v.v1 = subsref( v.v1, s );
+                v.v2 = subsref( v.v2, s );
+                v.v3 = subsref( v.v3, s );
+                v.v4 = subsref( v.v4, s );
+            end
         end
 
         function v = subsasgn( v, s, b )
+            target_empty = false;
+            for k=1:length(s.subs)
+                if isempty(s.subs{k})
+                    target_empty = true;
+                    break;
+                end
+            end
+            if target_empty
+                return;
+            end
+
             if ~isa( v, 'QuadDouble' )
                 v = QuadDouble( v );
             end
@@ -971,7 +1005,7 @@ classdef QuadDouble
                 s = s + 1.0;
             end
 
-            v = QuadDouble.Make( pow2( s.v1, m ), pow2( s.v2, m ) );
+            v = TimesPowerOf2( s, pow2( 1.0, m ) );
             if expm1Flag
                 [ v.v1( Select ), v.v2( Select ), v.v3( Select ), v.v4( Select ) ] = QuadDouble.QDPlusDouble( v.v1( Select ), v.v2( Select ), v.v3( Select ), v.v4( Select ), -1.0 );
             end
@@ -1443,9 +1477,10 @@ classdef QuadDouble
                 A = Vec( A );
             end
             Size = size( A );
-            A = [ reshape( A.v1, [ Size( 1 ), 1, Size( 2 : end ) ] ), reshape( A.v2, [ Size( 1 ), 1, Size( 2 : end ) ] ) ];
+            A = [ A.v1, A.v2, A.v3, A.v4 ];
             [ C, ia, ic ] = unique( A, 'rows', varargin{:} );
-            C = QuadDouble.Make( reshape( C( :, 1, : ), [ numel( ia ), Size( 2 : end ) ] ), reshape( C( :, 2, : ), [ numel( ia ), Size( 2 : end ) ] ) );
+            n = Size( 2 );
+            C = QuadDouble.Make( C( :, 1 : n ), C( :, ( n + 1 ) : ( 2 * n ) ), C( :, ( 2 * n ) + 1 : ( 3 * n ) ), C( :, ( 3 * n ) + 1 : ( 4 * n ) ) );
             if RowFlag
                 C = C.';
             end
@@ -2542,7 +2577,7 @@ classdef QuadDouble
         end
     end
 
-    methods ( Static, Access = private )
+    methods ( Static, Access = { ?QuadDouble, ?OctDouble } )
         function v = Make( a1, a2, a3, a4 )
             v = QuadDouble;
             v.v1 = a1;
