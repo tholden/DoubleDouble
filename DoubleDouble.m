@@ -110,6 +110,8 @@ classdef DoubleDouble
             if isa( in, 'DoubleDouble' )
                 v.v1 = in.v1;
                 v.v2 = in.v2;
+            elseif isa( in, 'QuadDouble' )
+                [ v.v1, v.v2 ] = ToSumOfDoubles( in );
             else
                 v.v1 = double( in );
                 v.v2 = zeros( size( in ) );

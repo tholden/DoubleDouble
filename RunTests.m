@@ -1,5 +1,5 @@
 function Results = RunTests()
-    % RunTests Run all DoubleDouble tests
+    % RunTests Run all DoubleDouble and QuadDouble tests
     %
     % This function runs the comprehensive test suite for the DoubleDouble class
     % and reports the results.
@@ -17,7 +17,9 @@ function Results = RunTests()
     import matlab.unittest.plugins.ToFile;
     
     % Create a test suite from the DoubleDoubleTest class
-    Suite = TestSuite.fromClass( ?DoubleDoubleTest );
+    Suite1 = TestSuite.fromClass( ?DoubleDoubleTest );
+    Suite2 = TestSuite.fromClass( ?QuadDoubleTest );
+    Suite = [ Suite1, Suite2 ];
     
     % Create a test runner with verbose output
     Runner = TestRunner.withTextOutput( 'Verbosity', 3 );
