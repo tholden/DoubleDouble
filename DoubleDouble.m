@@ -92,7 +92,7 @@ classdef DoubleDouble < BaseExtDouble
 
     methods
 
-        function v = promote( ~, a )
+        function v = Promote( ~, a )
             v = DoubleDouble( a );
         end
 

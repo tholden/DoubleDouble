@@ -7,7 +7,7 @@ classdef (Abstract) BaseExtDouble
 
     methods (Abstract)
         v = Make( z, a1, a2 )
-        v = promote( v, a )
+        v = Promote( v, a )
     end
 
     methods (Sealed)
@@ -40,7 +40,7 @@ classdef (Abstract) BaseExtDouble
                 end
             end
             if ~isa( val, 'BaseExtDouble' )
-                val = v.promote( val );
+                val = v.Promote( val );
             end
             s = substruct( '()', { idx } );
             v.v1 = subsasgn( v.v1, s, val.v1 );
@@ -75,7 +75,7 @@ classdef (Abstract) BaseExtDouble
         end
 
         function v = double( v )
-            v = v.v1;
+            v = double( v.v1 );
         end
 
         function v = isscalar( v )
@@ -298,10 +298,10 @@ classdef (Abstract) BaseExtDouble
 
         function v = mtimes( a, b )
             if ~isa( a, 'BaseExtDouble' )
-                a = b.promote( a );
+                a = b.Promote( a );
             end
             if ~isa( b, 'BaseExtDouble' )
-                b = a.promote( b );
+                b = a.Promote( b );
             end
             v = a.MTimes( b );
         end
@@ -310,7 +310,7 @@ classdef (Abstract) BaseExtDouble
             if isa( a, 'BaseExtDouble' )
                 v = a.RDivide( b );
             else
-                a = b.promote( a );
+                a = b.Promote( a );
                 v = a.RDivide( b );
             end
         end
@@ -319,7 +319,7 @@ classdef (Abstract) BaseExtDouble
             if isa( b, 'BaseExtDouble' )
                 v = b.RDivide( a );
             else
-                b = a.promote( b );
+                b = a.Promote( b );
                 v = b.RDivide( a );
             end
         end
@@ -332,7 +332,7 @@ classdef (Abstract) BaseExtDouble
                 return
             end
             if ~isa( v, 'BaseExtDouble' )
-                v = a.promote( v );
+                v = a.Promote( v );
             end
             assert( Ra == Rv );
             if Ra ~= Ca
@@ -373,10 +373,10 @@ classdef (Abstract) BaseExtDouble
 
         function v = mrdivide( v, a )
             if ~isa( a, 'BaseExtDouble' )
-                a = v.promote( a );
+                a = v.Promote( a );
             end
             if ~isa( v, 'BaseExtDouble' )
-                v = a.promote( v );
+                v = a.Promote( v );
             end
             at = a';
             vt = v';
@@ -385,7 +385,7 @@ classdef (Abstract) BaseExtDouble
 
         function v = power( a, b )
             if ~isa( a, 'BaseExtDouble' )
-                a = b.promote( a );
+                a = b.Promote( a );
             end
             if isa( b, 'BaseExtDouble' )
                 b2 = b.TimesPowerOf2( 2 );
@@ -561,16 +561,16 @@ classdef (Abstract) BaseExtDouble
                 d = 1;
             end
             if ~isa( a, 'BaseExtDouble' )
-                a = a.promote( a );
+                a = a.Promote( a );
             end
             if ~isa( b, 'BaseExtDouble' )
-                b = a.promote( b );
+                b = a.Promote( b );
             end
             if ~isa( d, 'BaseExtDouble' )
-                d = a.promote( d );
+                d = a.Promote( d );
             end
             c = double( floor( ( b - a ) ./ d ) );
-            v = a + ( 0:c ) .* d;
+            v = a + ( 0 : c ) .* d;
         end
 
         function v = ctranspose( v )
@@ -598,10 +598,10 @@ classdef (Abstract) BaseExtDouble
                 v = horzcat( horzcat( a, b ), varargin{:} );
             else
                 if ~isa( a, 'BaseExtDouble' )
-                    a = b.promote( a );
+                    a = b.Promote( a );
                 end
                 if ~isa( b, 'BaseExtDouble' )
-                    b = a.promote( b );
+                    b = a.Promote( b );
                 end
                 x1 = [ a.v1, b.v1 ];
                 x2 = [ a.v2, b.v2 ];
@@ -614,10 +614,10 @@ classdef (Abstract) BaseExtDouble
                 v = vertcat( vertcat( a, b ), varargin{:} );
             else
                 if ~isa( a, 'BaseExtDouble' )
-                    a = b.promote( a );
+                    a = b.Promote( a );
                 end
                 if ~isa( b, 'BaseExtDouble' )
-                    b = a.promote( b );
+                    b = a.Promote( b );
                 end
                 x1 = [ a.v1; b.v1 ];
                 x2 = [ a.v2; b.v2 ];
@@ -652,10 +652,10 @@ classdef (Abstract) BaseExtDouble
                 end
             else
                 if ~isa( v, 'BaseExtDouble' )
-                    v = b.promote( v );
+                    v = b.Promote( v );
                 end
                 if ~isa( b, 'BaseExtDouble' )
-                    b = v.promote( b );
+                    b = v.Promote( b );
                 end
                 v.v1 = subsasgn( v.v1, s, b.v1 );
                 v.v2 = subsasgn( v.v2, s, b.v2 );
@@ -733,7 +733,7 @@ classdef (Abstract) BaseExtDouble
                 else
                     v = sort( v, Dim, 'ComparisonMethod', cm, varargin{:} );
                 end
-                v = v.promote( v );
+                v = v.Promote( v );
             end
         end
 
@@ -891,10 +891,10 @@ classdef (Abstract) BaseExtDouble
                 end
             else
                 if ~isa( a, 'BaseExtDouble' )
-                    a = b.promote( a );
+                    a = b.Promote( a );
                 end
                 if ~isa( b, 'BaseExtDouble' )
-                    b = a.promote( b );
+                    b = a.Promote( b );
                 end
                 [ a, b ] = BaseExtDouble.ExpandSingleton( a, b );
                 i = ( a.v1 > b.v1 ) | ( ( a.v1 == b.v1 ) & ( a.v2 > b.v2 ) );
@@ -951,10 +951,10 @@ classdef (Abstract) BaseExtDouble
                 end
             else
                 if ~isa( a, 'BaseExtDouble' )
-                    a = b.promote( a );
+                    a = b.Promote( a );
                 end
                 if ~isa( b, 'BaseExtDouble' )
-                    b = a.promote( b );
+                    b = a.Promote( b );
                 end
                 [ a, b ] = BaseExtDouble.ExpandSingleton( a, b );
                 i = ( a.v1 < b.v1 ) | ( ( a.v1 == b.v1 ) & ( a.v2 < b.v2 ) );
@@ -1314,7 +1314,7 @@ classdef (Abstract) BaseExtDouble
                 elseif p == 1
                     v = max( sum( abs( v ), 1 ) );
                 else
-                    v = v.promote( 0 );
+                    v = v.Promote( 0 );
                 end
             end
         end
@@ -1500,7 +1500,7 @@ classdef (Abstract) BaseExtDouble
         function x = log( v )
             x = v.Make( log( v.v1 ), zeros( size( v.v1 ) ) );
             x = x + v .* exp( -x ) - 1.0;
-            x = x + v .* exp( -x ) - 1.0; % slightly paranoid, but does correct e.g. log(exp(v.promote( -40)))
+            x = x + v .* exp( -x ) - 1.0; % slightly paranoid, but does correct e.g. log(exp(v.Promote( -40)))
         end
 
         function v = log2( v )
@@ -1656,7 +1656,7 @@ classdef (Abstract) BaseExtDouble
             xx = x ./ r;
             yy = y ./ r;
             Select = abs( xx.v1 ) > abs( yy.v1 );
-            v = y.promote( atan2( y.v1, x.v1 ) );
+            v = y.Promote( atan2( y.v1, x.v1 ) );
             [ sin_z, cos_z ] = sincos( v );
             t = yy;
 
@@ -1890,8 +1890,8 @@ classdef (Abstract) BaseExtDouble
 
         function [ v, d ] = eig( x )
             [ v, d ] = eig( x.v1 );
-            v = x.promote( v );
-            d = x.promote( diag( d ) );
+            v = x.Promote( v );
+            d = x.Promote( diag( d ) );
             C = length( d );
             I = eye( C, 'BaseExtDouble' );
             for c = 1 : C
@@ -2089,11 +2089,11 @@ classdef (Abstract) BaseExtDouble
             end
 
             if ~isa( a, 'BaseExtDouble' )
-                a = b.promote( a );
+                a = b.Promote( a );
             end
 
             if ~isa( b, 'BaseExtDouble' )
-                b = a.promote( b );
+                b = a.Promote( b );
             end
 
             if n < 1
@@ -2368,18 +2368,7 @@ classdef (Abstract) BaseExtDouble
             cos_v = sqrt( 1 - sin_v .* sin_v );
         end
 
-        function v = IsEqualWithExpansion( a, b, varargin )
-            v = a == b;
-            v = all( v(:) );
-            if nargin > 2
-                for i = 1 : length( varargin )
-                    if ~v
-                        break
-                    end
-                    v = v && a.IsEqualWithExpansion( varargin{i} );
-                end
-            end
-        end
+
     end
 
     %% Not sealed
@@ -2496,23 +2485,7 @@ classdef (Abstract) BaseExtDouble
 
     end
 
-    methods (Static, Access = public)
-        function [ varargout ] = ExpandSingleton( varargin )
-            l = cellfun( @( x ) length( size( x ) ), varargin, 'UniformOutput', true );
-            n = length( varargin );
-            ss = ones( n, max( l ) );
-            for i = 1 : n
-                ss( i, 1 : l( i ) ) = size( varargin{ i } );
-            end
-            s = max( ss, [], 1 );
-            varargout = cell( 1, n );
-            for i = 1 : n
-                varargout{ i } = repmat( varargin{ i }, s ./ ss( i, : ) );
-            end
-        end
-    end
-
-    methods ( Static, Access = public )
+    methods ( Static, Access = private )
 
 
         function [ s1, s2 ] = Normalize( a1, a2 )
@@ -2759,6 +2732,33 @@ classdef (Abstract) BaseExtDouble
                 Supported = all( [ size( b ), size( c ) ] == 2 );
             catch
                 Supported = false;
+            end
+        end
+
+        function [ varargout ] = ExpandSingleton( varargin )
+            l = cellfun( @( x ) length( size( x ) ), varargin, 'UniformOutput', true );
+            n = length( varargin );
+            ss = ones( n, max( l ) );
+            for i = 1 : n
+                ss( i, 1 : l( i ) ) = size( varargin{ i } );
+            end
+            s = max( ss, [], 1 );
+            varargout = cell( 1, n );
+            for i = 1 : n
+                varargout{ i } = repmat( varargin{ i }, s ./ ss( i, : ) );
+            end
+        end
+
+        function v = IsEqualWithExpansion( a, b, varargin )
+            v = a == b;
+            v = all( v(:) );
+            if nargin > 2
+                for i = 1 : length( varargin )
+                    if ~v
+                        break
+                    end
+                    v = v && a.IsEqualWithExpansion( varargin{i} );
+                end
             end
         end
     end

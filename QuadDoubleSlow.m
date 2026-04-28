@@ -131,7 +131,7 @@ classdef QuadDoubleSlow < BaseExtDouble
 
 
     methods
-        function v = promote( ~, a )
+        function v = Promote( ~, a )
             v = QuadDoubleSlow( a );
         end
 

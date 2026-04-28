@@ -67,7 +67,7 @@ classdef QuadDouble < QuadDoubleSlow
             end
         end
 
-        function v = promote( ~, a )
+        function v = Promote( ~, a )
             v = QuadDouble( a );
         end
 
