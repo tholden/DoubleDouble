@@ -609,15 +609,9 @@ classdef OctDouble < BaseExtDouble
             Z1 = R .* C;
             Z2 = R .* S;
             v = reshape( [ Z1, Z2 ].', [ M, 1 ] );
-            v.v1 = v.v1( 1 : N );
-            v.v2 = v.v2( 1 : N );
-            v.v3 = v.v3( 1 : N );
-            v.v4 = v.v4( 1 : N );
-            v.v5 = v.v5( 1 : N );
-            v.v6 = v.v6( 1 : N );
-            v.v7 = v.v7( 1 : N );
-            v.v8 = v.v8( 1 : N );
+            v = v.Index( 1 : N );
             v = reshape( v, Size );
+
         end
 
         function v = rand( varargin )
