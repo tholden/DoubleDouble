@@ -5,6 +5,11 @@ classdef (Abstract) BaseExtDouble
         v2
     end
 
+    methods (Abstract)
+        v = Make( z, a1, a2 )
+        v = promote( v, a )
+    end
+
     methods (Sealed)
 
         function v = Index( v, idx )
@@ -42,16 +47,7 @@ classdef (Abstract) BaseExtDouble
             v.v2 = subsasgn( v.v2, s, val.v2 );
         end
 
-    end
 
-
-
-    methods (Abstract)
-        v = Make( z, a1, a2 )
-        v = promote( v, a )
-    end
-
-    methods (Sealed)
 
         function varargout = ToSumOfDoubles( v )
             varargout = cell( 1, nargout );
