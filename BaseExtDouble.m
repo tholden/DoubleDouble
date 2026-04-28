@@ -338,24 +338,24 @@ classdef (Abstract) BaseExtDouble
             if Ra ~= Ca
                 [ q, a ] = qr( a );
                 v = q' * v;
-                v = v.BackSubstitution( a );
+                v = BackSubstitution( v, a );
                 return
             end
             if v.IsEqualWithExpansion( triu( a, 1 ), 0 )
                 % Lower triangular
-                v = v.ForwardElimination( a );
+                v = ForwardElimination( v, a );
                 return
             elseif v.IsEqualWithExpansion( tril( a, -1 ), 0 )
                 % Upper triangular
-                v = v.BackSubstitution( a );
+                v = BackSubstitution( v, a );
                 return
             elseif a.IsEqualWithExpansion( a' )
                 [ L, d ] = ldl( a, 'vector_d' );
                 if all( all( isfinite( L ) ) ) && all( isfinite( d ) )
                     % Positive definite
-                    v = v.ForwardElimination( L );
+                    v = ForwardElimination( v, L );
                     v = v ./ d;
-                    v = v.BackSubstitution( L' );
+                    v = BackSubstitution( v, L' );
                     return
                 end
             end
@@ -365,10 +365,10 @@ classdef (Abstract) BaseExtDouble
             % Permutation and forward elimination
             v.v1 = v.v1( p, : );
             v.v2 = v.v2( p, : );
-            v = v.ForwardElimination( L );
+            v = ForwardElimination( v, L );
 
             % Back substitution
-            v = v.BackSubstitution( U );
+            v = BackSubstitution( v, U );
         end
 
         function v = mrdivide( v, a )
@@ -442,7 +442,7 @@ classdef (Abstract) BaseExtDouble
                     assert( length( unique( d.v1 ) ) == length( d.v1 ) );
                     v = v * diag( d .^ b ) / v;
                 else
-                    v = DoubleDouble;
+                    v = BaseExtDouble;
                 end
             end
         end
@@ -566,7 +566,7 @@ classdef (Abstract) BaseExtDouble
             if ~isa( b, 'BaseExtDouble' )
                 b = a.promote( b );
             end
-            if ~isa( d, 'DoubleDouble' )
+            if ~isa( d, 'BaseExtDouble' )
                 d = a.promote( d );
             end
             c = double( floor( ( b - a ) ./ d ) );
@@ -631,16 +631,8 @@ classdef (Abstract) BaseExtDouble
         function varargout = subsref( v, s )
 
             if strcmp( s(1).type, '.' )
-                if length(s) > 1
-                    try
-                        temp = builtin('subsref', v, s(1));
-                        [ varargout{ 1 : nargout } ] = subsref( temp, s(2:end) );
-                    catch e
-                        disp('Error in split subsref:');
-                        disp(s(1));
-                        disp(s(2));
-                        rethrow(e);
-                    end
+                if length( s ) > 1
+                    [ varargout{ 1 : nargout } ] = subsref( builtin( 'subsref', v, s( 1 ) ), s( 2 : end ) );
                 else
                     [ varargout{ 1 : nargout } ] = builtin( 'subsref', v, s );
                 end
@@ -653,10 +645,8 @@ classdef (Abstract) BaseExtDouble
 
         function v = subsasgn( v, s, b )
             if strcmp( s(1).type, '.' )
-                if length(s) > 1
-                    temp = builtin('subsref', v, s(1));
-                    temp = subsasgn( temp, s(2:end), b );
-                    v = builtin( 'subsasgn', v, s(1), temp );
+                if length( s ) > 1
+                    v = builtin( 'subsasgn', v, s( 1 ), subsasgn( builtin( 'subsref', v, s( 1 ) ), s( 2 : end ), b ) );
                 else
                     v = builtin( 'subsasgn', v, s, b );
                 end
@@ -1346,7 +1336,7 @@ classdef (Abstract) BaseExtDouble
                 v = sign( v.v1 );
             else
                 abs_v = abs( v );
-                [ v.v1, v.v2 ] = v.DDDividedByDD( v.v1, v.v2, abs_v.v1, abs_v.v2, true );
+                [ v.v1, v.v2 ] = v.EDDividedByED( v.v1, v.v2, abs_v.v1, abs_v.v2, true );
             end
         end
 
@@ -1405,7 +1395,7 @@ classdef (Abstract) BaseExtDouble
             vx = v.v1( Select ) .* x;
             [ t1_, t2_ ] = v.DoubleTimesDouble( vx, vx );
             t = v.Make( v.v1( Select ), v.v2( Select ) ) - v.Make( t1_, t2_ );
-            [ t1_, t2_ ] = v.DDPlusDouble( vx, zeros( size( vx ) ), t.v1 .* ( x * 0.5 ) );
+            [ t1_, t2_ ] = v.EDPlusDouble( vx, zeros( size( vx ) ), t.v1 .* ( x * 0.5 ) );
             t = v.Make( t1_, t2_ );
             v.v1( Select ) = t.v1;
             v.v2( Select ) = t.v2;
@@ -1418,7 +1408,7 @@ classdef (Abstract) BaseExtDouble
             vx = v_sel.v1 .* x;
             [ t1_, t2_ ] = v.DoubleTimesDouble( vx, vx );
             t = v_sel - v.Make( t1_, t2_ );
-            [ t1_, t2_ ] = v.DDPlusDouble( vx, zeros( size( vx ) ), t.v1 .* ( x * 0.5 ) );
+            [ t1_, t2_ ] = v.EDPlusDouble( vx, zeros( size( vx ) ), t.v1 .* ( x * 0.5 ) );
             t = v.Make( t1_, t2_ );
             v = BaseExtDouble.Assign(v, Select, t);
         end
@@ -1485,14 +1475,14 @@ classdef (Abstract) BaseExtDouble
             s = s.TimesPowerOf2( 2.0 ) + s .* s;
             if expm1Flag
                 Select = m ~= 0;
-                [ s.v1( Select ), s.v2( Select ) ] = v.DDPlusDouble( s.v1( Select ), s.v2( Select ), 1.0 );
+                [ s.v1( Select ), s.v2( Select ) ] = v.EDPlusDouble( s.v1( Select ), s.v2( Select ), 1.0 );
             else
                 s = s + 1.0;
             end
 
             v = v.Make( pow2( s.v1, m ), pow2( s.v2, m ) );
             if expm1Flag
-                [ v.v1( Select ), v.v2( Select ) ] = v.DDPlusDouble( v.v1( Select ), v.v2( Select ), -1.0 );
+                [ v.v1( Select ), v.v2( Select ) ] = v.EDPlusDouble( v.v1( Select ), v.v2( Select ), -1.0 );
             end
         end
 
@@ -1591,9 +1581,9 @@ classdef (Abstract) BaseExtDouble
                 a_cos_t_s = BaseExtDouble.Index(a_cos_t, Select);
                 b_sin_t_s = BaseExtDouble.Index(b_sin_t, Select);
                 b_cos_t_s = BaseExtDouble.Index(b_cos_t, Select);
-                [ t1, t2 ] = v.DDPlusDD( +a_sin_t_s.v1, +a_sin_t_s.v2, +b_cos_t_s.v1, +b_cos_t_s.v2 );
+                [ t1, t2 ] = v.EDPlusED( +a_sin_t_s.v1, +a_sin_t_s.v2, +b_cos_t_s.v1, +b_cos_t_s.v2 );
                 sin_v = BaseExtDouble.Assign(sin_v, Select, v.Make(t1, t2));
-                [ t1, t2 ] = v.DDPlusDD( -b_sin_t_s.v1, -b_sin_t_s.v2, +a_cos_t_s.v1, +a_cos_t_s.v2 );
+                [ t1, t2 ] = v.EDPlusED( -b_sin_t_s.v1, -b_sin_t_s.v2, +a_cos_t_s.v1, +a_cos_t_s.v2 );
                 cos_v = BaseExtDouble.Assign(cos_v, Select, v.Make(t1, t2));
             end
 
@@ -1603,9 +1593,9 @@ classdef (Abstract) BaseExtDouble
                 a_cos_t_s = BaseExtDouble.Index(a_cos_t, Select);
                 b_sin_t_s = BaseExtDouble.Index(b_sin_t, Select);
                 b_cos_t_s = BaseExtDouble.Index(b_cos_t, Select);
-                [ t1, t2 ] = v.DDPlusDD( +a_sin_t_s.v1, +a_sin_t_s.v2, -b_cos_t_s.v1, -b_cos_t_s.v2 );
+                [ t1, t2 ] = v.EDPlusED( +a_sin_t_s.v1, +a_sin_t_s.v2, -b_cos_t_s.v1, -b_cos_t_s.v2 );
                 sin_v = BaseExtDouble.Assign(sin_v, Select, v.Make(t1, t2));
-                [ t1, t2 ] = v.DDPlusDD( +b_sin_t_s.v1, +b_sin_t_s.v2, +a_cos_t_s.v1, +a_cos_t_s.v2 );
+                [ t1, t2 ] = v.EDPlusED( +b_sin_t_s.v1, +b_sin_t_s.v2, +a_cos_t_s.v1, +a_cos_t_s.v2 );
                 cos_v = BaseExtDouble.Assign(cos_v, Select, v.Make(t1, t2));
             end
 
@@ -1674,8 +1664,8 @@ classdef (Abstract) BaseExtDouble
                 tSelect = BaseExtDouble.Index(t, Select);
                 sinZSelect = BaseExtDouble.Index(sin_z, Select);
                 cosZSelect = BaseExtDouble.Index(cos_z, Select);
-                [ t1, t2 ] = v.DDPlusDD( tSelect.v1, tSelect.v2, -sinZSelect.v1, -sinZSelect.v2 );
-                [ t1, t2 ] = v.DDDividedByDD( t1, t2, +cosZSelect.v1, +cosZSelect.v2 );
+                [ t1, t2 ] = v.EDPlusED( tSelect.v1, tSelect.v2, -sinZSelect.v1, -sinZSelect.v2 );
+                [ t1, t2 ] = v.EDDividedByED( t1, t2, +cosZSelect.v1, +cosZSelect.v2 );
                 t = BaseExtDouble.Assign(t, Select, v.Make(t1, t2));
             end
 
@@ -1684,8 +1674,8 @@ classdef (Abstract) BaseExtDouble
                 xxSelect = BaseExtDouble.Index(xx, Select);
                 sinZSelect = BaseExtDouble.Index(sin_z, Select);
                 cosZSelect = BaseExtDouble.Index(cos_z, Select);
-                [ t1, t2 ] = v.DDPlusDD( xxSelect.v1, xxSelect.v2, -cosZSelect.v1, -cosZSelect.v2 );
-                [ t1, t2 ] = v.DDDividedByDD( t1, t2, -sinZSelect.v1, -sinZSelect.v2 );
+                [ t1, t2 ] = v.EDPlusED( xxSelect.v1, xxSelect.v2, -cosZSelect.v1, -cosZSelect.v2 );
+                [ t1, t2 ] = v.EDDividedByED( t1, t2, -sinZSelect.v1, -sinZSelect.v2 );
                 t = BaseExtDouble.Assign(t, Select, v.Make(t1, t2));
             end
             v = v + t;
@@ -1760,19 +1750,19 @@ classdef (Abstract) BaseExtDouble
 
                     % Compute multipliers
                     i = k + 1 : m;
-                    [ v.v1( i, k ), v.v2( i, k ) ] = v.DDDividedByDD( v.v1( i, k ), v.v2( i, k ), v.v1( k, k ), v.v2( k, k ) );
+                    [ v.v1( i, k ), v.v2( i, k ) ] = v.EDDividedByED( v.v1( i, k ), v.v2( i, k ), v.v1( k, k ), v.v2( k, k ) );
 
                     % Update the remainder of the matrix
                     j = k + 1 : n;
                     % A( i, j ) = A( i, j ) - A( i, k ) .* A( k, j );
-                    [ t1, t2 ] = v.DDTimesDD( v.v1( i, k ), v.v2( i, k ), v.v1( k, j ), v.v2( k, j ) );
-                    [ v.v1( i, j ), v.v2( i, j ) ] = v.DDPlusDD( v.v1( i, j ), v.v2( i, j ), -t1, -t2 );
+                    [ t1, t2 ] = v.EDTimesED( v.v1( i, k ), v.v2( i, k ), v.v1( k, j ), v.v2( k, j ) );
+                    [ v.v1( i, j ), v.v2( i, j ) ] = v.EDPlusED( v.v1( i, j ), v.v2( i, j ), -t1, -t2 );
                 end
             end
 
             if nargout > 1
                 % Separate result
-                L = tril( v, -1 ) + eye( m, n, 'DoubleDouble' );
+                L = tril( v, -1 ) + eye( m, n, 'BaseExtDouble' );
                 U = triu( v );
                 if n > m
                     L.v1 = L.v1( :, 1:m );
@@ -1799,7 +1789,7 @@ classdef (Abstract) BaseExtDouble
 
         function [ q, v ] = qr( v )
             [ m, n ] = size( v );
-            I = eye( m, 'DoubleDouble' );
+            I = eye( m, 'BaseExtDouble' );
             QT = I;
             for c = 1 : min( m - 1, n )
                 x = v.Make( v.v1( :, c ), v.v2( :, c ) );
@@ -1811,7 +1801,7 @@ classdef (Abstract) BaseExtDouble
                     alpha = -alpha .* sign_x_c;
                 end
                 a = x;
-                [ a.v1( c ), a.v2( c ) ] = v.DDPlusDD( a.v1( c ), a.v2( c ), -alpha.v1, -alpha.v2 );
+                [ a.v1( c ), a.v2( c ) ] = v.EDPlusED( a.v1( c ), a.v2( c ), -alpha.v1, -alpha.v2 );
                 b = a ./ norm( a );
                 if isreal( v )
                     temp_ = b .* b.';
@@ -1874,21 +1864,21 @@ classdef (Abstract) BaseExtDouble
             d.v1( 1 ) = x1( 1 );
             d.v2( 1 ) = x2( 1 );
             idxs = 2 : n;
-            [ L.v1( idxs, 1 ), L.v2( idxs, 1 ) ] = v.DDDividedByDD( v.v1( idxs, 1 ), v.v2( 2 : n, 1 ), x1( 1 ), x2( 1 ) );
+            [ L.v1( idxs, 1 ), L.v2( idxs, 1 ) ] = v.EDDividedByED( v.v1( idxs, 1 ), v.v2( 2 : n, 1 ), x1( 1 ), x2( 1 ) );
             for j = 2 : n
                 idxs = 1 : j - 1;
-                [ x1( idxs ), x2( idxs ) ] = v.DDTimesDD( conj( L.v1( j, idxs ) ), conj( L.v2( j, idxs ) ), d.v1( idxs ), d.v2( idxs ) );
-                [ t1( idxs ), t2( idxs ) ] = v.DDTimesDD( L.v1( j, idxs ), L.v2( j, idxs ), x1( idxs ), x2( idxs ) );
+                [ x1( idxs ), x2( idxs ) ] = v.EDTimesED( conj( L.v1( j, idxs ) ), conj( L.v2( j, idxs ) ), d.v1( idxs ), d.v2( idxs ) );
+                [ t1( idxs ), t2( idxs ) ] = v.EDTimesED( L.v1( j, idxs ), L.v2( j, idxs ), x1( idxs ), x2( idxs ) );
                 t = sum( v.Make( t1( idxs ), t2( idxs ) ) );
-                [ x1( j ), x2( j ) ] = v.DDPlusDD( v.v1( j, j ), v.v2( j, j ), -t.v1, -t.v2 );
+                [ x1( j ), x2( j ) ] = v.EDPlusED( v.v1( j, j ), v.v2( j, j ), -t.v1, -t.v2 );
                 d.v1( j ) = x1( j );
                 d.v2( j ) = x2( j );
                 if j < n
                     jdxs = j + 1 : n;
-                    [ s1, s2 ] = v.DDTimesDD( L.v1( jdxs, idxs ), L.v2( jdxs, idxs ), x1( idxs ), x2( idxs ) );
+                    [ s1, s2 ] = v.EDTimesED( L.v1( jdxs, idxs ), L.v2( jdxs, idxs ), x1( idxs ), x2( idxs ) );
                     tt = sum( v.Make( s1, s2 ), 2 );
-                    [ t1( jdxs ), t2( jdxs ) ] = v.DDPlusDD( v.v1( jdxs, j ), v.v2( jdxs, j ), -tt.v1, -tt.v2 );
-                    [ L.v1( jdxs, j ), L.v2( jdxs, j ) ] = v.DDDividedByDD( t1( jdxs ), t2( jdxs ), x1( j ), x2( j ) );
+                    [ t1( jdxs ), t2( jdxs ) ] = v.EDPlusED( v.v1( jdxs, j ), v.v2( jdxs, j ), -tt.v1, -tt.v2 );
+                    [ L.v1( jdxs, j ), L.v2( jdxs, j ) ] = v.EDDividedByED( t1( jdxs ), t2( jdxs ), x1( j ), x2( j ) );
                 end
             end
             if nargin < 2 || ~strcmp( type, 'vector_d' )
@@ -1903,7 +1893,7 @@ classdef (Abstract) BaseExtDouble
             v = x.promote( v );
             d = x.promote( diag( d ) );
             C = length( d );
-            I = eye( C, 'DoubleDouble' );
+            I = eye( C, 'BaseExtDouble' );
             for c = 1 : C
                 vi = x.Make( v.v1( :, c ), v.v2( :, c ) );
                 dii = x.Make( d.v1( c, 1 ), d.v2( c, 1 ) );
@@ -2126,84 +2116,6 @@ classdef (Abstract) BaseExtDouble
             end
         end
 
-        function v = IsEqualWithExpansion( a, b, varargin )
-            v = a == b;
-            v = all( v(:) );
-            if nargin > 2
-                for i = 1 : length( varargin )
-                    if ~v
-                        break
-                    end
-                    v = v && a.IsEqualWithExpansion( varargin{i} );
-                end
-            end
-        end
-    end
-    methods
-
-        function v = Plus( a, b )
-            if isa( a, 'BaseExtDouble' )
-                if isa( b, 'BaseExtDouble' )
-                    [ x1, x2 ] = DoubleDouble.DDPlusDD( a.v1, a.v2, b.v1, b.v2 );
-                else
-                    [ x1, x2 ] = DoubleDouble.DDPlusDouble( a.v1, a.v2, double( b ) );
-                end
-            else
-                if isa( b, 'BaseExtDouble' )
-                    [ x1, x2 ] = DoubleDouble.DDPlusDouble( b.v1, b.v2, double( a ) );
-                else
-                    [ x1, x2 ] = BaseExtDouble.DoublePlusDouble( double( a ), double( b ) );
-                end
-            end
-            if isa( a, 'BaseExtDouble' )
-                v = a.Make( x1, x2 );
-            else
-                v = b.Make( x1, x2 );
-            end
-        end
-
-        function v = Minus( a, b )
-            if isa( a, 'BaseExtDouble' )
-                if isa( b, 'BaseExtDouble' )
-                    [ x1, x2 ] = DoubleDouble.DDPlusDD( a.v1, a.v2, -b.v1, -b.v2 );
-                else
-                    [ x1, x2 ] = DoubleDouble.DDPlusDouble( a.v1, a.v2, -double( b ) );
-                end
-            else
-                if isa( b, 'BaseExtDouble' )
-                    [ x1, x2 ] = DoubleDouble.DDPlusDouble( -b.v1, -b.v2, double( a ) );
-                else
-                    [ x1, x2 ] = BaseExtDouble.DoublePlusDouble( double( a ), -double( b ) );
-                end
-            end
-            if isa( a, 'BaseExtDouble' )
-                v = a.Make( x1, x2 );
-            else
-                v = b.Make( x1, x2 );
-            end
-        end
-
-        function v = Times( a, b )
-            if isa( a, 'BaseExtDouble' )
-                if isa( b, 'BaseExtDouble' )
-                    [ x1, x2 ] = DoubleDouble.DDTimesDD( a.v1, a.v2, b.v1, b.v2 );
-                else
-                    [ x1, x2 ] = DoubleDouble.DDTimesDouble( a.v1, a.v2, double( b ) );
-                end
-            else
-                if isa( b, 'BaseExtDouble' )
-                    [ x1, x2 ] = DoubleDouble.DDTimesDouble( b.v1, b.v2, double( a ) );
-                else
-                    [ x1, x2 ] = BaseExtDouble.DoubleTimesDouble( double( a ), double( b ) );
-                end
-            end
-            if isa( a, 'BaseExtDouble' )
-                v = a.Make( x1, x2 );
-            else
-                v = b.Make( x1, x2 );
-            end
-        end
-
         function v = MTimes( a, b )
             [ R, c ] = size( a );
             [ r, C ] = size( b );
@@ -2227,50 +2139,6 @@ classdef (Abstract) BaseExtDouble
             end
         end
 
-        function v = RDivide( a, b )
-            if isa( a, 'BaseExtDouble' )
-                if isa( b, 'BaseExtDouble' )
-                    [ x1, x2 ] = DoubleDouble.DDDividedByDD( a.v1, a.v2, b.v1, b.v2 );
-                else
-                    [ x1, x2 ] = DoubleDouble.DDDividedByDouble( a.v1, a.v2, double( b ) );
-                end
-            else
-                if isa( b, 'BaseExtDouble' )
-                    da = double( a );
-                    [ x1, x2 ] = DoubleDouble.DDDividedByDD( da, zeros( size( da ) ), b.v1, b.v2 );
-                else
-                    [ x1, x2 ] = BaseExtDouble.DoubleDividedByDouble( double( a ), double( b ) );
-                end
-            end
-            if isa( a, 'BaseExtDouble' )
-                v = a.Make( x1, x2 );
-            else
-                v = b.Make( x1, x2 );
-            end
-        end
-
-        function v = LDivide( b, a )
-            if isa( a, 'BaseExtDouble' )
-                if isa( b, 'BaseExtDouble' )
-                    [ x1, x2 ] = DoubleDouble.DDDividedByDD( a.v1, a.v2, b.v1, b.v2 );
-                else
-                    [ x1, x2 ] = DoubleDouble.DDDividedByDouble( a.v1, a.v2, double( b ) );
-                end
-            else
-                if isa( b, 'BaseExtDouble' )
-                    da = double( a );
-                    [ x1, x2 ] = DoubleDouble.DDDividedByDD( da, zeros( size( da ) ), b.v1, b.v2 );
-                else
-                    [ x1, x2 ] = BaseExtDouble.DoubleDividedByDouble( double( a ), double( b ) );
-                end
-            end
-            if isa( a, 'BaseExtDouble' )
-                v = a.Make( x1, x2 );
-            else
-                v = b.Make( x1, x2 );
-            end
-        end
-
         function v = MLDivide( a, v )
             [ Ra, Ca ] = size( a );
             [ Rv, Cv ] = size( v );
@@ -2279,7 +2147,7 @@ classdef (Abstract) BaseExtDouble
                 return
             end
             if ~isa( v, 'BaseExtDouble' )
-                v = DoubleDouble( v );
+                v = BaseExtDouble( v );
             end
             assert( Ra == Rv );
             if Ra ~= Ca
@@ -2375,7 +2243,7 @@ classdef (Abstract) BaseExtDouble
                 else
                     v = sort( v, Dim, 'ComparisonMethod', cm, varargin{:} );
                 end
-                v = DoubleDouble( v );
+                v = BaseExtDouble( v );
             end
         end
 
@@ -2443,8 +2311,6 @@ classdef (Abstract) BaseExtDouble
             c = v.Make( cell2mat( c1 ), cell2mat( c2 ) );
         end
 
-
-
         function v = Norm( v, p )
             if ( sum( size( v ) ~= 1 ) <= 1 ) || ( numel( p ) ~= 1 )
                 v = abs( v );
@@ -2468,84 +2334,19 @@ classdef (Abstract) BaseExtDouble
                 elseif p == 1
                     v = max( sum( abs( v ), 1 ) );
                 else
-                    v = DoubleDouble;
+                    v = BaseExtDouble;
                 end
             end
         end
 
         function v = Vec( v )
-            v.v1 = v.v1(:);
-            v.v2 = v.v2(:);
+            v.v1 = Vec( v.v1 );
+            v.v2 = Vec( v.v2 );
         end
 
         function v = TimesPowerOf2( v, b )
-            assert( isa( b, 'double' ) );
-            v.v1 = v.v1 .* b;
-            v.v2 = v.v2 .* b;
-        end
-
-        function v = ForwardElimination( v, L )
-            % For lower triangular L, x = ForwardElimination( b, L ) solves L*x = b.
-            [ m, n ] = size( L );
-            mn = min( m, n );
-            [ vm, vn ] = size( v );
-            if vm < n
-                v = [ v; zeros( n - vm, vn ) ];
-            elseif vm > n
-                v.v1( (n+1):vm, : ) = [];
-                v.v2( (n+1):vm, : ) = [];
-            end
-            if isa( L, 'BaseExtDouble' )
-                [ v.v1( 1, : ), v.v2( 1, : ) ] = DoubleDouble.DDDividedByDD( v.v1( 1, : ), v.v2( 1, : ), L.v1( 1, 1 ), L.v2( 1, 1 ), true );
-                for k = 2 : mn
-                    j = 1 : k - 1;
-                    [ t1, t2 ] = DoubleDouble.DDTimesDD( v.v1( j, : ), v.v2( j, : ), L.v1( k, j ).', L.v2( k, j ).' );
-                    t = sum( v.Make( t1, t2 ), 1 );
-                    [ t1, t2 ] = DoubleDouble.DDPlusDD( v.v1( k, : ), v.v2( k, : ), -t.v1, -t.v2 );
-                    [ v.v1( k, : ), v.v2( k, : ) ] = DoubleDouble.DDDividedByDD( t1, t2, L.v1( k, k ), L.v2( k, k ), true );
-                end
-            else
-                [ v.v1( 1, : ), v.v2( 1, : ) ] = DoubleDouble.DDDividedByDouble( v.v1( 1, : ), v.v2( 1, : ), L( 1, 1 ), true );
-                for k = 2 : mn
-                    j = 1 : k - 1;
-                    [ t1, t2 ] = DoubleDouble.DDTimesDouble( v.v1( j, : ), v.v2( j, : ), L( k, j ).' );
-                    t = sum( v.Make( t1, t2 ), 1 );
-                    [ t1, t2 ] = DoubleDouble.DDPlusDD( v.v1( k, : ), v.v2( k, : ), -t.v1, -t.v2 );
-                    [ v.v1( k, : ), v.v2( k, : ) ] = DoubleDouble.DDDividedByDouble( t1, t2, L( k, k ), true );
-                end
-            end
-        end
-
-        function v = BackSubstitution( v, U )
-            % For upper triangular U, x = BackSubstitution( b, U ) solves U*x = b.
-            [ m, n ] = size( U );
-            mn = min( m, n );
-            [ vm, vn ] = size( v );
-            if vm < n
-                v = [ v; zeros( n - vm, vn ) ];
-            elseif vm > n
-                v.v1( (n+1):vm, : ) = [];
-                v.v2( (n+1):vm, : ) = [];
-            end
-            if isa( U, 'BaseExtDouble' )
-                [ v.v1( mn, : ), v.v2( mn, : ) ] = DoubleDouble.DDDividedByDD( v.v1( mn, : ), v.v2( mn, : ), U.v1( mn, mn ), U.v2( mn, mn ), true );
-                for k = mn - 1 : -1 : 1
-                    j = k + 1 : n;
-                    [ t1, t2 ] = DoubleDouble.DDTimesDD( v.v1( j, : ), v.v2( j, : ), U.v1( k, j ).', U.v2( k, j ).' );
-                    t = sum( v.Make( t1, t2 ), 1 );
-                    [ t1, t2 ] = DoubleDouble.DDPlusDD( v.v1( k, : ), v.v2( k, : ), -t.v1, -t.v2 );
-                    [ v.v1( k, : ), v.v2( k, : ) ] = DoubleDouble.DDDividedByDD( t1, t2, U.v1( k, k ), U.v2( k, k ), true );
-                end
-            else
-                [ v.v1( mn, : ), v.v2( mn, : ) ] = DoubleDouble.DDDividedByDouble( v.v1( mn, : ), v.v2( mn, : ), U( mn, mn ), true );
-                for k = mn - 1 : -1 : 1
-                    j = k + 1 : n;
-                    [ t1, t2 ] = DoubleDouble.DDTimesDouble( v.v1( j, : ), v.v2( j, : ), U( k, j ).' );
-                    t = sum( v.Make( t1, t2 ), 1 );
-                    [ t1, t2 ] = DoubleDouble.DDPlusDD( v.v1( k, : ), v.v2( k, : ), -t.v1, -t.v2 );
-                    [ v.v1( k, : ), v.v2( k, : ) ] = DoubleDouble.DDDividedByDouble( t1, t2, U( k, k ), true );
-                end
-            end
+            v.v1 = TimesPowerOf2( v.v1, b );
+            v.v2 = TimesPowerOf2( v.v2, b );
         end
 
         function v = SinTaylor( v )
@@ -2566,6 +2367,133 @@ classdef (Abstract) BaseExtDouble
             sin_v = SinTaylor( v );
             cos_v = sqrt( 1 - sin_v .* sin_v );
         end
+
+        function v = IsEqualWithExpansion( a, b, varargin )
+            v = a == b;
+            v = all( v(:) );
+            if nargin > 2
+                for i = 1 : length( varargin )
+                    if ~v
+                        break
+                    end
+                    v = v && a.IsEqualWithExpansion( varargin{i} );
+                end
+            end
+        end
+    end
+
+    %% Not sealed
+    methods
+
+        function v = Plus( a, b )
+            if isa( a, 'BaseExtDouble' )
+                if isa( b, 'BaseExtDouble' )
+                    [ x1, x2 ] = BaseExtDouble.EDPlusED( a.v1, a.v2, b.v1, b.v2 );
+                else
+                    [ x1, x2 ] = BaseExtDouble.EDPlusDouble( a.v1, a.v2, double( b ) );
+                end
+            else
+                if isa( b, 'BaseExtDouble' )
+                    [ x1, x2 ] = BaseExtDouble.EDPlusDouble( b.v1, b.v2, double( a ) );
+                else
+                    [ x1, x2 ] = BaseExtDouble.DoublePlusDouble( double( a ), double( b ) );
+                end
+            end
+            if isa( a, 'BaseExtDouble' )
+                v = a.Make( x1, x2 );
+            else
+                v = b.Make( x1, x2 );
+            end
+        end
+
+        function v = Minus( a, b )
+            if isa( a, 'BaseExtDouble' )
+                if isa( b, 'BaseExtDouble' )
+                    [ x1, x2 ] = BaseExtDouble.EDPlusED( a.v1, a.v2, -b.v1, -b.v2 );
+                else
+                    [ x1, x2 ] = BaseExtDouble.EDPlusDouble( a.v1, a.v2, -double( b ) );
+                end
+            else
+                if isa( b, 'BaseExtDouble' )
+                    [ x1, x2 ] = BaseExtDouble.EDPlusDouble( -b.v1, -b.v2, double( a ) );
+                else
+                    [ x1, x2 ] = BaseExtDouble.DoublePlusDouble( double( a ), -double( b ) );
+                end
+            end
+            if isa( a, 'BaseExtDouble' )
+                v = a.Make( x1, x2 );
+            else
+                v = b.Make( x1, x2 );
+            end
+        end
+
+        function v = Times( a, b )
+            if isa( a, 'BaseExtDouble' )
+                if isa( b, 'BaseExtDouble' )
+                    [ x1, x2 ] = BaseExtDouble.EDTimesED( a.v1, a.v2, b.v1, b.v2 );
+                else
+                    [ x1, x2 ] = BaseExtDouble.EDTimesDouble( a.v1, a.v2, double( b ) );
+                end
+            else
+                if isa( b, 'BaseExtDouble' )
+                    [ x1, x2 ] = BaseExtDouble.EDTimesDouble( b.v1, b.v2, double( a ) );
+                else
+                    [ x1, x2 ] = BaseExtDouble.DoubleTimesDouble( double( a ), double( b ) );
+                end
+            end
+            if isa( a, 'BaseExtDouble' )
+                v = a.Make( x1, x2 );
+            else
+                v = b.Make( x1, x2 );
+            end
+        end
+
+        function v = RDivide( a, b )
+            if isa( a, 'BaseExtDouble' )
+                if isa( b, 'BaseExtDouble' )
+                    [ x1, x2 ] = BaseExtDouble.EDDividedByED( a.v1, a.v2, b.v1, b.v2 );
+                else
+                    [ x1, x2 ] = BaseExtDouble.EDDividedByDouble( a.v1, a.v2, double( b ) );
+                end
+            else
+                if isa( b, 'BaseExtDouble' )
+                    da = double( a );
+                    [ x1, x2 ] = BaseExtDouble.EDDividedByED( da, zeros( size( da ) ), b.v1, b.v2 );
+                else
+                    [ x1, x2 ] = BaseExtDouble.DoubleDividedByDouble( double( a ), double( b ) );
+                end
+            end
+            if isa( a, 'BaseExtDouble' )
+                v = a.Make( x1, x2 );
+            else
+                v = b.Make( x1, x2 );
+            end
+        end
+
+        function v = LDivide( b, a )
+            if isa( a, 'BaseExtDouble' )
+                if isa( b, 'BaseExtDouble' )
+                    [ x1, x2 ] = BaseExtDouble.EDDividedByED( a.v1, a.v2, b.v1, b.v2 );
+                else
+                    [ x1, x2 ] = BaseExtDouble.EDDividedByDouble( a.v1, a.v2, double( b ) );
+                end
+            else
+                if isa( b, 'BaseExtDouble' )
+                    da = double( a );
+                    [ x1, x2 ] = BaseExtDouble.EDDividedByED( da, zeros( size( da ) ), b.v1, b.v2 );
+                else
+                    [ x1, x2 ] = BaseExtDouble.DoubleDividedByDouble( double( a ), double( b ) );
+                end
+            end
+            if isa( a, 'BaseExtDouble' )
+                v = a.Make( x1, x2 );
+            else
+                v = b.Make( x1, x2 );
+            end
+        end
+
+
+
     end
 
     methods (Static, Access = public)
@@ -2593,7 +2521,7 @@ classdef (Abstract) BaseExtDouble
             s2 = a2 - t;
         end
 
-        function [ s1, s2 ] = DDPlusDD( a1, a2, b1, b2 )
+        function [ s1, s2 ] = EDPlusED( a1, a2, b1, b2 )
             if BaseExtDouble.SingletonExpansionNotSupported
                 [ a1, a2, b1, b2 ] = BaseExtDouble.ExpandSingleton( a1, a2, b1, b2 );
             end
@@ -2605,7 +2533,7 @@ classdef (Abstract) BaseExtDouble
             [ s1, s2 ] = BaseExtDouble.Normalize( s1, s2 );
         end
 
-        function [ s1, s2 ] = DDPlusDouble( a1, a2, b )
+        function [ s1, s2 ] = EDPlusDouble( a1, a2, b )
             if BaseExtDouble.SingletonExpansionNotSupported
                 [ a1, a2, b ] = BaseExtDouble.ExpandSingleton( a1, a2, b );
             end
@@ -2626,7 +2554,7 @@ classdef (Abstract) BaseExtDouble
             s2 = t1 + t2;
         end
 
-        function [ p1, p2 ] = DDTimesDD( a1, a2, b1, b2 )
+        function [ p1, p2 ] = EDTimesED( a1, a2, b1, b2 )
             if BaseExtDouble.SingletonExpansionNotSupported
                 [ a1, a2, b1, b2 ] = BaseExtDouble.ExpandSingleton( a1, a2, b1, b2 );
             end
@@ -2636,7 +2564,7 @@ classdef (Abstract) BaseExtDouble
             [ p1, p2 ] = BaseExtDouble.Normalize( p1, p2 );
         end
 
-        function [ p1, p2 ] = DDTimesDouble( a1, a2, b )
+        function [ p1, p2 ] = EDTimesDouble( a1, a2, b )
             if BaseExtDouble.SingletonExpansionNotSupported
                 [ a1, a2, b ] = BaseExtDouble.ExpandSingleton( a1, a2, b );
             end
@@ -2657,7 +2585,7 @@ classdef (Abstract) BaseExtDouble
             p2 = t2 + a2 .* b2;
         end
 
-        function [ r1, r2 ] = DDDividedByDD( a1, a2, b1, b2, AnySolutionWillDo )
+        function [ r1, r2 ] = EDDividedByED( a1, a2, b1, b2, AnySolutionWillDo )
             if BaseExtDouble.SingletonExpansionNotSupported
                 [ a1, a2, b1, b2 ] = BaseExtDouble.ExpandSingleton( a1, a2, b1, b2 );
             end
@@ -2665,14 +2593,14 @@ classdef (Abstract) BaseExtDouble
                 AnySolutionWillDo = false;
             end
             q1 = a1 ./ b1;
-            [ p1, p2 ] = DoubleDouble.DDTimesDouble( b1, b2, q1 );
-            [ r1, r2 ] = DoubleDouble.DDPlusDD( a1, a2, -p1, -p2 );
+            [ p1, p2 ] = BaseExtDouble.EDTimesDouble( b1, b2, q1 );
+            [ r1, r2 ] = BaseExtDouble.EDPlusED( a1, a2, -p1, -p2 );
             q2 = r1 ./ b1;
-            [ p1, p2 ] = DoubleDouble.DDTimesDouble( b1, b2, q2 );
-            [ r1, ~  ] = DoubleDouble.DDPlusDD( r1, r2, -p1, -p2 );
+            [ p1, p2 ] = BaseExtDouble.EDTimesDouble( b1, b2, q2 );
+            [ r1, ~  ] = BaseExtDouble.EDPlusED( r1, r2, -p1, -p2 );
             q3 = r1 ./ b1;
             [ q1, q2 ] = BaseExtDouble.Normalize( q1, q2 );
-            [ r1, r2 ] = DoubleDouble.DDPlusDD( q1, q2, q3, zeros( size( q3 ) ) );
+            [ r1, r2 ] = BaseExtDouble.EDPlusED( q1, q2, q3, zeros( size( q3 ) ) );
             Select = ( b1 == 0 ) & ( b2 == 0 );
             if any( Select(:) )
                 if ( isscalar( Select ) ) && ( numel( a1 ) > 1 )
@@ -2705,7 +2633,7 @@ classdef (Abstract) BaseExtDouble
             end
         end
 
-        function [ r1, r2 ] = DDDividedByDouble( a1, a2, b, AnySolutionWillDo )
+        function [ r1, r2 ] = EDDividedByDouble( a1, a2, b, AnySolutionWillDo )
             if BaseExtDouble.SingletonExpansionNotSupported
                 [ a1, a2, b ] = BaseExtDouble.ExpandSingleton( a1, a2, b );
             end

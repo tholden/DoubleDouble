@@ -38,10 +38,10 @@
 classdef DoubleDouble < BaseExtDouble
 
     properties ( Constant, GetAccess = public )
-        zero = DoubleDouble.MakeConst( 0, 0 );
-        one = DoubleDouble.MakeConst( 1, 0 );
-        eps = DoubleDouble.MakeConst( 4.93038065763132e-32, 0 );
-        pi = DoubleDouble.MakeConst( 3.141592653589793116e+00, 1.224646799147353207e-16 );
+        zero = DoubleDouble.MakeStatic( 0, 0 );
+        one = DoubleDouble.MakeStatic( 1, 0 );
+        eps = DoubleDouble.MakeStatic( 4.93038065763132e-32, 0 );
+        pi = DoubleDouble.MakeStatic( 3.141592653589793116e+00, 1.224646799147353207e-16 );
     end
 
     properties ( Constant, GetAccess = public )
@@ -66,12 +66,12 @@ classdef DoubleDouble < BaseExtDouble
 
         NInverseFactorial = 15;
 
-        piT2   = DoubleDouble.MakeConst( 6.283185307179586232e+00,  2.449293598294706414e-16 );
-        piD2   = DoubleDouble.MakeConst( 1.570796326794896558e+00,  6.123233995736766036e-17 );
-        piD16  = DoubleDouble.MakeConst( 1.963495408493620697e-01,  7.654042494670957545e-18 );
+        piT2   = DoubleDouble.MakeStatic( 6.283185307179586232e+00,  2.449293598294706414e-16 );
+        piD2   = DoubleDouble.MakeStatic( 1.570796326794896558e+00,  6.123233995736766036e-17 );
+        piD16  = DoubleDouble.MakeStatic( 1.963495408493620697e-01,  7.654042494670957545e-18 );
 
-        log_2  = DoubleDouble.MakeConst( 6.931471805599452862e-01,  2.319046813846299558e-17 );
-        log_10 = DoubleDouble.MakeConst( 2.302585092994045901e+00, -2.170756223382249351e-16 );
+        log_2  = DoubleDouble.MakeStatic( 6.931471805599452862e-01,  2.319046813846299558e-17 );
+        log_10 = DoubleDouble.MakeStatic( 2.302585092994045901e+00, -2.170756223382249351e-16 );
 
         SinTable = [
             0, 0;
@@ -97,7 +97,7 @@ classdef DoubleDouble < BaseExtDouble
         end
 
         function v = Make( ~, a1, a2 )
-            v = DoubleDouble.MakeConst( a1, a2 );
+            v = DoubleDouble.MakeStatic( a1, a2 );
         end
 
         function v = DoubleDouble( in, varargin )
@@ -126,34 +126,40 @@ classdef DoubleDouble < BaseExtDouble
 
     methods ( Static )
 
-        % I am happy that these should not be in the base class.
+        %% I am happy that these should not be in the base class.
 
         function v = ones( varargin )
-            v = DoubleDouble.MakeConst( ones( varargin{:}, 'double' ), zeros( varargin{:}, 'double' ) );
+            v = DoubleDouble.MakeStatic( ones( varargin{:}, 'double' ), zeros( varargin{:}, 'double' ) );
         end
 
         function v = zeros( varargin )
-            v = DoubleDouble.MakeConst( zeros( varargin{:}, 'double' ), zeros( varargin{:}, 'double' ) );
+            v = DoubleDouble.MakeStatic( zeros( varargin{:}, 'double' ), zeros( varargin{:}, 'double' ) );
         end
 
         function v = eye( varargin )
-            v = DoubleDouble.MakeConst( eye( varargin{:}, 'double' ), zeros( varargin{:}, 'double' ) );
+            v = DoubleDouble.MakeStatic( eye( varargin{:}, 'double' ), zeros( varargin{:}, 'double' ) );
         end
 
         function v = nan( varargin )
-            v = DoubleDouble.MakeConst( nan( varargin{:}, 'double' ), nan( varargin{:}, 'double' ) );
+            v = DoubleDouble.MakeStatic( nan( varargin{:}, 'double' ), nan( varargin{:}, 'double' ) );
         end
 
         function v = inf( varargin )
-            v = DoubleDouble.MakeConst( inf( varargin{:}, 'double' ), inf( varargin{:}, 'double' ) );
+            v = DoubleDouble.MakeStatic( inf( varargin{:}, 'double' ), inf( varargin{:}, 'double' ) );
         end
 
         function v = rand( varargin )
             t = rand( varargin{:}, 'double' );
-            v = DoubleDouble.MakeConst( t, eps( t ) .* ( rand( varargin{:}, 'double' ) - 0.5 ) );
+            v = DoubleDouble.MakeStatic( t, eps( t ) .* ( rand( varargin{:}, 'double' ) - 0.5 ) );
         end
 
-        % The following should have the implementations in the base class (non-static), and the static functions should be trivial wrappers.
+        function v = randi( imax, varargin )
+            v = DoubleDouble.MakeStatic( randi( imax, varargin{:}, 'double' ), zeros( varargin{:}, 'double' ) );
+        end
+
+
+
+        %% The following should have the implementations in the base class (non-static, sealed), and the static functions should be trivial wrappers.
 
         function v = randn( varargin )
             Size = [ varargin{ : } ];
@@ -178,9 +184,6 @@ classdef DoubleDouble < BaseExtDouble
         end
 
 
-        function v = randi( imax, varargin )
-            v = DoubleDouble.MakeConst( randi( imax, varargin{:}, 'double' ), zeros( varargin{:}, 'double' ) );
-        end
 
 
 
@@ -188,8 +191,7 @@ classdef DoubleDouble < BaseExtDouble
 
 
 
-
-        % The following should be non-static functions in the base class.
+        %% The following should be non-static sealed functions in the base class.
 
         function s = Sum( v, Dim )
             if isa( v, 'DoubleDouble' )
@@ -203,16 +205,16 @@ classdef DoubleDouble < BaseExtDouble
                 Length = Size( Dim );
                 if Length == 0
                     Size = max( 1, Size );
-                    s = DoubleDouble.MakeConst( zeros( Size ), zeros( Size ) );
+                    s = DoubleDouble.MakeStatic( zeros( Size ), zeros( Size ) );
                     return
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
                 x2 = mat2cell( v.v2, Blocks{:} );
-                s = DoubleDouble.MakeConst( x1{ 1 }, x2{ 1 } );
+                s = DoubleDouble.MakeStatic( x1{ 1 }, x2{ 1 } );
                 for i = 2 : Length
-                    s = DoubleDouble.Plus( s, DoubleDouble.MakeConst( x1{ i }, x2{ i } ) );
+                    s = DoubleDouble.Plus( s, DoubleDouble.MakeStatic( x1{ i }, x2{ i } ) );
                 end
             else
                 if nargin < 2 || isempty( Dim )
@@ -225,7 +227,7 @@ classdef DoubleDouble < BaseExtDouble
                 Length = Size( Dim );
                 if Length == 0
                     Size = max( 1, Size );
-                    s = DoubleDouble.MakeConst( zeros( Size ), zeros( Size ) );
+                    s = DoubleDouble.MakeStatic( zeros( Size ), zeros( Size ) );
                     return
                 end
                 Blocks = num2cell( Size );
@@ -249,20 +251,20 @@ classdef DoubleDouble < BaseExtDouble
                 Size = size( v.v1 );
                 Length = Size( Dim );
                 if Length == 0
-                    c = DoubleDouble.MakeConst( zeros( Size ), zeros( Size ) );
+                    c = DoubleDouble.MakeStatic( zeros( Size ), zeros( Size ) );
                     return
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
                 x2 = mat2cell( v.v2, Blocks{:} );
-                s = DoubleDouble.MakeConst( x1{ 1 }, x2{ 1 } );
+                s = DoubleDouble.MakeStatic( x1{ 1 }, x2{ 1 } );
                 c1 = cell( size( x1 ) );
                 c2 = cell( size( x2 ) );
                 c1{1} = s.v1;
                 c2{1} = s.v2;
                 for i = 2 : Length
-                    s = DoubleDouble.Plus( s, DoubleDouble.MakeConst( x1{ i }, x2{ i } ) );
+                    s = DoubleDouble.Plus( s, DoubleDouble.MakeStatic( x1{ i }, x2{ i } ) );
                     c1{i} = s.v1;
                     c2{i} = s.v2;
                 end
@@ -276,7 +278,7 @@ classdef DoubleDouble < BaseExtDouble
                 Size = size( v );
                 Length = Size( Dim );
                 if Length == 0
-                    c = DoubleDouble.MakeConst( zeros( Size ), zeros( Size ) );
+                    c = DoubleDouble.MakeStatic( zeros( Size ), zeros( Size ) );
                     return
                 end
                 Blocks = num2cell( Size );
@@ -293,7 +295,7 @@ classdef DoubleDouble < BaseExtDouble
                     c2{i} = s.v2;
                 end
             end
-            c = DoubleDouble.MakeConst( cell2mat( c1 ), cell2mat( c2 ) );
+            c = DoubleDouble.MakeStatic( cell2mat( c1 ), cell2mat( c2 ) );
         end
 
 
@@ -309,16 +311,16 @@ classdef DoubleDouble < BaseExtDouble
                 Length = Size( Dim );
                 if Length == 0
                     Size = max( 1, Size );
-                    s = DoubleDouble.MakeConst( ones( Size ), zeros( Size ) );
+                    s = DoubleDouble.MakeStatic( ones( Size ), zeros( Size ) );
                     return
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
                 x2 = mat2cell( v.v2, Blocks{:} );
-                s = DoubleDouble.MakeConst( x1{ 1 }, x2{ 1 } );
+                s = DoubleDouble.MakeStatic( x1{ 1 }, x2{ 1 } );
                 for i = 2 : Length
-                    s = DoubleDouble.Times( s, DoubleDouble.MakeConst( x1{ i }, x2{ i } ) );
+                    s = DoubleDouble.Times( s, DoubleDouble.MakeStatic( x1{ i }, x2{ i } ) );
                 end
             else
                 if nargin < 2 || isempty( Dim )
@@ -331,7 +333,7 @@ classdef DoubleDouble < BaseExtDouble
                 Length = Size( Dim );
                 if Length == 0
                     Size = max( 1, Size );
-                    s = DoubleDouble.MakeConst( ones( Size ), zeros( Size ) );
+                    s = DoubleDouble.MakeStatic( ones( Size ), zeros( Size ) );
                     return
                 end
                 Blocks = num2cell( Size );
@@ -355,20 +357,20 @@ classdef DoubleDouble < BaseExtDouble
                 Size = size( v.v1 );
                 Length = Size( Dim );
                 if Length == 0
-                    c = DoubleDouble.MakeConst( zeros( Size ), zeros( Size ) );
+                    c = DoubleDouble.MakeStatic( zeros( Size ), zeros( Size ) );
                     return
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
                 x2 = mat2cell( v.v2, Blocks{:} );
-                s = DoubleDouble.MakeConst( x1{ 1 }, x2{ 1 } );
+                s = DoubleDouble.MakeStatic( x1{ 1 }, x2{ 1 } );
                 c1 = cell( size( x1 ) );
                 c2 = cell( size( x2 ) );
                 c1{1} = s.v1;
                 c2{1} = s.v2;
                 for i = 2 : Length
-                    s = DoubleDouble.Times( s, DoubleDouble.MakeConst( x1{ i }, x2{ i } ) );
+                    s = DoubleDouble.Times( s, DoubleDouble.MakeStatic( x1{ i }, x2{ i } ) );
                     c1{i} = s.v1;
                     c2{i} = s.v2;
                 end
@@ -382,7 +384,7 @@ classdef DoubleDouble < BaseExtDouble
                 Size = size( v );
                 Length = Size( Dim );
                 if Length == 0
-                    c = DoubleDouble.MakeConst( zeros( Size ), zeros( Size ) );
+                    c = DoubleDouble.MakeStatic( zeros( Size ), zeros( Size ) );
                     return
                 end
                 Blocks = num2cell( Size );
@@ -399,7 +401,7 @@ classdef DoubleDouble < BaseExtDouble
                     c2{i} = s.v2;
                 end
             end
-            c = DoubleDouble.MakeConst( cell2mat( c1 ), cell2mat( c2 ) );
+            c = DoubleDouble.MakeStatic( cell2mat( c1 ), cell2mat( c2 ) );
         end
 
 
@@ -423,11 +425,11 @@ classdef DoubleDouble < BaseExtDouble
                     Blocks{ Dim } = ones( Length, 1 );
                     x1 = mat2cell( a.v1, Blocks{:} );
                     x2 = mat2cell( a.v2, Blocks{:} );
-                    s = DoubleDouble.MakeConst( x1{ 1 }, x2{ 1 } );
+                    s = DoubleDouble.MakeStatic( x1{ 1 }, x2{ 1 } );
                     Size( Dim ) = 1;
                     i = ones( Size );
                     for j = 2 : Length
-                        [ s, ii ] = DoubleDouble.Max( DoubleDouble.MakeConst( x1{ j }, x2{ j } ), s );
+                        [ s, ii ] = DoubleDouble.Max( DoubleDouble.MakeStatic( x1{ j }, x2{ j } ), s );
                         i( ii ) = j;
                     end
                 else
@@ -473,20 +475,20 @@ classdef DoubleDouble < BaseExtDouble
                 Size = size( v.v1 );
                 Length = Size( Dim );
                 if Length == 0
-                    c = DoubleDouble.MakeConst( zeros( Size ), zeros( Size ) );
+                    c = DoubleDouble.MakeStatic( zeros( Size ), zeros( Size ) );
                     return
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
                 x2 = mat2cell( v.v2, Blocks{:} );
-                s = DoubleDouble.MakeConst( x1{ 1 }, x2{ 1 } );
+                s = DoubleDouble.MakeStatic( x1{ 1 }, x2{ 1 } );
                 c1 = cell( size( x1 ) );
                 c2 = cell( size( x2 ) );
                 c1{1} = s.v1;
                 c2{1} = s.v2;
                 for i = 2 : Length
-                    s = DoubleDouble.Max( s, DoubleDouble.MakeConst( x1{ i }, x2{ i } ) );
+                    s = DoubleDouble.Max( s, DoubleDouble.MakeStatic( x1{ i }, x2{ i } ) );
                     c1{i} = s.v1;
                     c2{i} = s.v2;
                 end
@@ -500,7 +502,7 @@ classdef DoubleDouble < BaseExtDouble
                 Size = size( v );
                 Length = Size( Dim );
                 if Length == 0
-                    c = DoubleDouble.MakeConst( zeros( Size ), zeros( Size ) );
+                    c = DoubleDouble.MakeStatic( zeros( Size ), zeros( Size ) );
                     return
                 end
                 Blocks = num2cell( Size );
@@ -517,7 +519,7 @@ classdef DoubleDouble < BaseExtDouble
                     c2{i} = s.v2;
                 end
             end
-            c = DoubleDouble.MakeConst( cell2mat( c1 ), cell2mat( c2 ) );
+            c = DoubleDouble.MakeStatic( cell2mat( c1 ), cell2mat( c2 ) );
         end
 
         function [ s, i ] = Min( a, b, Dim )
@@ -535,11 +537,11 @@ classdef DoubleDouble < BaseExtDouble
                     Blocks{ Dim } = ones( Length, 1 );
                     x1 = mat2cell( a.v1, Blocks{:} );
                     x2 = mat2cell( a.v2, Blocks{:} );
-                    s = DoubleDouble.MakeConst( x1{ 1 }, x2{ 1 } );
+                    s = DoubleDouble.MakeStatic( x1{ 1 }, x2{ 1 } );
                     Size( Dim ) = 1;
                     i = ones( Size );
                     for j = 2 : Length
-                        [ s, ii ] = DoubleDouble.Min( DoubleDouble.MakeConst( x1{ j }, x2{ j } ), s );
+                        [ s, ii ] = DoubleDouble.Min( DoubleDouble.MakeStatic( x1{ j }, x2{ j } ), s );
                         i( ii ) = j;
                     end
                 else
@@ -585,20 +587,20 @@ classdef DoubleDouble < BaseExtDouble
                 Size = size( v.v1 );
                 Length = Size( Dim );
                 if Length == 0
-                    c = DoubleDouble.MakeConst( zeros( Size ), zeros( Size ) );
+                    c = DoubleDouble.MakeStatic( zeros( Size ), zeros( Size ) );
                     return
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
                 x2 = mat2cell( v.v2, Blocks{:} );
-                s = DoubleDouble.MakeConst( x1{ 1 }, x2{ 1 } );
+                s = DoubleDouble.MakeStatic( x1{ 1 }, x2{ 1 } );
                 c1 = cell( size( x1 ) );
                 c2 = cell( size( x2 ) );
                 c1{1} = s.v1;
                 c2{1} = s.v2;
                 for i = 2 : Length
-                    s = DoubleDouble.Min( s, DoubleDouble.MakeConst( x1{ i }, x2{ i } ) );
+                    s = DoubleDouble.Min( s, DoubleDouble.MakeStatic( x1{ i }, x2{ i } ) );
                     c1{i} = s.v1;
                     c2{i} = s.v2;
                 end
@@ -612,7 +614,7 @@ classdef DoubleDouble < BaseExtDouble
                 Size = size( v );
                 Length = Size( Dim );
                 if Length == 0
-                    c = DoubleDouble.MakeConst( zeros( Size ), zeros( Size ) );
+                    c = DoubleDouble.MakeStatic( zeros( Size ), zeros( Size ) );
                     return
                 end
                 Blocks = num2cell( Size );
@@ -629,7 +631,7 @@ classdef DoubleDouble < BaseExtDouble
                     c2{i} = s.v2;
                 end
             end
-            c = DoubleDouble.MakeConst( cell2mat( c1 ), cell2mat( c2 ) );
+            c = DoubleDouble.MakeStatic( cell2mat( c1 ), cell2mat( c2 ) );
         end
 
         function v = Dot( a, b, Dim )
@@ -645,14 +647,10 @@ classdef DoubleDouble < BaseExtDouble
 
     end
 
-    methods ( Access = public )
-
-
-    end
 
     methods ( Static, Access = public )
 
-        function v = MakeConst( a1, a2 )
+        function v = MakeStatic( a1, a2 )
             v = DoubleDouble;
             v.v1 = a1;
             v.v2 = a2;
@@ -665,22 +663,5 @@ classdef DoubleDouble < BaseExtDouble
 
 
 
-
-
-
-
-
-
-        function Supported = TestSingletonExpansion
-            a = ones( 2, 1 );
-            b = [];
-            c = [];
-            try
-                b = a + a.';
-                c = a .* a.';
-            catch
-            end
-            Supported = all( [ size( b ), size( c ) ] == 2 );
-        end
     end
 end

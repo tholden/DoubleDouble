@@ -39,27 +39,17 @@
 
 classdef OctDouble < BaseExtDouble
 
-    properties ( SetAccess = public, GetAccess = public )
-        v3
-        v4
-        v5
-        v6
-        v7
-        v8
-    end
-
-
     properties ( Constant, GetAccess = public )
-        zero = OctDouble.MakeConst( QuadDouble.MakeConst( 0, 0, 0, 0 ), QuadDouble.MakeConst( 0, 0, 0, 0 ) );
-        one = OctDouble.MakeConst( QuadDouble.MakeConst( 1, 0, 0, 0 ), QuadDouble.MakeConst( 0, 0, 0, 0 ) );
+        zero = OctDouble.MakeStatic( QuadDouble.MakeStatic( 0, 0, 0, 0 ), QuadDouble.MakeStatic( 0, 0, 0, 0 ) );
+        one = OctDouble.MakeStatic( QuadDouble.MakeStatic( 1, 0, 0, 0 ), QuadDouble.MakeStatic( 0, 0, 0, 0 ) );
 
-        pi = OctDouble.MakeConst( QuadDouble.MakeConst( 3.14159265358979311600e+00, 1.22464679914735320717e-16, -2.99476980971833966589e-33, 1.11245422086336528155e-49 ), QuadDouble.MakeConst( 5.67223197964031574414e-66, 1.74498621613524860120e-83, 6.02937273224953984001e-100, 1.91012354687998999148e-116 ) );
-        log_2 = OctDouble.MakeConst( QuadDouble.MakeConst( 6.93147180559945286227e-01, 2.31904681384629955842e-17, 5.70770843841621206578e-34, -3.58243221060181142336e-50 ), QuadDouble.MakeConst( -1.35216967579886295691e-66, 6.08063874024081390981e-83, 2.89550243323471468856e-99, 2.35138671214564105578e-116 ) );
-        log_10 = OctDouble.MakeConst( QuadDouble.MakeConst( 2.30258509299404590109e+00, -2.17075622338224935076e-16, -9.98426245446577657012e-33, -4.02335745445020637879e-49 ), QuadDouble.MakeConst( 1.92889952896933719193e-65, -5.21257011815125512829e-82, -2.60373698986932938056e-98, 8.29741762082190113745e-115 ) );
-        piT2 = OctDouble.MakeConst( QuadDouble.MakeConst( 6.28318530717958623200e+00, 2.44929359829470641435e-16, -5.98953961943667933177e-33, 2.22490844172673056309e-49 ), QuadDouble.MakeConst( 1.13444639592806314883e-65, 3.48997243227049720241e-83, 1.20587454644990796800e-99, 3.82024709375997998296e-116 ) );
-        piD2 = OctDouble.MakeConst( QuadDouble.MakeConst( 1.57079632679489655800e+00, 6.12323399573676603587e-17, -1.49738490485916983294e-33, 5.56227110431682640773e-50 ), QuadDouble.MakeConst( 2.83611598982015787207e-66, 8.72493108067624300601e-84, 3.01468636612476992000e-100, 9.55061773439994995741e-117 ) );
-        piD16 = OctDouble.MakeConst( QuadDouble.MakeConst( 1.96349540849362069750e-01, 7.65404249467095754484e-18, -1.87173113107396229118e-34, 6.95283888039603300966e-51 ), QuadDouble.MakeConst( 3.54514498727519734009e-67, 1.09061638508453037575e-84, 3.76835795765596240000e-101, 1.19382721679999374468e-117 ) );
-        eps = OctDouble.MakeConst( QuadDouble.MakeConst( 2.30824465444643394519e-128, 0.00000000000000000000e+00, 0.00000000000000000000e+00, 0.00000000000000000000e+00 ), QuadDouble.MakeConst( 0.00000000000000000000e+00, 0.00000000000000000000e+00, 0.00000000000000000000e+00, 0.00000000000000000000e+00 ) );
+        pi = OctDouble.MakeStatic( QuadDouble.MakeStatic( 3.14159265358979311600e+00, 1.22464679914735320717e-16, -2.99476980971833966589e-33, 1.11245422086336528155e-49 ), QuadDouble.MakeStatic( 5.67223197964031574414e-66, 1.74498621613524860120e-83, 6.02937273224953984001e-100, 1.91012354687998999148e-116 ) );
+        log_2 = OctDouble.MakeStatic( QuadDouble.MakeStatic( 6.93147180559945286227e-01, 2.31904681384629955842e-17, 5.70770843841621206578e-34, -3.58243221060181142336e-50 ), QuadDouble.MakeStatic( -1.35216967579886295691e-66, 6.08063874024081390981e-83, 2.89550243323471468856e-99, 2.35138671214564105578e-116 ) );
+        log_10 = OctDouble.MakeStatic( QuadDouble.MakeStatic( 2.30258509299404590109e+00, -2.17075622338224935076e-16, -9.98426245446577657012e-33, -4.02335745445020637879e-49 ), QuadDouble.MakeStatic( 1.92889952896933719193e-65, -5.21257011815125512829e-82, -2.60373698986932938056e-98, 8.29741762082190113745e-115 ) );
+        piT2 = OctDouble.MakeStatic( QuadDouble.MakeStatic( 6.28318530717958623200e+00, 2.44929359829470641435e-16, -5.98953961943667933177e-33, 2.22490844172673056309e-49 ), QuadDouble.MakeStatic( 1.13444639592806314883e-65, 3.48997243227049720241e-83, 1.20587454644990796800e-99, 3.82024709375997998296e-116 ) );
+        piD2 = OctDouble.MakeStatic( QuadDouble.MakeStatic( 1.57079632679489655800e+00, 6.12323399573676603587e-17, -1.49738490485916983294e-33, 5.56227110431682640773e-50 ), QuadDouble.MakeStatic( 2.83611598982015787207e-66, 8.72493108067624300601e-84, 3.01468636612476992000e-100, 9.55061773439994995741e-117 ) );
+        piD16 = OctDouble.MakeStatic( QuadDouble.MakeStatic( 1.96349540849362069750e-01, 7.65404249467095754484e-18, -1.87173113107396229118e-34, 6.95283888039603300966e-51 ), QuadDouble.MakeStatic( 3.54514498727519734009e-67, 1.09061638508453037575e-84, 3.76835795765596240000e-101, 1.19382721679999374468e-117 ) );
+        eps = OctDouble.MakeStatic( QuadDouble.MakeStatic( 2.30824465444643394519e-128, 0.00000000000000000000e+00, 0.00000000000000000000e+00, 0.00000000000000000000e+00 ), QuadDouble.MakeStatic( 0.00000000000000000000e+00, 0.00000000000000000000e+00, 0.00000000000000000000e+00, 0.00000000000000000000e+00 ) );
     end
 
     properties ( Constant, GetAccess = public )
@@ -433,7 +423,7 @@ classdef OctDouble < BaseExtDouble
     methods
 
         function v = Make( ~, a1, a2 )
-            v = OctDouble.MakeConst( a1, a2 );
+            v = OctDouble.MakeStatic( a1, a2 );
         end
         function v = OctDouble( in, varargin )
             if nargin == 0
@@ -584,23 +574,23 @@ classdef OctDouble < BaseExtDouble
     methods ( Static )
 
         function v = ones( varargin )
-            v = OctDouble.MakeConst( QuadDouble(ones( varargin{:}, 'double' )), QuadDouble(zeros( varargin{:}, 'double' )) );
+            v = OctDouble.MakeStatic( QuadDouble(ones( varargin{:}, 'double' )), QuadDouble(zeros( varargin{:}, 'double' )) );
         end
 
         function v = zeros( varargin )
-            v = OctDouble.MakeConst( QuadDouble(zeros( varargin{:}, 'double' )), QuadDouble(zeros( varargin{:}, 'double' )) );
+            v = OctDouble.MakeStatic( QuadDouble(zeros( varargin{:}, 'double' )), QuadDouble(zeros( varargin{:}, 'double' )) );
         end
 
         function v = eye( varargin )
-            v = OctDouble.MakeConst( QuadDouble(eye( varargin{:}, 'double' )), QuadDouble(zeros( varargin{:}, 'double' )) );
+            v = OctDouble.MakeStatic( QuadDouble(eye( varargin{:}, 'double' )), QuadDouble(zeros( varargin{:}, 'double' )) );
         end
 
         function v = nan( varargin )
-            v = OctDouble.MakeConst( QuadDouble(nan( varargin{:}, 'double' )), QuadDouble(nan( varargin{:}, 'double' )) );
+            v = OctDouble.MakeStatic( QuadDouble(nan( varargin{:}, 'double' )), QuadDouble(nan( varargin{:}, 'double' )) );
         end
 
         function v = inf( varargin )
-            v = OctDouble.MakeConst( QuadDouble(inf( varargin{:}, 'double' )), QuadDouble(inf( varargin{:}, 'double' )) );
+            v = OctDouble.MakeStatic( QuadDouble(inf( varargin{:}, 'double' )), QuadDouble(inf( varargin{:}, 'double' )) );
         end
         function v = randn( varargin )
             Size = [ varargin{ : } ];
@@ -632,12 +622,12 @@ classdef OctDouble < BaseExtDouble
 
         function v = rand( varargin )
             t = rand( varargin{:}, 'double' );
-            v = OctDouble.MakeConst( QuadDouble(t), QuadDouble(eps( t ) .* ( rand( varargin{:}, 'double' ) - 0.5 )) );
+            v = OctDouble.MakeStatic( QuadDouble(t), QuadDouble(eps( t ) .* ( rand( varargin{:}, 'double' ) - 0.5 )) );
         end
 
 
         function v = randi( imax, varargin )
-            v = OctDouble.MakeConst( QuadDouble(randi( imax, varargin{:}, 'double' )), QuadDouble(zeros( varargin{:}, 'double' )) );
+            v = OctDouble.MakeStatic( QuadDouble(randi( imax, varargin{:}, 'double' )), QuadDouble(zeros( varargin{:}, 'double' )) );
         end
 
 
@@ -668,9 +658,9 @@ classdef OctDouble < BaseExtDouble
                 Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
                 x2 = mat2cell( v.v2, Blocks{:} );
-                s = OctDouble.MakeConst( x1{ 1 }, x2{ 1 } );
+                s = OctDouble.MakeStatic( x1{ 1 }, x2{ 1 } );
                 for i = 2 : Length
-                    s = OctDouble.Plus( s, OctDouble.MakeConst( x1{ i }, x2{ i } ) );
+                    s = OctDouble.Plus( s, OctDouble.MakeStatic( x1{ i }, x2{ i } ) );
                 end
             else
                 if nargin < 2 || isempty( Dim )
@@ -714,13 +704,13 @@ classdef OctDouble < BaseExtDouble
                 Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
                 x2 = mat2cell( v.v2, Blocks{:} );
-                s = OctDouble.MakeConst( x1{ 1 }, x2{ 1 } );
+                s = OctDouble.MakeStatic( x1{ 1 }, x2{ 1 } );
                 c1 = cell( size( x1 ) );
                 c2 = cell( size( x2 ) );
                 c1{1} = s.v1;
                 c2{1} = s.v2;
                 for i = 2 : Length
-                    s = OctDouble.Plus( s, OctDouble.MakeConst( x1{ i }, x2{ i } ) );
+                    s = OctDouble.Plus( s, OctDouble.MakeStatic( x1{ i }, x2{ i } ) );
                     c1{i} = s.v1;
                     c2{i} = s.v2;
                 end
@@ -751,7 +741,7 @@ classdef OctDouble < BaseExtDouble
                     c2{i} = s.v2;
                 end
             end
-            c = OctDouble.MakeConst( cat( Dim, c1{:} ), cat( Dim, c2{:} ) );
+            c = OctDouble.MakeStatic( cat( Dim, c1{:} ), cat( Dim, c2{:} ) );
         end
 
 
@@ -767,16 +757,16 @@ classdef OctDouble < BaseExtDouble
                 Length = Size( Dim );
                 if Length == 0
                     Size = max( 1, Size );
-                    s = OctDouble.MakeConst( ones( Size ), zeros( Size ) );
+                    s = OctDouble.MakeStatic( ones( Size ), zeros( Size ) );
                     return
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
                 x2 = mat2cell( v.v2, Blocks{:} );
-                s = OctDouble.MakeConst( x1{ 1 }, x2{ 1 } );
+                s = OctDouble.MakeStatic( x1{ 1 }, x2{ 1 } );
                 for i = 2 : Length
-                    s = OctDouble.Times( s, OctDouble.MakeConst( x1{ i }, x2{ i } ) );
+                    s = OctDouble.Times( s, OctDouble.MakeStatic( x1{ i }, x2{ i } ) );
                 end
             else
                 if nargin < 2 || isempty( Dim )
@@ -789,7 +779,7 @@ classdef OctDouble < BaseExtDouble
                 Length = Size( Dim );
                 if Length == 0
                     Size = max( 1, Size );
-                    s = OctDouble.MakeConst( ones( Size ), zeros( Size ) );
+                    s = OctDouble.MakeStatic( ones( Size ), zeros( Size ) );
                     return
                 end
                 Blocks = num2cell( Size );
@@ -820,13 +810,13 @@ classdef OctDouble < BaseExtDouble
                 Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
                 x2 = mat2cell( v.v2, Blocks{:} );
-                s = OctDouble.MakeConst( x1{ 1 }, x2{ 1 } );
+                s = OctDouble.MakeStatic( x1{ 1 }, x2{ 1 } );
                 c1 = cell( size( x1 ) );
                 c2 = cell( size( x2 ) );
                 c1{1} = s.v1;
                 c2{1} = s.v2;
                 for i = 2 : Length
-                    s = OctDouble.Times( s, OctDouble.MakeConst( x1{ i }, x2{ i } ) );
+                    s = OctDouble.Times( s, OctDouble.MakeStatic( x1{ i }, x2{ i } ) );
                     c1{i} = s.v1;
                     c2{i} = s.v2;
                 end
@@ -857,7 +847,7 @@ classdef OctDouble < BaseExtDouble
                     c2{i} = s.v2;
                 end
             end
-            c = OctDouble.MakeConst( cat( Dim, c1{:} ), cat( Dim, c2{:} ) );
+            c = OctDouble.MakeStatic( cat( Dim, c1{:} ), cat( Dim, c2{:} ) );
         end
 
 
@@ -881,11 +871,11 @@ classdef OctDouble < BaseExtDouble
                     Blocks{ Dim } = ones( Length, 1 );
                     x1 = mat2cell( a.v1, Blocks{:} );
                     x2 = mat2cell( a.v2, Blocks{:} );
-                    s = OctDouble.MakeConst( x1{ 1 }, x2{ 1 } );
+                    s = OctDouble.MakeStatic( x1{ 1 }, x2{ 1 } );
                     Size( Dim ) = 1;
                     i = ones( Size );
                     for j = 2 : Length
-                        [ s, ii ] = OctDouble.Max( OctDouble.MakeConst( x1{ j }, x2{ j } ), s );
+                        [ s, ii ] = OctDouble.Max( OctDouble.MakeStatic( x1{ j }, x2{ j } ), s );
                         i( ii ) = j;
                     end
                 else
@@ -938,13 +928,13 @@ classdef OctDouble < BaseExtDouble
                 Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
                 x2 = mat2cell( v.v2, Blocks{:} );
-                s = OctDouble.MakeConst( x1{ 1 }, x2{ 1 } );
+                s = OctDouble.MakeStatic( x1{ 1 }, x2{ 1 } );
                 c1 = cell( size( x1 ) );
                 c2 = cell( size( x2 ) );
                 c1{1} = s.v1;
                 c2{1} = s.v2;
                 for i = 2 : Length
-                    s = OctDouble.Max( s, OctDouble.MakeConst( x1{ i }, x2{ i } ) );
+                    s = OctDouble.Max( s, OctDouble.MakeStatic( x1{ i }, x2{ i } ) );
                     c1{i} = s.v1;
                     c2{i} = s.v2;
                 end
@@ -975,7 +965,7 @@ classdef OctDouble < BaseExtDouble
                     c2{i} = s.v2;
                 end
             end
-            c = OctDouble.MakeConst( cat( Dim, c1{:} ), cat( Dim, c2{:} ) );
+            c = OctDouble.MakeStatic( cat( Dim, c1{:} ), cat( Dim, c2{:} ) );
         end
 
         function [ s, i ] = Min( a, b, Dim )
@@ -993,11 +983,11 @@ classdef OctDouble < BaseExtDouble
                     Blocks{ Dim } = ones( Length, 1 );
                     x1 = mat2cell( a.v1, Blocks{:} );
                     x2 = mat2cell( a.v2, Blocks{:} );
-                    s = OctDouble.MakeConst( x1{ 1 }, x2{ 1 } );
+                    s = OctDouble.MakeStatic( x1{ 1 }, x2{ 1 } );
                     Size( Dim ) = 1;
                     i = ones( Size );
                     for j = 2 : Length
-                        [ s, ii ] = OctDouble.Min( OctDouble.MakeConst( x1{ j }, x2{ j } ), s );
+                        [ s, ii ] = OctDouble.Min( OctDouble.MakeStatic( x1{ j }, x2{ j } ), s );
                         i( ii ) = j;
                     end
                 else
@@ -1050,13 +1040,13 @@ classdef OctDouble < BaseExtDouble
                 Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
                 x2 = mat2cell( v.v2, Blocks{:} );
-                s = OctDouble.MakeConst( x1{ 1 }, x2{ 1 } );
+                s = OctDouble.MakeStatic( x1{ 1 }, x2{ 1 } );
                 c1 = cell( size( x1 ) );
                 c2 = cell( size( x2 ) );
                 c1{1} = s.v1;
                 c2{1} = s.v2;
                 for i = 2 : Length
-                    s = OctDouble.Min( s, OctDouble.MakeConst( x1{ i }, x2{ i } ) );
+                    s = OctDouble.Min( s, OctDouble.MakeStatic( x1{ i }, x2{ i } ) );
                     c1{i} = s.v1;
                     c2{i} = s.v2;
                 end
@@ -1087,7 +1077,7 @@ classdef OctDouble < BaseExtDouble
                     c2{i} = s.v2;
                 end
             end
-            c = OctDouble.MakeConst( cat( Dim, c1{:} ), cat( Dim, c2{:} ) );
+            c = OctDouble.MakeStatic( cat( Dim, c1{:} ), cat( Dim, c2{:} ) );
         end
 
         function v = Dot( a, b, Dim )
@@ -1112,7 +1102,7 @@ classdef OctDouble < BaseExtDouble
     end
 
     methods ( Static, Access = public )
-        function v = MakeConst( a1, a2 )
+        function v = MakeStatic( a1, a2 )
             v = OctDouble;
             if ~isa( a1, 'QuadDouble' ) && ~isempty( a1 )
                 a1 = QuadDouble( a1 );

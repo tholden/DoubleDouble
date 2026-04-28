@@ -1,12 +1,13 @@
 function [ Q, R ] = qrExt( A )
     % Type-agnostic QR decomposition (Modified Gram-Schmidt)
+
     [ m, n ] = size( A );
     Q = zeros( m, n, 'like', A );
     R = zeros( n, n, 'like', A );
-    
+
     for j = 1 : n
         v = A( :, j );
-        for i = 1 : j - 1
+        for i = 1 : ( j - 1 )
             R( i, j ) = sum( conj( Q( :, i ) ) .* v );
             v = v - R( i, j ) * Q( :, i );
         end
@@ -17,4 +18,5 @@ function [ Q, R ] = qrExt( A )
             Q( :, j ) = v;
         end
     end
+
 end

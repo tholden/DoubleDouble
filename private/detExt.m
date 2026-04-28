@@ -1,4 +1,5 @@
 function v = detExt( v )
+
     [ m, n ] = size( v );
     if m ~= n
         throw( MException( 'MATLAB:square', 'Matrix must be square.' ) );
@@ -12,4 +13,5 @@ function v = detExt( v )
     else
         v = NaN( 'like', v );
     end
+
 end
