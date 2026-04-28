@@ -35,126 +35,274 @@
 % (3) Neither the name of the New Mexico Inst of Mining & Tech nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 % 2. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-classdef DoubleDouble < BaseExtDouble
+% WARNING: This code was primarily written by AI, based on OctDouble.m, using DoubleDouble components. Having not gone through it line by line, I cannot 100% guarantee its correctness.
+
+classdef QuadDoubleSlow < BaseExtDouble
+
+
 
     properties ( Constant, GetAccess = public )
-        zero = DoubleDouble.MakeConst( 0, 0 );
-        one = DoubleDouble.MakeConst( 1, 0 );
-        eps = DoubleDouble.MakeConst( 4.93038065763132e-32, 0 );
-        pi = DoubleDouble.MakeConst( 3.141592653589793116e+00, 1.224646799147353207e-16 );
+        zero = QuadDoubleSlow.MakeConst( DoubleDouble.MakeConst(0, 0), DoubleDouble.MakeConst(0, 0 ) );
+        one = QuadDoubleSlow.MakeConst( DoubleDouble.MakeConst(1, 0), DoubleDouble.MakeConst(0, 0 ) );
+        eps = QuadDoubleSlow.MakeConst( DoubleDouble.MakeConst(1.21543267145725000000e-63, 0.00000000000000000000e+00), DoubleDouble.MakeConst(0.00000000000000000000e+00, 0.00000000000000000000e+00 ) );
+        pi = QuadDoubleSlow.MakeConst( DoubleDouble.MakeConst(3.14159265358979311600e+00, 1.22464679914735320717e-16), DoubleDouble.MakeConst(-2.99476980971833966589e-33, 1.11245422086336528166e-49 ) );
     end
 
     properties ( Constant, GetAccess = public )
 
+        piT2   = QuadDoubleSlow.MakeConst( DoubleDouble.MakeConst(6.28318530717958623200e+00, 2.44929359829470641444e-16), DoubleDouble.MakeConst(-5.98953961943667933152e-33, 2.22490844172673056346e-49 ) );
+        piD2   = QuadDoubleSlow.MakeConst( DoubleDouble.MakeConst(1.57079632679489655800e+00, 6.12323399573676603611e-17), DoubleDouble.MakeConst(-1.49738490485916983288e-33, 5.56227110431682640865e-50 ) );
+        piD16  = QuadDoubleSlow.MakeConst( DoubleDouble.MakeConst(1.96349540849362069750e-01, 7.65404249467095754484e-18), DoubleDouble.MakeConst(-1.87173113107396229118e-34, 6.95283888039603300966e-51 ) );
+        log_2  = QuadDoubleSlow.MakeConst( DoubleDouble.MakeConst(6.93147180559945286227e-01, 2.31904681384629955842e-17), DoubleDouble.MakeConst(5.70770843841621206578e-34, -3.58243221060181142336e-50 ) );
+        log_10 = QuadDoubleSlow.MakeConst( DoubleDouble.MakeConst(2.30258509299404590109e+00, -2.17075622338224935076e-16), DoubleDouble.MakeConst(-9.98426245446577657012e-33, -4.02335745445020637879e-49 ) );
+
         InverseFactorial = [
-            1.66666666666666657e-01,  9.25185853854297066e-18;
-            4.16666666666666644e-02,  2.31296463463574266e-18;
-            8.33333333333333322e-03,  1.15648231731787138e-19;
-            1.38888888888888894e-03, -5.30054395437357706e-20;
-            1.98412698412698413e-04,  1.72095582934207053e-22;
-            2.48015873015873016e-05,  2.15119478667758816e-23;
-            2.75573192239858925e-06, -1.85839327404647208e-22;
-            2.75573192239858883e-07,  2.37677146222502973e-23;
-            2.50521083854417202e-08, -1.44881407093591197e-24;
-            2.08767569878681002e-09, -1.20734505911325997e-25;
-            1.60590438368216133e-10,  1.25852945887520981e-26;
-            1.14707455977297245e-11,  2.06555127528307454e-28;
-            7.64716373181981641e-13,  7.03872877733453001e-30;
-            4.77947733238738525e-14,  4.39920548583408126e-31;
-            2.81145725434552060e-15,  1.65088427308614326e-31;
+            1.00000000000000000000e+00, 0.00000000000000000000e+00, 0.00000000000000000000e+00, 0.00000000000000000000e+00;
+            5.00000000000000000000e-01, 0.00000000000000000000e+00, 0.00000000000000000000e+00, 0.00000000000000000000e+00;
+            1.66666666666666657415e-01, 9.25185853854297065662e-18, 5.13581318503262865639e-34, 2.85094902409834186429e-50;
+            4.16666666666666643537e-02, 2.31296463463574266415e-18, 1.28395329625815716410e-34, 7.12737256024585466073e-51;
+            8.33333333333333321769e-03, 1.15648231731787138023e-19, 1.60494162032269652194e-36, 2.22730392507682967421e-53;
+            1.38888888888888894189e-03, -5.30054395437357705906e-20, -1.73868675534958775956e-36, -1.63335621172300839684e-52;
+            1.98412698412698412526e-04, 1.72095582934207052868e-22, 1.49269123913941270724e-40, 1.29470326746002470656e-58;
+            2.48015873015873015658e-05, 2.15119478667758816085e-23, 1.86586404892426588405e-41, 1.61837908432503088320e-59;
+            2.75573192239858925110e-06, -1.85839327404647208104e-22, 8.49175460488199287009e-39, -5.72661640789429621316e-55;
+            2.75573192239858882758e-07, 2.37677146222502973185e-23, -3.26318890334088294370e-40, 1.61435111860404415106e-56;
+            2.50521083854417202239e-08, -1.44881407093591196603e-24, 2.04267351467144545891e-41, -8.49632672007163174711e-58;
+            2.08767569878681001866e-09, -1.20734505911325997169e-25, 1.70222792889287100335e-42, 1.41609532150396699816e-58;
+            1.60590438368216133409e-10, 1.25852945887520980521e-26, -5.31334602762985030694e-43, 3.54021472597605527826e-59;
+            1.14707455977297245073e-11, 2.06555127528307454245e-28, 6.88907923246664603290e-45, 5.72920002655109095474e-61;
+            7.64716373181981640551e-13, 7.03872877733453001061e-30, -7.82753927716258344520e-48, 1.92138649443790241643e-64;
+            4.77947733238738525345e-14, 4.39920548583408125663e-31, -4.89221204822661465325e-49, 1.20086655902368901027e-65;
+            2.81145725434552059811e-15, 1.65088427308614325994e-31, -2.87777179307447917987e-50, 4.27110689256293549037e-67;
+            1.56192069685862252711e-16, 1.19106796602737540024e-32, -4.57750605962998323416e-49, 2.87494142340899603160e-67;
+            8.22063524662432949554e-18, 2.21418941196042653637e-34, -1.50891402377419897072e-50, 1.40072951514781547649e-67;
+            4.11031762331216484407e-19, 1.44129733786595271498e-36, -5.28562754878981208303e-53, -4.14764725635765684990e-70;
+            1.95729410633912625952e-20, -1.36435038300879084872e-36, 1.33923482511250642308e-53, -6.82108942414933121893e-70;
+            8.89679139245057407789e-22, -7.91140261487237621703e-38, -3.18779767905709332675e-54, 1.27057810175205661633e-70;
+            3.86817017063068412615e-23, -8.84317765548234384789e-40, 3.87181571061732467175e-56, -1.95652575315225570181e-72;
+            1.61173757109611838590e-24, -3.68465735645097660329e-41, 1.61325654609055194656e-57, -8.15219063813439928119e-74;
+            6.44695028438447358950e-26, -1.93304042337034648245e-42, -1.52130238070391441718e-58, 6.64377273721295752858e-75;
+            2.47959626322479758961e-27, -1.29537309647652287758e-43, 6.40339015984996240505e-60, -8.46024562770674585087e-77;
+            9.18368986379554600539e-29, 1.43031503967873220242e-45, -8.55122677465050479948e-62, 8.38146710023453831785e-78;
+            3.27988923706983775898e-30, 1.51175427440298786897e-46, 8.05851771951971592852e-63, -9.09648053071092885400e-81;
+            1.13099628864477158818e-31, 1.04980154129595060239e-47, -4.34615092939779517622e-64, -4.96677980014005581500e-81;
+            3.76998762881590538515e-33, 2.58703478327503238348e-49, 3.23789002742563998619e-66, 2.56128591057885727338e-82;
+            1.21612504155351789377e-34, 5.58629056788880576964e-51, 6.61594857808279192552e-68, -3.16204422895208590789e-84;
+            3.80039075485474341802e-36, 1.74571580246525180301e-52, 2.06748393065087247673e-69, -9.88138821547526846215e-86;
+            1.15163356207719508905e-37, -6.09957445788453977976e-54, -5.34474961965941048489e-70, 2.62531262385000815484e-86;
+            3.38715753552116179633e-39, 5.09056148151084994757e-56, 3.98956734903634402553e-72, -1.14951294479092623352e-88;
+            9.67759295863189067186e-41, 3.20229554864556196033e-57, 6.54750720501810103533e-74, -5.91334284153607618996e-91;
+            2.68822026628663633314e-42, 5.35506116594333401341e-59, -1.12906019874498675666e-75, -7.09714352853527273815e-92;
+            7.26546017915307135902e-44, -4.36409714935444569150e-61, 2.55032501210183748394e-77, 3.62259693228430959850e-94;
+            1.91196320504028195296e-45, -2.78608221768831260969e-62, 2.03474372241013280071e-78, -9.13939362246162656853e-95;
+            4.90246975651354351900e-47, -1.21301910051792795265e-63, -4.47071800113765855194e-80, 5.37597340717858998037e-97;
+            1.22561743912838584936e-48, 6.03392734831560538813e-68, 4.07624961245823729659e-84, -1.59820353307989972028e-102;
+            2.98931082714240461486e-50, -1.04072477030331555467e-66, -1.37613197137759057242e-83, -5.01838323088147032117e-100;
+            7.11740673129143899398e-52, 3.17420753842055730074e-68, 1.24112898646225877483e-84, -1.09918879326293740961e-100;
+            1.65521086774219514723e-53, 4.14710519049482419382e-70, 4.32187417758181305900e-88, 1.61954498080637493977e-104;
+            3.76184288123226156652e-55, 2.25971359112361835283e-71, -1.45255187387709499120e-87, -1.23159968713973768582e-104;
+            8.35965084718280448735e-57, -5.04027988508830641661e-73, -1.97116512594399310946e-89, -1.18661232656178290706e-106;
+            1.81731540156147899030e-58, 1.36506933987936602796e-74, 2.54490150401424344048e-91, -2.39064169520447011495e-107;
+            3.86662851396059404326e-60, -1.56435500578638897666e-76, -1.28638554473548469031e-92, -4.72409213107264703206e-109;
+            8.05547607075123643865e-62, 8.25581847807094913248e-78, -2.67996988486559310482e-94, -9.84185860640134798346e-111;
+            1.64397470831657907432e-63, -4.08088098184429380620e-80, -3.32913139064192010208e-96, 1.47073743046046679366e-112;
+            3.28794941663315801371e-65, 5.33225140364648136571e-82, 8.32419386223677346691e-99, 6.67478974686111897684e-115;
             ];
 
-        NInverseFactorial = 15;
-
-        piT2   = DoubleDouble.MakeConst( 6.283185307179586232e+00,  2.449293598294706414e-16 );
-        piD2   = DoubleDouble.MakeConst( 1.570796326794896558e+00,  6.123233995736766036e-17 );
-        piD16  = DoubleDouble.MakeConst( 1.963495408493620697e-01,  7.654042494670957545e-18 );
-
-        log_2  = DoubleDouble.MakeConst( 6.931471805599452862e-01,  2.319046813846299558e-17 );
-        log_10 = DoubleDouble.MakeConst( 2.302585092994045901e+00, -2.170756223382249351e-16 );
+        NInverseFactorial = 50;
 
         SinTable = [
-            0, 0;
-            1.950903220161282758e-01, -7.991079068461731263e-18;
-            3.826834323650897818e-01, -1.005077269646158761e-17;
-            5.555702330196021776e-01,  4.709410940561676821e-17;
-            7.071067811865475727e-01, -4.833646656726456726e-17;
+            0.00000000000000000000e+00, 0.00000000000000000000e+00, 0.00000000000000000000e+00, 0.00000000000000000000e+00;
+            1.95090322016128275839e-01, -7.99107906846173126344e-18, 6.18462700242207127059e-34, -3.58402709180329369584e-50;
+            3.82683432365089781779e-01, -1.00507726964615876117e-17, -2.06053163028066946701e-34, -1.27177246980852050275e-50;
+            5.55570233019602177649e-01, 4.70941094056167682138e-17, -2.06405203836829206178e-33, 1.22901631885671376629e-49;
+            7.07106781186547572737e-01, -4.83364665672645672553e-17, 2.06933765434970678136e-33, 2.46777349573417545616e-50;
             ];
 
         CosTable = [
-            1, 0;
-            9.807852804032304306e-01,  1.854693999782500573e-17;
-            9.238795325112867385e-01,  1.764504708433667706e-17;
-            8.314696123025452357e-01,  1.407385698472802389e-18;
-            7.071067811865475727e-01, -4.833646656726456726e-17;
+            1.00000000000000000000e+00, 0.00000000000000000000e+00, 0.00000000000000000000e+00, 0.00000000000000000000e+00;
+            9.80785280403230430579e-01, 1.85469399978250057259e-17, -1.06965644455307566037e-33, 6.66681744752649605784e-50;
+            9.23879532511286738483e-01, 1.76450470843366770600e-17, -5.04425373215868178317e-34, -4.04786777168238900471e-50;
+            8.31469612302545235671e-01, 1.40738569847280238931e-18, 4.69513153839808352459e-35, -2.02338815193825684523e-52;
+            7.07106781186547572737e-01, -4.83364665672645672553e-17, 2.06933765434970678136e-33, 2.46777349573417545616e-50;
             ];
     end
 
-    methods
+    
 
+    methods
         function v = promote( ~, a )
-            v = DoubleDouble( a );
+            v = QuadDoubleSlow( a );
         end
 
         function v = Make( ~, a1, a2 )
-            v = DoubleDouble.MakeConst( a1, a2 );
+            v = QuadDoubleSlow.MakeConst( a1, a2 );
         end
-
-        function v = DoubleDouble( in, varargin )
+        function v = QuadDoubleSlow( in, varargin )
             if nargin == 0
-                v.v1 = [];
-                v.v2 = [];
+                v.v1 = DoubleDouble( [] );
+                v.v2 = DoubleDouble( [] );
                 return
             end
             if nargin >= 2
                 for i = 1 : length( varargin )
-                    in = DoubleDouble.Plus( in, varargin{ i } );
+                    in = QuadDoubleSlow.Plus( in, varargin{ i } );
                 end
             end
-            if isa( in, 'DoubleDouble' )
+            if isa( in, 'QuadDoubleSlow' )
                 v.v1 = in.v1;
                 v.v2 = in.v2;
-            elseif isa( in, 'BaseExtDouble' )
-                [ v.v1, v.v2 ] = ToSumOfDoubles( in );
+            elseif isa( in, 'DoubleDouble' )
+                v.v1 = in;
+                v.v2 = DoubleDouble( zeros( size( in ) ) );
+
             else
-                v.v1 = double( in );
-                v.v2 = zeros( size( in ) );
+                v.v1 = DoubleDouble( in );
+                v.v2 = DoubleDouble( zeros( size( in ) ) );
             end
         end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     end
 
     methods ( Static )
 
-        % I am happy that these should not be in the base class.
-
         function v = ones( varargin )
-            v = DoubleDouble.MakeConst( ones( varargin{:}, 'double' ), zeros( varargin{:}, 'double' ) );
+            v = QuadDoubleSlow.MakeConst( DoubleDouble(ones( varargin{:}, 'double' )), DoubleDouble(zeros( varargin{:}, 'double' )) );
         end
 
         function v = zeros( varargin )
-            v = DoubleDouble.MakeConst( zeros( varargin{:}, 'double' ), zeros( varargin{:}, 'double' ) );
+            v = QuadDoubleSlow.MakeConst( DoubleDouble(zeros( varargin{:}, 'double' )), DoubleDouble(zeros( varargin{:}, 'double' )) );
         end
 
         function v = eye( varargin )
-            v = DoubleDouble.MakeConst( eye( varargin{:}, 'double' ), zeros( varargin{:}, 'double' ) );
+            v = QuadDoubleSlow.MakeConst( DoubleDouble(eye( varargin{:}, 'double' )), DoubleDouble(zeros( varargin{:}, 'double' )) );
         end
 
         function v = nan( varargin )
-            v = DoubleDouble.MakeConst( nan( varargin{:}, 'double' ), nan( varargin{:}, 'double' ) );
+            v = QuadDoubleSlow.MakeConst( DoubleDouble(nan( varargin{:}, 'double' )), DoubleDouble(nan( varargin{:}, 'double' )) );
         end
 
         function v = inf( varargin )
-            v = DoubleDouble.MakeConst( inf( varargin{:}, 'double' ), inf( varargin{:}, 'double' ) );
+            v = QuadDoubleSlow.MakeConst( DoubleDouble(inf( varargin{:}, 'double' )), DoubleDouble(inf( varargin{:}, 'double' )) );
         end
-
-        function v = rand( varargin )
-            t = rand( varargin{:}, 'double' );
-            v = DoubleDouble.MakeConst( t, eps( t ) .* ( rand( varargin{:}, 'double' ) - 0.5 ) );
-        end
-
-        % The following should have the implementations in the base class (non-static), and the static functions should be trivial wrappers.
-
         function v = randn( varargin )
             Size = [ varargin{ : } ];
             if isempty( Size )
@@ -164,10 +312,10 @@ classdef DoubleDouble < BaseExtDouble
             end
             N = prod( Size );
             M = 2 * ceil( 0.5 * N );
-            U = DoubleDouble.rand( M / 2, 1 );
-            V = DoubleDouble.rand( M / 2, 1 );
+            U = QuadDoubleSlow.rand( M / 2, 1 );
+            V = QuadDoubleSlow.rand( M / 2, 1 );
             R = sqrt( -2 * log( U ) );
-            Theta = 2 * DoubleDouble.pi * V;
+            Theta = 2 * QuadDoubleSlow.pi * V;
             [ S, C ] = sincos( Theta );
             Z1 = R .* C;
             Z2 = R .* S;
@@ -177,9 +325,14 @@ classdef DoubleDouble < BaseExtDouble
             v = reshape( v, Size );
         end
 
+        function v = rand( varargin )
+            t = rand( varargin{:}, 'double' );
+            v = QuadDoubleSlow.MakeConst( DoubleDouble(t), DoubleDouble(eps( t ) .* ( rand( varargin{:}, 'double' ) - 0.5 )) );
+        end
+
 
         function v = randi( imax, varargin )
-            v = DoubleDouble.MakeConst( randi( imax, varargin{:}, 'double' ), zeros( varargin{:}, 'double' ) );
+            v = QuadDoubleSlow.MakeConst( DoubleDouble(randi( imax, varargin{:}, 'double' )), DoubleDouble(zeros( varargin{:}, 'double' )) );
         end
 
 
@@ -189,10 +342,10 @@ classdef DoubleDouble < BaseExtDouble
 
 
 
-        % The following should be non-static functions in the base class.
+
 
         function s = Sum( v, Dim )
-            if isa( v, 'DoubleDouble' )
+            if isa( v, 'QuadDoubleSlow' )
                 if nargin < 2 || isempty( Dim )
                     Dim = find( size( v.v1 ) > 1, 1 );
                     if isempty( Dim )
@@ -203,16 +356,16 @@ classdef DoubleDouble < BaseExtDouble
                 Length = Size( Dim );
                 if Length == 0
                     Size = max( 1, Size );
-                    s = DoubleDouble.MakeConst( zeros( Size ), zeros( Size ) );
+                    s = QuadDoubleSlow.zeros( Size );
                     return
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
                 x2 = mat2cell( v.v2, Blocks{:} );
-                s = DoubleDouble.MakeConst( x1{ 1 }, x2{ 1 } );
+                s = QuadDoubleSlow.MakeConst( x1{ 1 }, x2{ 1 } );
                 for i = 2 : Length
-                    s = DoubleDouble.Plus( s, DoubleDouble.MakeConst( x1{ i }, x2{ i } ) );
+                    s = QuadDoubleSlow.Plus( s, QuadDoubleSlow.MakeConst( x1{ i }, x2{ i } ) );
                 end
             else
                 if nargin < 2 || isempty( Dim )
@@ -225,7 +378,7 @@ classdef DoubleDouble < BaseExtDouble
                 Length = Size( Dim );
                 if Length == 0
                     Size = max( 1, Size );
-                    s = DoubleDouble.MakeConst( zeros( Size ), zeros( Size ) );
+                    s = QuadDoubleSlow.zeros( Size );
                     return
                 end
                 Blocks = num2cell( Size );
@@ -233,13 +386,13 @@ classdef DoubleDouble < BaseExtDouble
                 x = mat2cell( v, Blocks{:} );
                 s = x{ 1 };
                 for i = 2 : Length
-                    s = DoubleDouble.Plus( s, x{ i } );
+                    s = QuadDoubleSlow.Plus( s, x{ i } );
                 end
             end
         end
 
         function c = CumSum( v, Dim )
-            if isa( v, 'DoubleDouble' )
+            if isa( v, 'QuadDoubleSlow' )
                 if nargin < 2 || isempty( Dim )
                     Dim = find( size( v.v1 ) > 1, 1 );
                     if isempty( Dim )
@@ -249,20 +402,20 @@ classdef DoubleDouble < BaseExtDouble
                 Size = size( v.v1 );
                 Length = Size( Dim );
                 if Length == 0
-                    c = DoubleDouble.MakeConst( zeros( Size ), zeros( Size ) );
+                    c = QuadDoubleSlow.zeros( Size );
                     return
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
                 x2 = mat2cell( v.v2, Blocks{:} );
-                s = DoubleDouble.MakeConst( x1{ 1 }, x2{ 1 } );
+                s = QuadDoubleSlow.MakeConst( x1{ 1 }, x2{ 1 } );
                 c1 = cell( size( x1 ) );
                 c2 = cell( size( x2 ) );
                 c1{1} = s.v1;
                 c2{1} = s.v2;
                 for i = 2 : Length
-                    s = DoubleDouble.Plus( s, DoubleDouble.MakeConst( x1{ i }, x2{ i } ) );
+                    s = QuadDoubleSlow.Plus( s, QuadDoubleSlow.MakeConst( x1{ i }, x2{ i } ) );
                     c1{i} = s.v1;
                     c2{i} = s.v2;
                 end
@@ -276,7 +429,7 @@ classdef DoubleDouble < BaseExtDouble
                 Size = size( v );
                 Length = Size( Dim );
                 if Length == 0
-                    c = DoubleDouble.MakeConst( zeros( Size ), zeros( Size ) );
+                    c = QuadDoubleSlow.zeros( Size );
                     return
                 end
                 Blocks = num2cell( Size );
@@ -288,17 +441,17 @@ classdef DoubleDouble < BaseExtDouble
                 c1{1} = s;
                 c2{1} = zeros( size( s ) );
                 for i = 2 : Length
-                    s = DoubleDouble.Plus( s, x{ i } );
+                    s = QuadDoubleSlow.Plus( s, x{ i } );
                     c1{i} = s.v1;
                     c2{i} = s.v2;
                 end
             end
-            c = DoubleDouble.MakeConst( cell2mat( c1 ), cell2mat( c2 ) );
+            c = QuadDoubleSlow.MakeConst( cat( Dim, c1{:} ), cat( Dim, c2{:} ) );
         end
 
 
         function s = Prod( v, Dim )
-            if isa( v, 'DoubleDouble' )
+            if isa( v, 'QuadDoubleSlow' )
                 if nargin < 2 || isempty( Dim )
                     Dim = find( size( v.v1 ) > 1, 1 );
                     if isempty( Dim )
@@ -309,16 +462,16 @@ classdef DoubleDouble < BaseExtDouble
                 Length = Size( Dim );
                 if Length == 0
                     Size = max( 1, Size );
-                    s = DoubleDouble.MakeConst( ones( Size ), zeros( Size ) );
+                    s = QuadDoubleSlow.MakeConst( ones( Size ), zeros( Size ) );
                     return
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
                 x2 = mat2cell( v.v2, Blocks{:} );
-                s = DoubleDouble.MakeConst( x1{ 1 }, x2{ 1 } );
+                s = QuadDoubleSlow.MakeConst( x1{ 1 }, x2{ 1 } );
                 for i = 2 : Length
-                    s = DoubleDouble.Times( s, DoubleDouble.MakeConst( x1{ i }, x2{ i } ) );
+                    s = QuadDoubleSlow.Times( s, QuadDoubleSlow.MakeConst( x1{ i }, x2{ i } ) );
                 end
             else
                 if nargin < 2 || isempty( Dim )
@@ -331,7 +484,7 @@ classdef DoubleDouble < BaseExtDouble
                 Length = Size( Dim );
                 if Length == 0
                     Size = max( 1, Size );
-                    s = DoubleDouble.MakeConst( ones( Size ), zeros( Size ) );
+                    s = QuadDoubleSlow.MakeConst( ones( Size ), zeros( Size ) );
                     return
                 end
                 Blocks = num2cell( Size );
@@ -339,13 +492,13 @@ classdef DoubleDouble < BaseExtDouble
                 x = mat2cell( v, Blocks{:} );
                 s = x{ 1 };
                 for i = 2 : Length
-                    s = DoubleDouble.Times( s, x{ i } );
+                    s = QuadDoubleSlow.Times( s, x{ i } );
                 end
             end
         end
 
         function c = CumProd( v, Dim )
-            if isa( v, 'DoubleDouble' )
+            if isa( v, 'QuadDoubleSlow' )
                 if nargin < 2 || isempty( Dim )
                     Dim = find( size( v.v1 ) > 1, 1 );
                     if isempty( Dim )
@@ -355,20 +508,20 @@ classdef DoubleDouble < BaseExtDouble
                 Size = size( v.v1 );
                 Length = Size( Dim );
                 if Length == 0
-                    c = DoubleDouble.MakeConst( zeros( Size ), zeros( Size ) );
+                    c = QuadDoubleSlow.zeros( Size );
                     return
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
                 x2 = mat2cell( v.v2, Blocks{:} );
-                s = DoubleDouble.MakeConst( x1{ 1 }, x2{ 1 } );
+                s = QuadDoubleSlow.MakeConst( x1{ 1 }, x2{ 1 } );
                 c1 = cell( size( x1 ) );
                 c2 = cell( size( x2 ) );
                 c1{1} = s.v1;
                 c2{1} = s.v2;
                 for i = 2 : Length
-                    s = DoubleDouble.Times( s, DoubleDouble.MakeConst( x1{ i }, x2{ i } ) );
+                    s = QuadDoubleSlow.Times( s, QuadDoubleSlow.MakeConst( x1{ i }, x2{ i } ) );
                     c1{i} = s.v1;
                     c2{i} = s.v2;
                 end
@@ -382,7 +535,7 @@ classdef DoubleDouble < BaseExtDouble
                 Size = size( v );
                 Length = Size( Dim );
                 if Length == 0
-                    c = DoubleDouble.MakeConst( zeros( Size ), zeros( Size ) );
+                    c = QuadDoubleSlow.zeros( Size );
                     return
                 end
                 Blocks = num2cell( Size );
@@ -394,23 +547,23 @@ classdef DoubleDouble < BaseExtDouble
                 c1{1} = s;
                 c2{1} = zeros( size( s ) );
                 for i = 2 : Length
-                    s = DoubleDouble.Times( s, x{ i } );
+                    s = QuadDoubleSlow.Times( s, x{ i } );
                     c1{i} = s.v1;
                     c2{i} = s.v2;
                 end
             end
-            c = DoubleDouble.MakeConst( cell2mat( c1 ), cell2mat( c2 ) );
+            c = QuadDoubleSlow.MakeConst( cat( Dim, c1{:} ), cat( Dim, c2{:} ) );
         end
 
 
         function [ s, i ] = Max( a, b, Dim )
             if isempty( b )
                 if isempty( a )
-                    s = DoubleDouble;
+                    s = QuadDoubleSlow;
                     i = [];
                     return
                 end
-                if isa( a, 'DoubleDouble' )
+                if isa( a, 'QuadDoubleSlow' )
                     if nargin < 3 || isempty( Dim )
                         Dim = find( size( a.v1 ) > 1, 1 );
                         if isempty( Dim )
@@ -423,11 +576,11 @@ classdef DoubleDouble < BaseExtDouble
                     Blocks{ Dim } = ones( Length, 1 );
                     x1 = mat2cell( a.v1, Blocks{:} );
                     x2 = mat2cell( a.v2, Blocks{:} );
-                    s = DoubleDouble.MakeConst( x1{ 1 }, x2{ 1 } );
+                    s = QuadDoubleSlow.MakeConst( x1{ 1 }, x2{ 1 } );
                     Size( Dim ) = 1;
                     i = ones( Size );
                     for j = 2 : Length
-                        [ s, ii ] = DoubleDouble.Max( DoubleDouble.MakeConst( x1{ j }, x2{ j } ), s );
+                        [ s, ii ] = QuadDoubleSlow.Max( QuadDoubleSlow.MakeConst( x1{ j }, x2{ j } ), s );
                         i( ii ) = j;
                     end
                 else
@@ -444,17 +597,17 @@ classdef DoubleDouble < BaseExtDouble
                     x = mat2cell( a, Blocks{:} );
                     s = x{ 1 };
                     for j = 2 : Length
-                        s = DoubleDouble.Max( s, x{ j } );
+                        s = QuadDoubleSlow.Max( s, x{ j } );
                     end
                 end
             else
-                if ~isa( a, 'DoubleDouble' )
-                    a = DoubleDouble( a );
+                if ~isa( a, 'QuadDoubleSlow' )
+                    a = QuadDoubleSlow( a );
                 end
-                if ~isa( b, 'DoubleDouble' )
-                    b = DoubleDouble( b );
+                if ~isa( b, 'QuadDoubleSlow' )
+                    b = QuadDoubleSlow( b );
                 end
-                [ a, b ] = DoubleDouble.ExpandSingleton( a, b );
+                [ a, b ] = QuadDoubleSlow.ExpandSingleton( a, b );
                 i = ( a.v1 > b.v1 ) | ( ( a.v1 == b.v1 ) & ( a.v2 > b.v2 ) );
                 s = b;
                 s.v1( i ) = a.v1( i );
@@ -463,7 +616,7 @@ classdef DoubleDouble < BaseExtDouble
         end
 
         function c = CumMax( v, Dim )
-            if isa( v, 'DoubleDouble' )
+            if isa( v, 'QuadDoubleSlow' )
                 if nargin < 3 || isempty( Dim )
                     Dim = find( size( v.v1 ) > 1, 1 );
                     if isempty( Dim )
@@ -473,20 +626,20 @@ classdef DoubleDouble < BaseExtDouble
                 Size = size( v.v1 );
                 Length = Size( Dim );
                 if Length == 0
-                    c = DoubleDouble.MakeConst( zeros( Size ), zeros( Size ) );
+                    c = QuadDoubleSlow.zeros( Size );
                     return
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
                 x2 = mat2cell( v.v2, Blocks{:} );
-                s = DoubleDouble.MakeConst( x1{ 1 }, x2{ 1 } );
+                s = QuadDoubleSlow.MakeConst( x1{ 1 }, x2{ 1 } );
                 c1 = cell( size( x1 ) );
                 c2 = cell( size( x2 ) );
                 c1{1} = s.v1;
                 c2{1} = s.v2;
                 for i = 2 : Length
-                    s = DoubleDouble.Max( s, DoubleDouble.MakeConst( x1{ i }, x2{ i } ) );
+                    s = QuadDoubleSlow.Max( s, QuadDoubleSlow.MakeConst( x1{ i }, x2{ i } ) );
                     c1{i} = s.v1;
                     c2{i} = s.v2;
                 end
@@ -500,7 +653,7 @@ classdef DoubleDouble < BaseExtDouble
                 Size = size( v );
                 Length = Size( Dim );
                 if Length == 0
-                    c = DoubleDouble.MakeConst( zeros( Size ), zeros( Size ) );
+                    c = QuadDoubleSlow.zeros( Size );
                     return
                 end
                 Blocks = num2cell( Size );
@@ -512,17 +665,17 @@ classdef DoubleDouble < BaseExtDouble
                 c1{1} = s;
                 c2{1} = zeros( size( s ) );
                 for i = 2 : Length
-                    s = DoubleDouble.Max( s, x{ i } );
+                    s = QuadDoubleSlow.Max( s, x{ i } );
                     c1{i} = s.v1;
                     c2{i} = s.v2;
                 end
             end
-            c = DoubleDouble.MakeConst( cell2mat( c1 ), cell2mat( c2 ) );
+            c = QuadDoubleSlow.MakeConst( cat( Dim, c1{:} ), cat( Dim, c2{:} ) );
         end
 
         function [ s, i ] = Min( a, b, Dim )
             if isempty( b )
-                if isa( a, 'DoubleDouble' )
+                if isa( a, 'QuadDoubleSlow' )
                     if nargin < 3 || isempty( Dim )
                         Dim = find( size( a.v1 ) > 1, 1 );
                         if isempty( Dim )
@@ -535,11 +688,11 @@ classdef DoubleDouble < BaseExtDouble
                     Blocks{ Dim } = ones( Length, 1 );
                     x1 = mat2cell( a.v1, Blocks{:} );
                     x2 = mat2cell( a.v2, Blocks{:} );
-                    s = DoubleDouble.MakeConst( x1{ 1 }, x2{ 1 } );
+                    s = QuadDoubleSlow.MakeConst( x1{ 1 }, x2{ 1 } );
                     Size( Dim ) = 1;
                     i = ones( Size );
                     for j = 2 : Length
-                        [ s, ii ] = DoubleDouble.Min( DoubleDouble.MakeConst( x1{ j }, x2{ j } ), s );
+                        [ s, ii ] = QuadDoubleSlow.Min( QuadDoubleSlow.MakeConst( x1{ j }, x2{ j } ), s );
                         i( ii ) = j;
                     end
                 else
@@ -556,17 +709,17 @@ classdef DoubleDouble < BaseExtDouble
                     x = mat2cell( a, Blocks{:} );
                     s = x{ 1 };
                     for j = 2 : Length
-                        s = DoubleDouble.Min( s, x{ j } );
+                        s = QuadDoubleSlow.Min( s, x{ j } );
                     end
                 end
             else
-                if ~isa( a, 'DoubleDouble' )
-                    a = DoubleDouble( a );
+                if ~isa( a, 'QuadDoubleSlow' )
+                    a = QuadDoubleSlow( a );
                 end
-                if ~isa( b, 'DoubleDouble' )
-                    b = DoubleDouble( b );
+                if ~isa( b, 'QuadDoubleSlow' )
+                    b = QuadDoubleSlow( b );
                 end
-                [ a, b ] = DoubleDouble.ExpandSingleton( a, b );
+                [ a, b ] = QuadDoubleSlow.ExpandSingleton( a, b );
                 i = ( a.v1 < b.v1 ) | ( ( a.v1 == b.v1 ) & ( a.v2 < b.v2 ) );
                 s = b;
                 s.v1( i ) = a.v1( i );
@@ -575,7 +728,7 @@ classdef DoubleDouble < BaseExtDouble
         end
 
         function c = CumMin( v, Dim )
-            if isa( v, 'DoubleDouble' )
+            if isa( v, 'QuadDoubleSlow' )
                 if nargin < 3 || isempty( Dim )
                     Dim = find( size( v.v1 ) > 1, 1 );
                     if isempty( Dim )
@@ -585,20 +738,20 @@ classdef DoubleDouble < BaseExtDouble
                 Size = size( v.v1 );
                 Length = Size( Dim );
                 if Length == 0
-                    c = DoubleDouble.MakeConst( zeros( Size ), zeros( Size ) );
+                    c = QuadDoubleSlow.zeros( Size );
                     return
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
                 x2 = mat2cell( v.v2, Blocks{:} );
-                s = DoubleDouble.MakeConst( x1{ 1 }, x2{ 1 } );
+                s = QuadDoubleSlow.MakeConst( x1{ 1 }, x2{ 1 } );
                 c1 = cell( size( x1 ) );
                 c2 = cell( size( x2 ) );
                 c1{1} = s.v1;
                 c2{1} = s.v2;
                 for i = 2 : Length
-                    s = DoubleDouble.Min( s, DoubleDouble.MakeConst( x1{ i }, x2{ i } ) );
+                    s = QuadDoubleSlow.Min( s, QuadDoubleSlow.MakeConst( x1{ i }, x2{ i } ) );
                     c1{i} = s.v1;
                     c2{i} = s.v2;
                 end
@@ -612,7 +765,7 @@ classdef DoubleDouble < BaseExtDouble
                 Size = size( v );
                 Length = Size( Dim );
                 if Length == 0
-                    c = DoubleDouble.MakeConst( zeros( Size ), zeros( Size ) );
+                    c = QuadDoubleSlow.zeros( Size );
                     return
                 end
                 Blocks = num2cell( Size );
@@ -624,12 +777,12 @@ classdef DoubleDouble < BaseExtDouble
                 c1{1} = s;
                 c2{1} = zeros( size( s ) );
                 for i = 2 : Length
-                    s = DoubleDouble.Min( s, x{ i } );
+                    s = QuadDoubleSlow.Min( s, x{ i } );
                     c1{i} = s.v1;
                     c2{i} = s.v2;
                 end
             end
-            c = DoubleDouble.MakeConst( cell2mat( c1 ), cell2mat( c2 ) );
+            c = QuadDoubleSlow.MakeConst( cat( Dim, c1{:} ), cat( Dim, c2{:} ) );
         end
 
         function v = Dot( a, b, Dim )
@@ -640,20 +793,24 @@ classdef DoubleDouble < BaseExtDouble
                 a = Vec( a );
                 b = Vec( b );
             end
-            v = DoubleDouble.Sum( DoubleDouble.Times( a, b ), Dim );
+            v = QuadDoubleSlow.Sum( QuadDoubleSlow.Times( a, b ), Dim );
         end
 
     end
 
     methods ( Access = public )
 
-
-    end
+end
 
     methods ( Static, Access = public )
-
         function v = MakeConst( a1, a2 )
-            v = DoubleDouble;
+            v = QuadDoubleSlow;
+            if ~isa( a1, 'DoubleDouble' ) && ~isempty( a1 )
+                a1 = DoubleDouble( a1 );
+            end
+            if ~isa( a2, 'DoubleDouble' ) && ~isempty( a2 )
+                a2 = DoubleDouble( a2 );
+            end
             v.v1 = a1;
             v.v2 = a2;
         end

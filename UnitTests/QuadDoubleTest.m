@@ -474,10 +474,22 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
         end
 
         function TestAtan( TestCase )
-            A = [ 0, 1 / sqrt( QuadDouble( 3 ) ), 1, sqrt( QuadDouble( 3 ) ) ];
-            At = atan( A );
-            Expected = [ 0, QuadDouble.pi / 6, QuadDouble.pi / 4, QuadDouble.pi / 3 ];
-            TestCase.verifyEqual( double( At ), double( Expected ), 'RelTol', TestCase.RelTol );
+            try
+                A = [ 0, 1 / sqrt( QuadDouble( 3 ) ), 1, sqrt( QuadDouble( 3 ) ) ];
+                At = atan( A );
+                Expected = [ 0, QuadDouble.pi / 6, QuadDouble.pi / 4, QuadDouble.pi / 3 ];
+                dAt = double(At);
+                dExp = double(Expected);
+                disp('class dAt:'); disp(class(dAt));
+                disp('class dExp:'); disp(class(dExp));
+                disp('class dAt(1):'); disp(class(dAt(1)));
+                disp('class dExp(1):'); disp(class(dExp(1)));
+                disp('class RelTol:'); disp(class(TestCase.RelTol));
+                TestCase.verifyEqual( dAt, dExp, 'RelTol', TestCase.RelTol );
+            catch e
+                disp(getReport(e, 'extended', 'hyperlinks', 'off'));
+                rethrow(e);
+            end
         end
 
         function TestAtan2( TestCase )

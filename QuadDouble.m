@@ -136,10 +136,6 @@ classdef QuadDouble
     methods
         function v = QuadDouble( in, varargin )
             if nargin == 0
-                v.v1 = [];
-                v.v2 = [];
-                v.v3 = [];
-                v.v4 = [];
                 return
             end
             if nargin >= 2
@@ -150,80 +146,84 @@ classdef QuadDouble
             if isa( in, 'QuadDouble' )
                 v.v1 = in.v1;
                 v.v2 = in.v2;
-                v.v3 = in.v3;
-                v.v4 = in.v4;
-            elseif isa( in, 'DoubleDouble' )
-                [ v.v1, v.v2 ] = ToSumOfDoubles( in );
-                v.v3 = zeros( size( v.v1 ) );
-                v.v4 = zeros( size( v.v1 ) );
+            elseif isa( in, 'BaseExtDouble' )
+                if isprop(in, 'v3')
+                    C = cell( 1, 4 );
+                else
+                    C = cell( 1, 2 );
+                end
+                [ C{ : } ] = ToSumOfDoubles( in );
+                if length( C ) < 2; C{ 2 } = zeros( size( C{ 1 } ) ); end
+                if length( C ) < 3; C{ 3 } = zeros( size( C{ 1 } ) ); end
+                if length( C ) < 4; C{ 4 } = zeros( size( C{ 1 } ) ); end
+                v.v1 = DoubleDouble.MakeConst( C{ 1 }, C{ 2 } );
+                v.v2 = DoubleDouble.MakeConst( C{ 3 }, C{ 4 } );
             else
-                v.v1 = double( in );
-                v.v2 = zeros( size( in ) );
-                v.v3 = zeros( size( in ) );
-                v.v4 = zeros( size( in ) );
+                v.v1 = DoubleDouble.MakeConst( double( in ), zeros( size( in ) ) );
+                v.v2 = DoubleDouble.MakeConst( zeros( size( in ) ), zeros( size( in ) ) );
             end
         end
 
         function disp( v )
-            if isempty( v.v1 )
+            if isempty( v.v1.v1 )
                 disp( '     []' );
             else
-                disp( v.v1 );
+                disp( v.v1.v1 );
             end
             disp( '     +' );
-            if isempty( v.v2 )
+            if isempty( v.v1.v2 )
                 disp( '     []' );
             else
-                disp( v.v2 );
+                disp( v.v1.v2 );
             end
             disp( '     +' );
-            if isempty( v.v3 )
+            if isempty( v.v2.v1 )
                 disp( '     []' );
             else
-                disp( v.v3 );
+                disp( v.v2.v1 );
             end
             disp( '     +' );
-            if isempty( v.v4 )
+            if isempty( v.v2.v2 )
                 disp( '     []' );
             else
-                disp( v.v4 );
+                disp( v.v2.v2 );
             end
             disp( ' ' );
         end
 
         function [ x1, x2, x3, x4 ] = ToSumOfDoubles( v )
-            x1 = v.v1;
-            x2 = v.v2;
-            x3 = v.v3;
-            x4 = v.v4;
+            x1 = v.v1.v1;
+            x2 = v.v1.v2;
+            x3 = v.v2.v1;
+            x4 = v.v2.v2;
         end
 
         function v = double( v )
-            v = v.v1;
+            v = v.v1.v1;
         end
 
         function v = isscalar( v )
-            v = isscalar( v.v1 );
+            v = isscalar( v.v1.v1 );
         end
 
         function v = isreal( v )
-            v = isreal( v.v1 ) && isreal( v.v2 ) && isreal( v.v3 ) && isreal( v.v4 );
+            v = isreal( v.v1.v1 ) && isreal( v.v1.v2 ) && isreal( v.v2.v1 ) && isreal( v.v2.v2 );
         end
 
         function v = isnumeric( v )
-            v = isnumeric( v.v1 ) && isnumeric( v.v2 ) && isnumeric( v.v3 ) && isnumeric( v.v4 );
+            v = isnumeric( v.v1.v1 ) && isnumeric( v.v1.v2 ) && isnumeric( v.v2.v1 ) && isnumeric( v.v2.v2 );
         end
 
         function v = isfinite( v )
-            v = isfinite( v.v1 ) & isfinite( v.v2 ) & isfinite( v.v3 ) & isfinite( v.v4 );
+            v = isfinite( v.v1.v1 ) & isfinite( v.v1.v2 ) & isfinite( v.v2.v1 ) & isfinite( v.v2.v2 );
         end
 
         function v = isinf( v )
-            v = isinf( v.v1 ) | isinf( v.v2 ) | isinf( v.v3 ) | isinf( v.v4 );
+            v = isinf( v.v1.v1 ) | isinf( v.v1.v2 ) | isinf( v.v2.v1 ) | isinf( v.v2.v2 );
         end
 
         function v = isnan( v )
-            v = isnan( v.v1 ) | isnan( v.v2 ) | isnan( v.v3 ) | isnan( v.v4 );
+            v = isnan( v.v1.v1 ) | isnan( v.v1.v2 ) | isnan( v.v2.v1 ) | isnan( v.v2.v2 );
         end
 
         function v = sparse( i, j, v, m, n, nz )
@@ -232,25 +232,25 @@ classdef QuadDouble
             elseif nargin < 3
                 assert( nargin == 1 );
                 v = i;
-                v.v1 = sparse( v.v1 );
-                v.v2 = sparse( v.v2 );
-                v.v3 = sparse( v.v3 );
-                v.v4 = sparse( v.v4 );
+                v.v1.v1 = sparse( v.v1.v1 );
+                v.v1.v2 = sparse( v.v1.v2 );
+                v.v2.v1 = sparse( v.v2.v1 );
+                v.v2.v2 = sparse( v.v2.v2 );
             elseif nargin == 3
-                v.v1 = sparse( i, j, v.v1 );
-                v.v2 = sparse( i, j, v.v2 );
-                v.v3 = sparse( i, j, v.v3 );
-                v.v4 = sparse( i, j, v.v4 );
+                v.v1.v1 = sparse( i, j, v.v1.v1 );
+                v.v1.v2 = sparse( i, j, v.v1.v2 );
+                v.v2.v1 = sparse( i, j, v.v2.v1 );
+                v.v2.v2 = sparse( i, j, v.v2.v2 );
             elseif nargin == 4
-                v.v1 = sparse( i, j, v.v1, m, n );
-                v.v2 = sparse( i, j, v.v2, m, n );
-                v.v3 = sparse( i, j, v.v3, m, n );
-                v.v4 = sparse( i, j, v.v4, m, n );
+                v.v1.v1 = sparse( i, j, v.v1.v1, m, n );
+                v.v1.v2 = sparse( i, j, v.v1.v2, m, n );
+                v.v2.v1 = sparse( i, j, v.v2.v1, m, n );
+                v.v2.v2 = sparse( i, j, v.v2.v2, m, n );
             else
-                v.v1 = sparse( i, j, v.v1, m, n, nz );
-                v.v2 = sparse( i, j, v.v2, m, n, nz );
-                v.v3 = sparse( i, j, v.v3, m, n, nz );
-                v.v4 = sparse( i, j, v.v4, m, n, nz );
+                v.v1.v1 = sparse( i, j, v.v1.v1, m, n, nz );
+                v.v1.v2 = sparse( i, j, v.v1.v2, m, n, nz );
+                v.v2.v1 = sparse( i, j, v.v2.v1, m, n, nz );
+                v.v2.v2 = sparse( i, j, v.v2.v2, m, n, nz );
             end
         end
 
@@ -269,50 +269,50 @@ classdef QuadDouble
                 [ varargout{ 1 }, varargout{ 2 } ] = find( v ~= 0, varargin{:} );
                 if nargout >= 3
                     LinearIndex = sub2ind( size( v ), varargout{ 1 }, varargout{ 2 } );
-                    varargout{ 3 } = QuadDouble.Make( v.v1( LinearIndex ), v.v2( LinearIndex ), v.v3( LinearIndex ), v.v4( LinearIndex ) );
+                    varargout{ 3 } = QuadDouble.Make( v.v1.v1( LinearIndex ), v.v1.v2( LinearIndex ), v.v2.v1( LinearIndex ), v.v2.v2( LinearIndex ) );
                 end
             end
         end
 
         function v = real( v )
-            v.v1 = real( v.v1 );
-            v.v2 = real( v.v2 );
-            v.v3 = real( v.v3 );
-            v.v4 = real( v.v4 );
+            v.v1.v1 = real( v.v1.v1 );
+            v.v1.v2 = real( v.v1.v2 );
+            v.v2.v1 = real( v.v2.v1 );
+            v.v2.v2 = real( v.v2.v2 );
         end
 
         function v = imag( v )
-            v.v1 = imag( v.v1 );
-            v.v2 = imag( v.v2 );
-            v.v3 = imag( v.v3 );
-            v.v4 = imag( v.v4 );
+            v.v1.v1 = imag( v.v1.v1 );
+            v.v1.v2 = imag( v.v1.v2 );
+            v.v2.v1 = imag( v.v2.v1 );
+            v.v2.v2 = imag( v.v2.v2 );
         end
 
         function v = conj( v )
-            v.v1 = conj( v.v1 );
-            v.v2 = conj( v.v2 );
-            v.v3 = conj( v.v3 );
-            v.v4 = conj( v.v4 );
+            v.v1.v1 = conj( v.v1.v1 );
+            v.v1.v2 = conj( v.v1.v2 );
+            v.v2.v1 = conj( v.v2.v1 );
+            v.v2.v2 = conj( v.v2.v2 );
         end
 
         function v = angle( v )
             if isreal( v )
                 Select = v >= 0;
-                v.v1( Select ) = 0;
-                v.v2( Select ) = 0;
-                v.v3( Select ) = 0;
-                v.v4( Select ) = 0;
-                v.v1( ~Select ) = QuadDouble.pi.v1;
-                v.v2( ~Select ) = QuadDouble.pi.v2;
-                v.v3( ~Select ) = QuadDouble.pi.v3;
-                v.v4( ~Select ) = QuadDouble.pi.v4;
+                v.v1.v1( Select ) = 0;
+                v.v1.v2( Select ) = 0;
+                v.v2.v1( Select ) = 0;
+                v.v2.v2( Select ) = 0;
+                v.v1.v1( ~Select ) = QuadDouble.pi.v1.v1;
+                v.v1.v2( ~Select ) = QuadDouble.pi.v1.v2;
+                v.v2.v1( ~Select ) = QuadDouble.pi.v2.v1;
+                v.v2.v2( ~Select ) = QuadDouble.pi.v2.v2;
             else
                 v = atan2( imag( v ), real( v ) );
             end
         end
 
         function [ v, varargout ] = size( v, varargin )
-            v = size( v.v1, varargin{:} );
+            v = size( v.v1.v1, varargin{:} );
             if nargout > 1
                 varargout = num2cell( v( 2:end ) );
                 v = v( 1 );
@@ -324,7 +324,7 @@ classdef QuadDouble
         end
 
         function v = numel( v )
-            v = numel( v.v1 );
+            v = numel( v.v1.v1 );
         end
 
         function n = numArgumentsFromSubscript( ~, ~, ~ )
@@ -333,9 +333,9 @@ classdef QuadDouble
 
         function v = end( v, k, n )
             if n == 1
-                v = numel( v.v1 );
+                v = numel( v.v1.v1 );
             else
-                v = size( v.v1 );
+                v = size( v.v1.v1 );
                 if k <= length( v )
                     v = v( k );
                 else
@@ -345,14 +345,14 @@ classdef QuadDouble
         end
 
         function v = repmat( v, varargin )
-            v = QuadDouble.Make( repmat( v.v1, varargin{:} ), repmat( v.v2, varargin{:} ), repmat( v.v3, varargin{:} ), repmat( v.v4, varargin{:} ) );
+            v = QuadDouble.Make( repmat( v.v1.v1, varargin{:} ), repmat( v.v1.v2, varargin{:} ), repmat( v.v2.v1, varargin{:} ), repmat( v.v2.v2, varargin{:} ) );
         end
 
         function v = reshape( v, varargin )
-            v.v1 = reshape( v.v1, varargin{:} );
-            v.v2 = reshape( v.v2, varargin{:} );
-            v.v3 = reshape( v.v3, varargin{:} );
-            v.v4 = reshape( v.v4, varargin{:} );
+            v.v1.v1 = reshape( v.v1.v1, varargin{:} );
+            v.v1.v2 = reshape( v.v1.v2, varargin{:} );
+            v.v2.v1 = reshape( v.v2.v1, varargin{:} );
+            v.v2.v2 = reshape( v.v2.v2, varargin{:} );
         end
 
         function v = isequal( a, b, varargin )
@@ -373,30 +373,30 @@ classdef QuadDouble
         end
 
         function v = isempty( v )
-            v = isempty( v.v1 );
+            v = isempty( v.v1.v1 );
         end
 
         function v = diag( v, k )
             if nargin < 2
-                v = QuadDouble.Make( diag( v.v1 ), diag( v.v2 ), diag( v.v3 ), diag( v.v4 ) );
+                v = QuadDouble.Make( diag( v.v1.v1 ), diag( v.v1.v2 ), diag( v.v2.v1 ), diag( v.v2.v2 ) );
             else
-                v = QuadDouble.Make( diag( v.v1, k ), diag( v.v2, k ), diag( v.v3, k ), diag( v.v4, k ) );
+                v = QuadDouble.Make( diag( v.v1.v1, k ), diag( v.v1.v2, k ), diag( v.v2.v1, k ), diag( v.v2.v2, k ) );
             end
         end
 
         function v = tril( v, k )
             if nargin < 2
-                v = QuadDouble.Make( tril( v.v1 ), tril( v.v2 ), tril( v.v3 ), tril( v.v4 ) );
+                v = QuadDouble.Make( tril( v.v1.v1 ), tril( v.v1.v2 ), tril( v.v2.v1 ), tril( v.v2.v2 ) );
             else
-                v = QuadDouble.Make( tril( v.v1, k ), tril( v.v2, k ), tril( v.v3, k ), tril( v.v4, k ) );
+                v = QuadDouble.Make( tril( v.v1.v1, k ), tril( v.v1.v2, k ), tril( v.v2.v1, k ), tril( v.v2.v2, k ) );
             end
         end
 
         function v = triu( v, k )
             if nargin < 2
-                v = QuadDouble.Make( triu( v.v1 ), triu( v.v2 ), triu( v.v3 ), triu( v.v4 ) );
+                v = QuadDouble.Make( triu( v.v1.v1 ), triu( v.v1.v2 ), triu( v.v2.v1 ), triu( v.v2.v2 ) );
             else
-                v = QuadDouble.Make( triu( v.v1, k ), triu( v.v2, k ), triu( v.v3, k ), triu( v.v4, k ) );
+                v = QuadDouble.Make( triu( v.v1.v1, k ), triu( v.v1.v2, k ), triu( v.v2.v1, k ), triu( v.v2.v2, k ) );
             end
         end
 
@@ -409,10 +409,10 @@ classdef QuadDouble
         end
 
         function v = uminus( v )
-            v.v1 = -v.v1;
-            v.v2 = -v.v2;
-            v.v3 = -v.v3;
-            v.v4 = -v.v4;
+            v.v1.v1 = -v.v1.v1;
+            v.v1.v2 = -v.v1.v2;
+            v.v2.v1 = -v.v2.v1;
+            v.v2.v2 = -v.v2.v2;
         end
 
         function v = uplus( v )
@@ -491,14 +491,14 @@ classdef QuadDouble
                 else
                     [ v, d ] = eig( b );
                     d = diag( d );
-                    assert( length( unique( d.v1 ) ) == length( d.v1 ) );
+                    assert( length( unique( d.v1.v1 ) ) == length( d.v1.v1 ) );
                     v = v * diag( a .^ d ) / v;
                 end
             else
                 if nb == 1
                     [ v, d ] = eig( a );
                     d = diag( d );
-                    assert( length( unique( d.v1 ) ) == length( d.v1 ) );
+                    assert( length( unique( d.v1.v1 ) ) == length( d.v1.v1 ) );
                     v = v * diag( d .^ b ) / v;
                 else
                     v = QuadDouble;
@@ -508,12 +508,12 @@ classdef QuadDouble
 
         function v = lt( a, b )
             if isa( a, 'QuadDouble' )
-                a1 = a.v1; a2 = a.v2; a3 = a.v3; a4 = a.v4;
+                a1 = a.v1.v1; a2 = a.v1.v2; a3 = a.v2.v1; a4 = a.v2.v2;
             else
                 a1 = a; a2 = 0; a3 = 0; a4 = 0;
             end
             if isa( b, 'QuadDouble' )
-                b1 = b.v1; b2 = b.v2; b3 = b.v3; b4 = b.v4;
+                b1 = b.v1.v1; b2 = b.v1.v2; b3 = b.v2.v1; b4 = b.v2.v2;
             else
                 b1 = b; b2 = 0; b3 = 0; b4 = 0;
             end
@@ -522,12 +522,12 @@ classdef QuadDouble
 
         function v = gt( a, b )
             if isa( a, 'QuadDouble' )
-                a1 = a.v1; a2 = a.v2; a3 = a.v3; a4 = a.v4;
+                a1 = a.v1.v1; a2 = a.v1.v2; a3 = a.v2.v1; a4 = a.v2.v2;
             else
                 a1 = a; a2 = 0; a3 = 0; a4 = 0;
             end
             if isa( b, 'QuadDouble' )
-                b1 = b.v1; b2 = b.v2; b3 = b.v3; b4 = b.v4;
+                b1 = b.v1.v1; b2 = b.v1.v2; b3 = b.v2.v1; b4 = b.v2.v2;
             else
                 b1 = b; b2 = 0; b3 = 0; b4 = 0;
             end
@@ -536,12 +536,12 @@ classdef QuadDouble
 
         function v = le( a, b )
             if isa( a, 'QuadDouble' )
-                a1 = a.v1; a2 = a.v2; a3 = a.v3; a4 = a.v4;
+                a1 = a.v1.v1; a2 = a.v1.v2; a3 = a.v2.v1; a4 = a.v2.v2;
             else
                 a1 = a; a2 = 0; a3 = 0; a4 = 0;
             end
             if isa( b, 'QuadDouble' )
-                b1 = b.v1; b2 = b.v2; b3 = b.v3; b4 = b.v4;
+                b1 = b.v1.v1; b2 = b.v1.v2; b3 = b.v2.v1; b4 = b.v2.v2;
             else
                 b1 = b; b2 = 0; b3 = 0; b4 = 0;
             end
@@ -550,12 +550,12 @@ classdef QuadDouble
 
         function v = ge( a, b )
             if isa( a, 'QuadDouble' )
-                a1 = a.v1; a2 = a.v2; a3 = a.v3; a4 = a.v4;
+                a1 = a.v1.v1; a2 = a.v1.v2; a3 = a.v2.v1; a4 = a.v2.v2;
             else
                 a1 = a; a2 = 0; a3 = 0; a4 = 0;
             end
             if isa( b, 'QuadDouble' )
-                b1 = b.v1; b2 = b.v2; b3 = b.v3; b4 = b.v4;
+                b1 = b.v1.v1; b2 = b.v1.v2; b3 = b.v2.v1; b4 = b.v2.v2;
             else
                 b1 = b; b2 = 0; b3 = 0; b4 = 0;
             end
@@ -564,12 +564,12 @@ classdef QuadDouble
 
         function v = ne( a, b )
             if isa( a, 'QuadDouble' )
-                a1 = a.v1; a2 = a.v2; a3 = a.v3; a4 = a.v4;
+                a1 = a.v1.v1; a2 = a.v1.v2; a3 = a.v2.v1; a4 = a.v2.v2;
             else
                 a1 = a; a2 = 0; a3 = 0; a4 = 0;
             end
             if isa( b, 'QuadDouble' )
-                b1 = b.v1; b2 = b.v2; b3 = b.v3; b4 = b.v4;
+                b1 = b.v1.v1; b2 = b.v1.v2; b3 = b.v2.v1; b4 = b.v2.v2;
             else
                 b1 = b; b2 = 0; b3 = 0; b4 = 0;
             end
@@ -578,12 +578,12 @@ classdef QuadDouble
 
         function v = eq( a, b )
             if isa( a, 'QuadDouble' )
-                a1 = a.v1; a2 = a.v2; a3 = a.v3; a4 = a.v4;
+                a1 = a.v1.v1; a2 = a.v1.v2; a3 = a.v2.v1; a4 = a.v2.v2;
             else
                 a1 = a; a2 = 0; a3 = 0; a4 = 0;
             end
             if isa( b, 'QuadDouble' )
-                b1 = b.v1; b2 = b.v2; b3 = b.v3; b4 = b.v4;
+                b1 = b.v1.v1; b2 = b.v1.v2; b3 = b.v2.v1; b4 = b.v2.v2;
             else
                 b1 = b; b2 = 0; b3 = 0; b4 = 0;
             end
@@ -609,31 +609,31 @@ classdef QuadDouble
         end
 
         function v = ctranspose( v )
-            v.v1 = v.v1';
-            v.v2 = v.v2';
-            v.v3 = v.v3';
-            v.v4 = v.v4';
+            v.v1.v1 = v.v1.v1';
+            v.v1.v2 = v.v1.v2';
+            v.v2.v1 = v.v2.v1';
+            v.v2.v2 = v.v2.v2';
         end
 
         function v = transpose( v )
-            v.v1 = v.v1.';
-            v.v2 = v.v2.';
-            v.v3 = v.v3.';
-            v.v4 = v.v4.';
+            v.v1.v1 = v.v1.v1.';
+            v.v1.v2 = v.v1.v2.';
+            v.v2.v1 = v.v2.v1.';
+            v.v2.v2 = v.v2.v2.';
         end
 
         function v = permute( v, DimOrder )
-            v.v1 = permute( v.v1, DimOrder );
-            v.v2 = permute( v.v2, DimOrder );
-            v.v3 = permute( v.v3, DimOrder );
-            v.v4 = permute( v.v4, DimOrder );
+            v.v1.v1 = permute( v.v1.v1, DimOrder );
+            v.v1.v2 = permute( v.v1.v2, DimOrder );
+            v.v2.v1 = permute( v.v2.v1, DimOrder );
+            v.v2.v2 = permute( v.v2.v2, DimOrder );
         end
 
         function v = ipermute( v, DimOrder )
-            v.v1 = ipermute( v.v1, DimOrder );
-            v.v2 = ipermute( v.v2, DimOrder );
-            v.v3 = ipermute( v.v3, DimOrder );
-            v.v4 = ipermute( v.v4, DimOrder );
+            v.v1.v1 = ipermute( v.v1.v1, DimOrder );
+            v.v1.v2 = ipermute( v.v1.v2, DimOrder );
+            v.v2.v1 = ipermute( v.v2.v1, DimOrder );
+            v.v2.v2 = ipermute( v.v2.v2, DimOrder );
         end
 
         function v = horzcat( a, b, varargin )
@@ -648,10 +648,10 @@ classdef QuadDouble
                 if ~isa( b, 'QuadDouble' )
                     b = QuadDouble( b );
                 end
-                x1 = [ a.v1, b.v1 ];
-                x2 = [ a.v2, b.v2 ];
-                x3 = [ a.v3, b.v3 ];
-                x4 = [ a.v4, b.v4 ];
+                x1 = [ a.v1.v1, b.v1.v1 ];
+                x2 = [ a.v1.v2, b.v1.v2 ];
+                x3 = [ a.v2.v1, b.v2.v1 ];
+                x4 = [ a.v2.v2, b.v2.v2 ];
                 v = QuadDouble.Make( x1, x2, x3, x4 );
             end
         end
@@ -668,10 +668,10 @@ classdef QuadDouble
                 if ~isa( b, 'QuadDouble' )
                     b = QuadDouble( b );
                 end
-                x1 = [ a.v1; b.v1 ];
-                x2 = [ a.v2; b.v2 ];
-                x3 = [ a.v3; b.v3 ];
-                x4 = [ a.v4; b.v4 ];
+                x1 = [ a.v1.v1; b.v1.v1 ];
+                x2 = [ a.v1.v2; b.v1.v2 ];
+                x3 = [ a.v2.v1; b.v2.v1 ];
+                x4 = [ a.v2.v2; b.v2.v2 ];
                 v = QuadDouble.Make( x1, x2, x3, x4 );
             end
         end
@@ -683,10 +683,10 @@ classdef QuadDouble
                 v = horzcat( varargin{:} );
             else
                 % For higher dimensions, convert each to doubles, cat, then rebuild
-                x1 = cellfun( @(x) x.v1, varargin, 'UniformOutput', false );
-                x2 = cellfun( @(x) x.v2, varargin, 'UniformOutput', false );
-                x3 = cellfun( @(x) x.v3, varargin, 'UniformOutput', false );
-                x4 = cellfun( @(x) x.v4, varargin, 'UniformOutput', false );
+                x1 = cellfun( @(x) x.v1.v1, varargin, 'UniformOutput', false );
+                x2 = cellfun( @(x) x.v1.v2, varargin, 'UniformOutput', false );
+                x3 = cellfun( @(x) x.v2.v1, varargin, 'UniformOutput', false );
+                x4 = cellfun( @(x) x.v2.v2, varargin, 'UniformOutput', false );
                 v = QuadDouble.Make( cat( Dim, x1{:} ), cat( Dim, x2{:} ), cat( Dim, x3{:} ), cat( Dim, x4{:} ) );
             end
         end
@@ -695,10 +695,10 @@ classdef QuadDouble
             if strcmp( s(1).type, '.' )
                 v = builtin( 'subsref', v, s );
             else
-                v.v1 = subsref( v.v1, s );
-                v.v2 = subsref( v.v2, s );
-                v.v3 = subsref( v.v3, s );
-                v.v4 = subsref( v.v4, s );
+                v.v1.v1 = subsref( v.v1.v1, s );
+                v.v1.v2 = subsref( v.v1.v2, s );
+                v.v2.v1 = subsref( v.v2.v1, s );
+                v.v2.v2 = subsref( v.v2.v2, s );
             end
         end
 
@@ -720,14 +720,14 @@ classdef QuadDouble
             if ~isa( b, 'QuadDouble' )
                 b = QuadDouble( b );
             end
-            v.v1 = subsasgn( v.v1, s, b.v1 );
-            v.v2 = subsasgn( v.v2, s, b.v2 );
-            v.v3 = subsasgn( v.v3, s, b.v3 );
-            v.v4 = subsasgn( v.v4, s, b.v4 );
+            v.v1.v1 = subsasgn( v.v1.v1, s, b.v1.v1 );
+            v.v1.v2 = subsasgn( v.v1.v2, s, b.v1.v2 );
+            v.v2.v1 = subsasgn( v.v2.v1, s, b.v2.v1 );
+            v.v2.v2 = subsasgn( v.v2.v2, s, b.v2.v2 );
         end
 
         function v = subsindex( v )
-            v = v.v1;
+            v = v.v1.v1;
         end
 
         function [ v, Indices ] = sort( v, varargin )
@@ -842,11 +842,11 @@ classdef QuadDouble
 
         function v = abs( v )
             if isreal( v )
-                Select = v.v1 < 0;
-                v.v1( Select ) = -v.v1( Select );
-                v.v2( Select ) = -v.v2( Select );
-                v.v3( Select ) = -v.v3( Select );
-                v.v4( Select ) = -v.v4( Select );
+                Select = v.v1.v1 < 0;
+                v.v1.v1( Select ) = -v.v1.v1( Select );
+                v.v1.v2( Select ) = -v.v1.v2( Select );
+                v.v2.v1( Select ) = -v.v2.v1( Select );
+                v.v2.v2( Select ) = -v.v2.v2( Select );
             else
                 real_v = real( v );
                 imag_v = imag( v );
@@ -856,93 +856,93 @@ classdef QuadDouble
 
         function v = sign( v )
             if isreal( v )
-                v = sign( v.v1 );
+                v = sign( v.v1.v1 );
             else
                 abs_v = abs( v );
-                [ v.v1, v.v2 ] = QuadDouble.QDDivQD( v.v1, v.v2, abs_v.v1, abs_v.v2 );
+                [ v.v1.v1, v.v1.v2 ] = QuadDouble.QDDivQD( v.v1.v1, v.v1.v2, abs_v.v1.v1, abs_v.v1.v2 );
             end
         end
 
         function v = floor( v )
-            x1 = floor( v.v1 );
+            x1 = floor( v.v1.v1 );
             x2 = zeros( size( x1 ) );
             x3 = x2; x4 = x2;
-            Select = x1 == v.v1;
-            x2( Select ) = floor( v.v2( Select ) );
-            Select = Select & ( x2 == v.v2 );
-            x3( Select ) = floor( v.v3( Select ) );
-            Select = Select & ( x3 == v.v3 );
-            x4( Select ) = floor( v.v4( Select ) );
+            Select = x1 == v.v1.v1;
+            x2( Select ) = floor( v.v1.v2( Select ) );
+            Select = Select & ( x2 == v.v1.v2 );
+            x3( Select ) = floor( v.v2.v1( Select ) );
+            Select = Select & ( x3 == v.v2.v1 );
+            x4( Select ) = floor( v.v2.v2( Select ) );
             [ x1, x2, x3, x4 ] = QuadDouble.Renorm4( x1, x2, x3, x4 );
             v = QuadDouble.Make( x1, x2, x3, x4 );
         end
         function v = ceil( v )
-            x1 = ceil( v.v1 );
+            x1 = ceil( v.v1.v1 );
             x2 = zeros( size( x1 ) );
             x3 = x2; x4 = x2;
-            Select = x1 == v.v1;
-            x2( Select ) = ceil( v.v2( Select ) );
-            Select = Select & ( x2 == v.v2 );
-            x3( Select ) = ceil( v.v3( Select ) );
-            Select = Select & ( x3 == v.v3 );
-            x4( Select ) = ceil( v.v4( Select ) );
+            Select = x1 == v.v1.v1;
+            x2( Select ) = ceil( v.v1.v2( Select ) );
+            Select = Select & ( x2 == v.v1.v2 );
+            x3( Select ) = ceil( v.v2.v1( Select ) );
+            Select = Select & ( x3 == v.v2.v1 );
+            x4( Select ) = ceil( v.v2.v2( Select ) );
             [ x1, x2, x3, x4 ] = QuadDouble.Renorm4( x1, x2, x3, x4 );
             v = QuadDouble.Make( x1, x2, x3, x4 );
         end
         function v = fix( v )
-            x1 = fix( v.v1 );
+            x1 = fix( v.v1.v1 );
             x2 = zeros( size( x1 ) );
             x3 = x2; x4 = x2;
-            Select = x1 == v.v1;
-            x2( Select ) = fix( v.v2( Select ) );
-            Select = Select & ( x2 == v.v2 );
-            x3( Select ) = fix( v.v3( Select ) );
-            Select = Select & ( x3 == v.v3 );
-            x4( Select ) = fix( v.v4( Select ) );
+            Select = x1 == v.v1.v1;
+            x2( Select ) = fix( v.v1.v2( Select ) );
+            Select = Select & ( x2 == v.v1.v2 );
+            x3( Select ) = fix( v.v2.v1( Select ) );
+            Select = Select & ( x3 == v.v2.v1 );
+            x4( Select ) = fix( v.v2.v2( Select ) );
             [ x1, x2, x3, x4 ] = QuadDouble.Renorm4( x1, x2, x3, x4 );
             v = QuadDouble.Make( x1, x2, x3, x4 );
         end
         function v = round( v )
-            x1 = round( v.v1 );
+            x1 = round( v.v1.v1 );
             x2 = zeros( size( x1 ) );
             x3 = x2; x4 = x2;
-            Select = x1 == v.v1;
-            x2( Select ) = round( v.v2( Select ) );
-            Select = Select & ( x2 == v.v2 );
-            x3( Select ) = round( v.v3( Select ) );
-            Select = Select & ( x3 == v.v3 );
-            x4( Select ) = round( v.v4( Select ) );
+            Select = x1 == v.v1.v1;
+            x2( Select ) = round( v.v1.v2( Select ) );
+            Select = Select & ( x2 == v.v1.v2 );
+            x3( Select ) = round( v.v2.v1( Select ) );
+            Select = Select & ( x3 == v.v2.v1 );
+            x4( Select ) = round( v.v2.v2( Select ) );
             % This is a simple round that doesn't handle .5 perfectly, but it matches qd_real's nint for most cases.
             [ x1, x2, x3, x4 ] = QuadDouble.Renorm4( x1, x2, x3, x4 );
             v = QuadDouble.Make( x1, x2, x3, x4 );
         end
         function v = realsqrt( v )
             Select = v < 0;
-            v.v1( Select ) = NaN;
-            v.v2( Select ) = NaN;
+            v.v1.v1( Select ) = NaN;
+            v.v1.v2( Select ) = NaN;
             Select = v > 0;
-            x = 1 ./ sqrt( v.v1( Select ) );
-            vx = v.v1( Select ) .* x;
-            t = QuadDouble.Make( v.v1( Select ), v.v2( Select ), v.v3( Select ), v.v4( Select ) ) - QuadDouble.Times( vx, vx );
-            t = QuadDouble.Plus( vx, t.v1 .* ( x * 0.5 ) );
-            v.v1( Select ) = t.v1;
-            v.v2( Select ) = t.v2;
+            x = 1 ./ sqrt( v.v1.v1( Select ) );
+            vx = v.v1.v1( Select ) .* x;
+            t = QuadDouble.Make( v.v1.v1( Select ), v.v1.v2( Select ), v.v2.v1( Select ), v.v2.v2( Select ) ) - QuadDouble.Times( vx, vx );
+            t = QuadDouble.Plus( vx, t.v1.v1 .* ( x * 0.5 ) );
+            v.v1.v1( Select ) = t.v1.v1;
+            v.v1.v2( Select ) = t.v1.v2;
         end
 
         function v = sqrt( v )
             Select = v ~= 0;
-            x = 1 ./ sqrt( v.v1( Select ) );
-            vx = v.v1( Select ) .* x;
-            t = QuadDouble.Make( v.v1( Select ), v.v2( Select ), v.v3( Select ), v.v4( Select ) ) - QuadDouble.Times( vx, vx );
-            t = QuadDouble.Plus( vx, t.v1 .* ( x * 0.5 ) );
-            v.v1( Select ) = t.v1;
-            v.v2( Select ) = t.v2;
+            x = 1 ./ sqrt( v.v1.v1( Select ) );
+            vx = v.v1.v1( Select ) .* x;
+            t = QuadDouble.Make( v.v1.v1( Select ), v.v1.v2( Select ), v.v2.v1( Select ), v.v2.v2( Select ) ) - QuadDouble.Times( vx, vx );
+            t = QuadDouble.Plus( vx, t.v1.v1 .* ( x * 0.5 ) );
+            v.v1.v1( Select ) = t.v1.v1;
+            v.v1.v2( Select ) = t.v1.v2;
         end
 
         function v = sqrtm( v )
             [ v, d ] = eig( v );
             d = diag( d );
-            assert( length( unique( d.v1 ) ) == length( d.v1 ) );
+            assert( length( unique( d.v1.v1 ) ) == length( d.v1.v1 ) );
             v = v * diag( sqrt( d ) ) / v;
         end
 
@@ -969,9 +969,9 @@ classdef QuadDouble
             % argument substantially speeds up the convergence.
             k = 512.0;
             inv_k = 1.0 / k;
-            Threshhold = inv_k .* QuadDouble.eps.v1;
+            Threshhold = inv_k .* QuadDouble.eps.v1.v1;
 
-            m = floor( v.v1 ./ QuadDouble.log_2.v1 + 0.5 );
+            m = floor( v.v1.v1 ./ QuadDouble.log_2.v1.v1 + 0.5 );
             r = TimesPowerOf2( v - QuadDouble.log_2 .* m, inv_k );
 
             p = r .* r;
@@ -982,7 +982,7 @@ classdef QuadDouble
                 s = s + t;
                 p = p .* r;
                 t = p .* QuadDouble.Make( QuadDouble.InverseFactorial( i, 1 ), QuadDouble.InverseFactorial( i, 2 ), QuadDouble.InverseFactorial( i, 3 ), QuadDouble.InverseFactorial( i, 4 ) );
-                if all( abs( t.v1( : ) ) <= Threshhold )
+                if all( abs( t.v1.v1( : ) ) <= Threshhold )
                     break
                 end
             end
@@ -1000,14 +1000,14 @@ classdef QuadDouble
             s = TimesPowerOf2( s, 2.0 ) + s .* s;
             if expm1Flag
                 Select = m ~= 0;
-                [ s.v1( Select ), s.v2( Select ), s.v3( Select ), s.v4( Select ) ] = QuadDouble.QDPlusDouble( s.v1( Select ), s.v2( Select ), s.v3( Select ), s.v4( Select ), 1.0 );
+                [ s.v1.v1( Select ), s.v1.v2( Select ), s.v2.v1( Select ), s.v2.v2( Select ) ] = QuadDouble.QDPlusDouble( s.v1.v1( Select ), s.v1.v2( Select ), s.v2.v1( Select ), s.v2.v2( Select ), 1.0 );
             else
                 s = s + 1.0;
             end
 
             v = TimesPowerOf2( s, pow2( 1.0, m ) );
             if expm1Flag
-                [ v.v1( Select ), v.v2( Select ), v.v3( Select ), v.v4( Select ) ] = QuadDouble.QDPlusDouble( v.v1( Select ), v.v2( Select ), v.v3( Select ), v.v4( Select ), -1.0 );
+                [ v.v1.v1( Select ), v.v1.v2( Select ), v.v2.v1( Select ), v.v2.v2( Select ) ] = QuadDouble.QDPlusDouble( v.v1.v1( Select ), v.v1.v2( Select ), v.v2.v1( Select ), v.v2.v2( Select ), -1.0 );
             end
         end
 
@@ -1018,12 +1018,12 @@ classdef QuadDouble
         function v = expm( v )
             [ v, d ] = eig( v );
             d = diag( d );
-            assert( length( unique( d.v1 ) ) == length( d.v1 ) );
+            assert( length( unique( d.v1.v1 ) ) == length( d.v1.v1 ) );
             v = v * diag( exp( d ) ) / v;
         end
 
         function x = log( v )
-            x = QuadDouble.Make( log( v.v1 ), zeros( size( v.v1 ) ) );
+            x = QuadDouble.Make( log( v.v1.v1 ), zeros( size( v.v1.v1 ) ) );
             x = x + v .* exp( -x ) - 1.0;
             x = x + v .* exp( -x ) - 1.0; % slightly paranoid, but does correct e.g. log( exp( QuadDouble( -40 ) ) )
         end
@@ -1039,14 +1039,14 @@ classdef QuadDouble
         function v = logm( v )
             [ v, d ] = eig( v );
             d = diag( d );
-            assert( length( unique( d.v1 ) ) == length( d.v1 ) );
+            assert( length( unique( d.v1.v1 ) ) == length( d.v1.v1 ) );
             v = v * diag( log( d ) ) / v;
         end
 
         function v = funm( v, f )
             [ v, d ] = eig( v );
             d = diag( d );
-            assert( length( unique( d.v1 ) ) == length( d.v1 ) );
+            assert( length( unique( d.v1.v1 ) ) == length( d.v1.v1 ) );
             v = v * diag( f( d ) ) / v;
         end
 
@@ -1067,12 +1067,12 @@ classdef QuadDouble
             z = round( v ./ QuadDouble.piT2 );
             r = v - QuadDouble.piT2 .* z;
 
-            q = floor( r.v1 ./ QuadDouble.piD2.v1 + 0.5 );
+            q = floor( r.v1.v1 ./ QuadDouble.piD2.v1.v1 + 0.5 );
             t = r - QuadDouble.piD2 .* q;
             j = q;
             abs_j = abs( j );
 
-            q = floor( t.v1 ./ QuadDouble.piD16.v1 + 0.5 );
+            q = floor( t.v1.v1 ./ QuadDouble.piD16.v1.v1 + 0.5 );
             t = t - QuadDouble.piD16 .* q;
             k = q;
             abs_k = abs( k );
@@ -1100,25 +1100,25 @@ classdef QuadDouble
 
             Select = k > 0;
 
-            [ sin_v.v1( Select ), sin_v.v2( Select ), sin_v.v3( Select ), sin_v.v4( Select ) ] = QuadDouble.QDPlusQD( +a_sin_t.v1( Select ), +a_sin_t.v2( Select ), +a_sin_t.v3( Select ), +a_sin_t.v4( Select ), +b_cos_t.v1( Select ), +b_cos_t.v2( Select ), +b_cos_t.v3( Select ), +b_cos_t.v4( Select ) );
-            [ cos_v.v1( Select ), cos_v.v2( Select ), cos_v.v3( Select ), cos_v.v4( Select ) ] = QuadDouble.QDPlusQD( -b_sin_t.v1( Select ), -b_sin_t.v2( Select ), -b_sin_t.v3( Select ), -b_sin_t.v4( Select ), +a_cos_t.v1( Select ), +a_cos_t.v2( Select ), +a_cos_t.v3( Select ), +a_cos_t.v4( Select ) );
+            [ sin_v.v1.v1( Select ), sin_v.v1.v2( Select ), sin_v.v2.v1( Select ), sin_v.v2.v2( Select ) ] = QuadDouble.QDPlusQD( +a_sin_t.v1.v1( Select ), +a_sin_t.v1.v2( Select ), +a_sin_t.v2.v1( Select ), +a_sin_t.v2.v2( Select ), +b_cos_t.v1.v1( Select ), +b_cos_t.v1.v2( Select ), +b_cos_t.v2.v1( Select ), +b_cos_t.v2.v2( Select ) );
+            [ cos_v.v1.v1( Select ), cos_v.v1.v2( Select ), cos_v.v2.v1( Select ), cos_v.v2.v2( Select ) ] = QuadDouble.QDPlusQD( -b_sin_t.v1.v1( Select ), -b_sin_t.v1.v2( Select ), -b_sin_t.v2.v1( Select ), -b_sin_t.v2.v2( Select ), +a_cos_t.v1.v1( Select ), +a_cos_t.v1.v2( Select ), +a_cos_t.v2.v1( Select ), +a_cos_t.v2.v2( Select ) );
 
             Select = k < 0;
 
-            [ sin_v.v1( Select ), sin_v.v2( Select ), sin_v.v3( Select ), sin_v.v4( Select ) ] = QuadDouble.QDPlusQD( +a_sin_t.v1( Select ), +a_sin_t.v2( Select ), +a_sin_t.v3( Select ), +a_sin_t.v4( Select ), -b_cos_t.v1( Select ), -b_cos_t.v2( Select ), -b_cos_t.v3( Select ), -b_cos_t.v4( Select ) );
-            [ cos_v.v1( Select ), cos_v.v2( Select ), cos_v.v3( Select ), cos_v.v4( Select ) ] = QuadDouble.QDPlusQD( +b_sin_t.v1( Select ), +b_sin_t.v2( Select ), +b_sin_t.v3( Select ), +b_sin_t.v4( Select ), +a_cos_t.v1( Select ), +a_cos_t.v2( Select ), +a_cos_t.v3( Select ), +a_cos_t.v4( Select ) );
+            [ sin_v.v1.v1( Select ), sin_v.v1.v2( Select ), sin_v.v2.v1( Select ), sin_v.v2.v2( Select ) ] = QuadDouble.QDPlusQD( +a_sin_t.v1.v1( Select ), +a_sin_t.v1.v2( Select ), +a_sin_t.v2.v1( Select ), +a_sin_t.v2.v2( Select ), -b_cos_t.v1.v1( Select ), -b_cos_t.v1.v2( Select ), -b_cos_t.v2.v1( Select ), -b_cos_t.v2.v2( Select ) );
+            [ cos_v.v1.v1( Select ), cos_v.v1.v2( Select ), cos_v.v2.v1( Select ), cos_v.v2.v2( Select ) ] = QuadDouble.QDPlusQD( +b_sin_t.v1.v1( Select ), +b_sin_t.v1.v2( Select ), +b_sin_t.v2.v1( Select ), +b_sin_t.v2.v2( Select ), +a_cos_t.v1.v1( Select ), +a_cos_t.v1.v2( Select ), +a_cos_t.v2.v1( Select ), +a_cos_t.v2.v2( Select ) );
 
             Select = j == 1;
 
-            [ sin_v.v1( Select ), sin_v.v2( Select ), sin_v.v3( Select ), sin_v.v4( Select ), cos_v.v1( Select ), cos_v.v2( Select ), cos_v.v3( Select ), cos_v.v4( Select ) ] = deal( +cos_v.v1( Select ), +cos_v.v2( Select ), +cos_v.v3( Select ), +cos_v.v4( Select ), -sin_v.v1( Select ), -sin_v.v2( Select ), -sin_v.v3( Select ), -sin_v.v4( Select ) );
+            [ sin_v.v1.v1( Select ), sin_v.v1.v2( Select ), sin_v.v2.v1( Select ), sin_v.v2.v2( Select ), cos_v.v1.v1( Select ), cos_v.v1.v2( Select ), cos_v.v2.v1( Select ), cos_v.v2.v2( Select ) ] = deal( +cos_v.v1.v1( Select ), +cos_v.v1.v2( Select ), +cos_v.v2.v1( Select ), +cos_v.v2.v2( Select ), -sin_v.v1.v1( Select ), -sin_v.v1.v2( Select ), -sin_v.v2.v1( Select ), -sin_v.v2.v2( Select ) );
 
             Select = j == -1;
 
-            [ sin_v.v1( Select ), sin_v.v2( Select ), sin_v.v3( Select ), sin_v.v4( Select ), cos_v.v1( Select ), cos_v.v2( Select ), cos_v.v3( Select ), cos_v.v4( Select ) ] = deal( -cos_v.v1( Select ), -cos_v.v2( Select ), -cos_v.v3( Select ), -cos_v.v4( Select ), +sin_v.v1( Select ), +sin_v.v2( Select ), +sin_v.v3( Select ), +sin_v.v4( Select ) );
+            [ sin_v.v1.v1( Select ), sin_v.v1.v2( Select ), sin_v.v2.v1( Select ), sin_v.v2.v2( Select ), cos_v.v1.v1( Select ), cos_v.v1.v2( Select ), cos_v.v2.v1( Select ), cos_v.v2.v2( Select ) ] = deal( -cos_v.v1.v1( Select ), -cos_v.v1.v2( Select ), -cos_v.v2.v1( Select ), -cos_v.v2.v2( Select ), +sin_v.v1.v1( Select ), +sin_v.v1.v2( Select ), +sin_v.v2.v1( Select ), +sin_v.v2.v2( Select ) );
 
             Select = abs_j == 2;
 
-            [ sin_v.v1( Select ), sin_v.v2( Select ), sin_v.v3( Select ), sin_v.v4( Select ), cos_v.v1( Select ), cos_v.v2( Select ), cos_v.v3( Select ), cos_v.v4( Select ) ] = deal( -sin_v.v1( Select ), -sin_v.v2( Select ), -sin_v.v3( Select ), -sin_v.v4( Select ), -cos_v.v1( Select ), -cos_v.v2( Select ), -cos_v.v3( Select ), -cos_v.v4( Select ) );
+            [ sin_v.v1.v1( Select ), sin_v.v1.v2( Select ), sin_v.v2.v1( Select ), sin_v.v2.v2( Select ), cos_v.v1.v1( Select ), cos_v.v1.v2( Select ), cos_v.v2.v1( Select ), cos_v.v2.v2( Select ) ] = deal( -sin_v.v1.v1( Select ), -sin_v.v1.v2( Select ), -sin_v.v2.v1( Select ), -sin_v.v2.v2( Select ), -cos_v.v1.v1( Select ), -cos_v.v1.v2( Select ), -cos_v.v2.v1( Select ), -cos_v.v2.v2( Select ) );
         end
 
         function v = sin( v )
@@ -1126,7 +1126,7 @@ classdef QuadDouble
         end
 
         function v = asin( v )
-            assert( all( abs( v.v1( : ) ) <= 1 ) );
+            assert( all( abs( v.v1.v1( : ) ) <= 1 ) );
             v = atan2( v, sqrt( 1 - v.*v ) );
         end
 
@@ -1135,7 +1135,7 @@ classdef QuadDouble
         end
 
         function v = acos( v )
-            assert( all( abs( v.v1( : ) ) <= 1 ) );
+            assert( all( abs( v.v1.v1( : ) ) <= 1 ) );
             v = atan2( sqrt( 1 - v.*v ), v );
         end
 
@@ -1152,15 +1152,15 @@ classdef QuadDouble
             r = sqrt( x.*x + y.*y );
             xx = x ./ r;
             yy = y ./ r;
-            Select = abs( xx.v1 ) > abs( yy.v1 );
-            v = QuadDouble( atan2( y.v1, x.v1 ) );
+            Select = abs( xx.v1.v1 ) > abs( yy.v1.v1 );
+            v = QuadDouble( atan2( y.v1.v1, x.v1.v1 ) );
             [ sin_z, cos_z ] = sincos( v );
             t = yy;
-            [ t.v1( Select ), t.v2( Select ), t.v3( Select ), t.v4( Select ) ] = QuadDouble.QDPlusQD( t.v1( Select ), t.v2( Select ), t.v3( Select ), t.v4( Select ),      -sin_z.v1( Select ), -sin_z.v2( Select ), -sin_z.v3( Select ), -sin_z.v4( Select ) );
-            [ t.v1( Select ), t.v2( Select ), t.v3( Select ), t.v4( Select ) ] = QuadDouble.QDDivQD( t.v1( Select ), t.v2( Select ), t.v3( Select ), t.v4( Select ), +cos_z.v1( Select ), +cos_z.v2( Select ), +cos_z.v3( Select ), +cos_z.v4( Select ) );
+            [ t.v1.v1( Select ), t.v1.v2( Select ), t.v2.v1( Select ), t.v2.v2( Select ) ] = QuadDouble.QDPlusQD( t.v1.v1( Select ), t.v1.v2( Select ), t.v2.v1( Select ), t.v2.v2( Select ),      -sin_z.v1.v1( Select ), -sin_z.v1.v2( Select ), -sin_z.v2.v1( Select ), -sin_z.v2.v2( Select ) );
+            [ t.v1.v1( Select ), t.v1.v2( Select ), t.v2.v1( Select ), t.v2.v2( Select ) ] = QuadDouble.QDDivQD( t.v1.v1( Select ), t.v1.v2( Select ), t.v2.v1( Select ), t.v2.v2( Select ), +cos_z.v1.v1( Select ), +cos_z.v1.v2( Select ), +cos_z.v2.v1( Select ), +cos_z.v2.v2( Select ) );
             Select = ~Select;
-            [ t.v1( Select ), t.v2( Select ), t.v3( Select ), t.v4( Select ) ] = QuadDouble.QDPlusQD( xx.v1( Select ), xx.v2( Select ), xx.v3( Select ), xx.v4( Select ),    -cos_z.v1( Select ), -cos_z.v2( Select ), -cos_z.v3( Select ), -cos_z.v4( Select ) );
-            [ t.v1( Select ), t.v2( Select ), t.v3( Select ), t.v4( Select ) ] = QuadDouble.QDDivQD( t.v1( Select ), t.v2( Select ), t.v3( Select ), t.v4( Select ), -sin_z.v1( Select ), -sin_z.v2( Select ), -sin_z.v3( Select ), -sin_z.v4( Select ) );
+            [ t.v1.v1( Select ), t.v1.v2( Select ), t.v2.v1( Select ), t.v2.v2( Select ) ] = QuadDouble.QDPlusQD( xx.v1.v1( Select ), xx.v1.v2( Select ), xx.v2.v1( Select ), xx.v2.v2( Select ),    -cos_z.v1.v1( Select ), -cos_z.v1.v2( Select ), -cos_z.v2.v1( Select ), -cos_z.v2.v2( Select ) );
+            [ t.v1.v1( Select ), t.v1.v2( Select ), t.v2.v1( Select ), t.v2.v2( Select ) ] = QuadDouble.QDDivQD( t.v1.v1( Select ), t.v1.v2( Select ), t.v2.v1( Select ), t.v2.v2( Select ), -sin_z.v1.v1( Select ), -sin_z.v1.v2( Select ), -sin_z.v2.v1( Select ), -sin_z.v2.v2( Select ) );
             v = v + t;
         end
 
@@ -1213,30 +1213,30 @@ classdef QuadDouble
             for k = 1 : min( m, n )
 
                 % Find index of largest element below diagonal in k-th column
-                [ ~, midx ] = max( abs( QuadDouble.Make( v.v1( k:m, k ), v.v2( k:m, k ), v.v3( k:m, k ), v.v4( k:m, k ) ) ) );
+                [ ~, midx ] = max( abs( QuadDouble.Make( v.v1.v1( k:m, k ), v.v1.v2( k:m, k ), v.v2.v1( k:m, k ), v.v2.v2( k:m, k ) ) ) );
                 midx = midx + k - 1;
 
                 % Skip elimination if column is zero
-                if v.v1( midx, k ) ~= 0 || v.v2( midx, k ) ~= 0
+                if v.v1.v1( midx, k ) ~= 0 || v.v1.v2( midx, k ) ~= 0
 
                     % Swap pivot row
                     if midx ~= k
-                        v.v1( [ k midx ], : ) = v.v1( [ midx k ], : );
-                        v.v2( [ k midx ], : ) = v.v2( [ midx k ], : );
-                        v.v3( [ k midx ], : ) = v.v3( [ midx k ], : );
-                        v.v4( [ k midx ], : ) = v.v4( [ midx k ], : );
+                        v.v1.v1( [ k midx ], : ) = v.v1.v1( [ midx k ], : );
+                        v.v1.v2( [ k midx ], : ) = v.v1.v2( [ midx k ], : );
+                        v.v2.v1( [ k midx ], : ) = v.v2.v1( [ midx k ], : );
+                        v.v2.v2( [ k midx ], : ) = v.v2.v2( [ midx k ], : );
                         p( [ k midx ] ) = p( [ midx k ] );
                     end
 
                     % Compute multipliers
                     i = k + 1 : m;
-                    [ v.v1( i, k ), v.v2( i, k ), v.v3( i, k ), v.v4( i, k ) ] = QuadDouble.QDDivQD( v.v1( i, k ), v.v2( i, k ), v.v3( i, k ), v.v4( i, k ), v.v1( k, k ), v.v2( k, k ), v.v3( k, k ), v.v4( k, k ) );
+                    [ v.v1.v1( i, k ), v.v1.v2( i, k ), v.v2.v1( i, k ), v.v2.v2( i, k ) ] = QuadDouble.QDDivQD( v.v1.v1( i, k ), v.v1.v2( i, k ), v.v2.v1( i, k ), v.v2.v2( i, k ), v.v1.v1( k, k ), v.v1.v2( k, k ), v.v2.v1( k, k ), v.v2.v2( k, k ) );
 
                     % Update the remainder of the matrix
                     j = k + 1 : n;
                     % A( i, j ) = A( i, j ) - A( i, k ) .* A( k, j );
-                    [ t1, t2, t3, t4 ] = QuadDouble.QDTimesQD( v.v1( i, k ), v.v2( i, k ), v.v3( i, k ), v.v4( i, k ), v.v1( k, j ), v.v2( k, j ), v.v3( k, j ), v.v4( k, j ) );
-                    [ v.v1( i, j ), v.v2( i, j ), v.v3( i, j ), v.v4( i, j ) ] = QuadDouble.QDPlusQD( v.v1( i, j ), v.v2( i, j ), v.v3( i, j ), v.v4( i, j ), -t1, -t2, -t3, -t4 );
+                    [ t1, t2, t3, t4 ] = QuadDouble.QDTimesQD( v.v1.v1( i, k ), v.v1.v2( i, k ), v.v2.v1( i, k ), v.v2.v2( i, k ), v.v1.v1( k, j ), v.v1.v2( k, j ), v.v2.v1( k, j ), v.v2.v2( k, j ) );
+                    [ v.v1.v1( i, j ), v.v1.v2( i, j ), v.v2.v1( i, j ), v.v2.v2( i, j ) ] = QuadDouble.QDPlusQD( v.v1.v1( i, j ), v.v1.v2( i, j ), v.v2.v1( i, j ), v.v2.v2( i, j ), -t1, -t2, -t3, -t4 );
                 end
             end
 
@@ -1245,15 +1245,15 @@ classdef QuadDouble
                 L = tril( v, -1 ) + eye( m, n, 'QuadDouble' );
                 U = triu( v );
                 if n > m
-                    L.v1 = L.v1( :, 1:m );
-                    L.v2 = L.v2( :, 1:m );
-                    L.v3 = L.v3( :, 1:m );
-                    L.v4 = L.v4( :, 1:m );
+                    L.v1.v1 = L.v1.v1( :, 1:m );
+                    L.v1.v2 = L.v1.v2( :, 1:m );
+                    L.v2.v1 = L.v2.v1( :, 1:m );
+                    L.v2.v2 = L.v2.v2( :, 1:m );
                 elseif n < m
-                    U.v1 = U.v1( 1:n, : );
-                    U.v2 = U.v2( 1:n, : );
-                    U.v3 = U.v3( 1:n, : );
-                    U.v4 = U.v4( 1:n, : );
+                    U.v1.v1 = U.v1.v1( 1:n, : );
+                    U.v1.v2 = U.v1.v2( 1:n, : );
+                    U.v2.v1 = U.v2.v1( 1:n, : );
+                    U.v2.v2 = U.v2.v2( 1:n, : );
                 end
                 v = L;
 
@@ -1265,10 +1265,10 @@ classdef QuadDouble
                     end
                 else
                     invp( p ) = 1 : m;
-                    v.v1 = v.v1( invp, : );
-                    v.v2 = v.v2( invp, : );
-                    v.v3 = v.v3( invp, : );
-                    v.v4 = v.v4( invp, : );
+                    v.v1.v1 = v.v1.v1( invp, : );
+                    v.v1.v2 = v.v1.v2( invp, : );
+                    v.v2.v1 = v.v2.v1( invp, : );
+                    v.v2.v2 = v.v2.v2( invp, : );
                 end
             end
         end
@@ -1278,18 +1278,18 @@ classdef QuadDouble
             I = eye( m, 'QuadDouble' );
             QT = I;
             for c = 1 : min( m - 1, n )
-                x = QuadDouble.Make( v.v1( :, c ), v.v2( :, c ), v.v3( :, c ), v.v4( :, c ) );
-                x.v1( 1 : ( c - 1 ) ) = 0;
-                x.v2( 1 : ( c - 1 ) ) = 0;
-                x.v3( 1 : ( c - 1 ) ) = 0;
-                x.v4( 1 : ( c - 1 ) ) = 0;
+                x = QuadDouble.Make( v.v1.v1( :, c ), v.v1.v2( :, c ), v.v2.v1( :, c ), v.v2.v2( :, c ) );
+                x.v1.v1( 1 : ( c - 1 ) ) = 0;
+                x.v1.v2( 1 : ( c - 1 ) ) = 0;
+                x.v2.v1( 1 : ( c - 1 ) ) = 0;
+                x.v2.v2( 1 : ( c - 1 ) ) = 0;
                 alpha = norm( x );
-                sign_x_c = sign( QuadDouble.Make( x.v1( c ), x.v2( c ), x.v3( c ), x.v4( c ) ) );
+                sign_x_c = sign( QuadDouble.Make( x.v1.v1( c ), x.v1.v2( c ), x.v2.v1( c ), x.v2.v2( c ) ) );
                 if sign_x_c ~= 0
                     alpha = -alpha .* sign_x_c;
                 end
                 a = x;
-                [ a.v1( c ), a.v2( c ), a.v3( c ), a.v4( c ) ] = QuadDouble.QDPlusQD( a.v1( c ), a.v2( c ), a.v3( c ), a.v4( c ), -alpha.v1, -alpha.v2, -alpha.v3, -alpha.v4 );
+                [ a.v1.v1( c ), a.v1.v2( c ), a.v2.v1( c ), a.v2.v2( c ) ] = QuadDouble.QDPlusQD( a.v1.v1( c ), a.v1.v2( c ), a.v2.v1( c ), a.v2.v2( c ), -alpha.v1.v1, -alpha.v1.v2, -alpha.v2.v1, -alpha.v2.v2 );
                 b = a ./ norm( a );
                 if isreal( v )
                     QTn = I - TimesPowerOf2( b .* b.', 2 );
@@ -1350,32 +1350,32 @@ classdef QuadDouble
             t3 = x1;
             t4 = x1;
             d = QuadDouble.Make( x1, x2, x3, x4 );
-            x1( 1 ) = v.v1( 1, 1 );
-            x2( 1 ) = v.v2( 1, 1 );
-            x3( 1 ) = v.v3( 1, 1 );
-            x4( 1 ) = v.v4( 1, 1 );
-            d.v1( 1 ) = x1( 1 );
-            d.v2( 1 ) = x2( 1 );
-            d.v3( 1 ) = x3( 1 );
-            d.v4( 1 ) = x4( 1 );
+            x1( 1 ) = v.v1.v1( 1, 1 );
+            x2( 1 ) = v.v1.v2( 1, 1 );
+            x3( 1 ) = v.v2.v1( 1, 1 );
+            x4( 1 ) = v.v2.v2( 1, 1 );
+            d.v1.v1( 1 ) = x1( 1 );
+            d.v1.v2( 1 ) = x2( 1 );
+            d.v2.v1( 1 ) = x3( 1 );
+            d.v2.v2( 1 ) = x4( 1 );
             idxs = 2 : n;
-            [ L.v1( idxs, 1 ), L.v2( idxs, 1 ), L.v3( idxs, 1 ), L.v4( idxs, 1 ) ] = QuadDouble.QDDivQD( v.v1( idxs, 1 ), v.v2( idxs, 1 ), v.v3( idxs, 1 ), v.v4( idxs, 1 ), x1( 1 ), x2( 1 ), x3( 1 ), x4( 1 ) );
+            [ L.v1.v1( idxs, 1 ), L.v1.v2( idxs, 1 ), L.v2.v1( idxs, 1 ), L.v2.v2( idxs, 1 ) ] = QuadDouble.QDDivQD( v.v1.v1( idxs, 1 ), v.v1.v2( idxs, 1 ), v.v2.v1( idxs, 1 ), v.v2.v2( idxs, 1 ), x1( 1 ), x2( 1 ), x3( 1 ), x4( 1 ) );
             for j = 2 : n
                 idxs = 1 : j - 1;
-                [ x1( idxs ), x2( idxs ), x3( idxs ), x4( idxs ) ] = QuadDouble.QDTimesQD( conj( L.v1( j, idxs ) ), conj( L.v2( j, idxs ) ), conj( L.v3( j, idxs ) ), conj( L.v4( j, idxs ) ), d.v1( idxs ), d.v2( idxs ), d.v3( idxs ), d.v4( idxs ) );
-                [ t1( idxs ), t2( idxs ), t3( idxs ), t4( idxs ) ] = QuadDouble.QDTimesQD( L.v1( j, idxs ), L.v2( j, idxs ), L.v3( j, idxs ), L.v4( j, idxs ), x1( idxs ), x2( idxs ), x3( idxs ), x4( idxs ) );
+                [ x1( idxs ), x2( idxs ), x3( idxs ), x4( idxs ) ] = QuadDouble.QDTimesQD( conj( L.v1.v1( j, idxs ) ), conj( L.v1.v2( j, idxs ) ), conj( L.v2.v1( j, idxs ) ), conj( L.v2.v2( j, idxs ) ), d.v1.v1( idxs ), d.v1.v2( idxs ), d.v2.v1( idxs ), d.v2.v2( idxs ) );
+                [ t1( idxs ), t2( idxs ), t3( idxs ), t4( idxs ) ] = QuadDouble.QDTimesQD( L.v1.v1( j, idxs ), L.v1.v2( j, idxs ), L.v2.v1( j, idxs ), L.v2.v2( j, idxs ), x1( idxs ), x2( idxs ), x3( idxs ), x4( idxs ) );
                 t = sum( QuadDouble.Make( t1( idxs ), t2( idxs ), t3( idxs ), t4( idxs ) ) );
-                [ x1( j ), x2( j ), x3( j ), x4( j ) ] = QuadDouble.QDPlusQD( v.v1( j, j ), v.v2( j, j ), v.v3( j, j ), v.v4( j, j ), -t.v1, -t.v2, -t.v3, -t.v4 );
-                d.v1( j ) = x1( j );
-                d.v2( j ) = x2( j );
-                d.v3( j ) = x3( j );
-                d.v4( j ) = x4( j );
+                [ x1( j ), x2( j ), x3( j ), x4( j ) ] = QuadDouble.QDPlusQD( v.v1.v1( j, j ), v.v1.v2( j, j ), v.v2.v1( j, j ), v.v2.v2( j, j ), -t.v1.v1, -t.v1.v2, -t.v2.v1, -t.v2.v2 );
+                d.v1.v1( j ) = x1( j );
+                d.v1.v2( j ) = x2( j );
+                d.v2.v1( j ) = x3( j );
+                d.v2.v2( j ) = x4( j );
                 if j < n
                     jdxs = j + 1 : n;
-                    [ s1, s2, s3, s4 ] = QuadDouble.QDTimesQD( L.v1( jdxs, idxs ), L.v2( jdxs, idxs ), L.v3( jdxs, idxs ), L.v4( jdxs, idxs ), x1( idxs ), x2( idxs ), x3( idxs ), x4( idxs ) );
+                    [ s1, s2, s3, s4 ] = QuadDouble.QDTimesQD( L.v1.v1( jdxs, idxs ), L.v1.v2( jdxs, idxs ), L.v2.v1( jdxs, idxs ), L.v2.v2( jdxs, idxs ), x1( idxs ), x2( idxs ), x3( idxs ), x4( idxs ) );
                     tt = sum( QuadDouble.Make( s1, s2, s3, s4 ), 2 );
-                    [ t1( jdxs ), t2( jdxs ), t3( jdxs ), t4( jdxs ) ] = QuadDouble.QDPlusQD( v.v1( jdxs, j ), v.v2( jdxs, j ), v.v3( jdxs, j ), v.v4( jdxs, j ), -tt.v1, -tt.v2, -tt.v3, -tt.v4 );
-                    [ L.v1( jdxs, j ), L.v2( jdxs, j ), L.v3( jdxs, j ), L.v4( jdxs, j ) ] = QuadDouble.QDDivQD( t1( jdxs ), t2( jdxs ), t3( jdxs ), t4( jdxs ), x1( j ), x2( j ), x3( j ), x4( j ) );
+                    [ t1( jdxs ), t2( jdxs ), t3( jdxs ), t4( jdxs ) ] = QuadDouble.QDPlusQD( v.v1.v1( jdxs, j ), v.v1.v2( jdxs, j ), v.v2.v1( jdxs, j ), v.v2.v2( jdxs, j ), -tt.v1.v1, -tt.v1.v2, -tt.v2.v1, -tt.v2.v2 );
+                    [ L.v1.v1( jdxs, j ), L.v1.v2( jdxs, j ), L.v2.v1( jdxs, j ), L.v2.v2( jdxs, j ) ] = QuadDouble.QDDivQD( t1( jdxs ), t2( jdxs ), t3( jdxs ), t4( jdxs ), x1( j ), x2( j ), x3( j ), x4( j ) );
                 end
             end
             if nargin < 2 || ~strcmp( type, 'vector_d' )
@@ -1386,14 +1386,14 @@ classdef QuadDouble
         end
 
         function [ v, d ] = eig( x )
-            [ v, d ] = eig( x.v1 );
+            [ v, d ] = eig( x.v1.v1 );
             v = QuadDouble( v );
             d = QuadDouble( diag( d ) );
             C = length( d );
             I = eye( C, 'QuadDouble' );
             for c = 1 : C
-                vi = QuadDouble.Make( v.v1( :, c ), v.v2( :, c ), v.v3( :, c ), v.v4( :, c ) );
-                dii = QuadDouble.Make( d.v1( c, 1 ), d.v2( c, 1 ), d.v3( c, 1 ), d.v4( c, 1 ) );
+                vi = QuadDouble.Make( v.v1.v1( :, c ), v.v1.v2( :, c ), v.v2.v1( :, c ), v.v2.v2( :, c ) );
+                dii = QuadDouble.Make( d.v1.v1( c, 1 ), d.v1.v2( c, 1 ), d.v2.v1( c, 1 ), d.v2.v2( c, 1 ) );
                 err = Inf;
                 while true
                     nvi = ( x - dii * I ) \ vi;
@@ -1418,14 +1418,14 @@ classdef QuadDouble
                     end
                 end
                 % disp( err );
-                d.v1( c, 1 ) = dii.v1;
-                d.v2( c, 1 ) = dii.v2;
-                d.v3( c, 1 ) = dii.v3;
-                d.v4( c, 1 ) = dii.v4;
-                v.v1( :, c ) = vi.v1;
-                v.v2( :, c ) = vi.v2;
-                v.v3( :, c ) = vi.v3;
-                v.v4( :, c ) = vi.v4;
+                d.v1.v1( c, 1 ) = dii.v1.v1;
+                d.v1.v2( c, 1 ) = dii.v1.v2;
+                d.v2.v1( c, 1 ) = dii.v2.v1;
+                d.v2.v2( c, 1 ) = dii.v2.v2;
+                v.v1.v1( :, c ) = vi.v1.v1;
+                v.v1.v2( :, c ) = vi.v1.v2;
+                v.v2.v1( :, c ) = vi.v2.v1;
+                v.v2.v2( :, c ) = vi.v2.v2;
             end
             if nargout < 2
                 v = d;
@@ -1453,11 +1453,11 @@ classdef QuadDouble
                 j = max( 1, k + 1 - N ) : min( k, M );
                 i = k - j + 1;
 
-                wk = QuadDouble.Dot( QuadDouble.Make( u.v1( j ), u.v2( j ), u.v3( j ), u.v4( j ) ), QuadDouble.Make( v.v1( i ), v.v2( i ), v.v3( i ), v.v4( i ) ) );
-                w.v1( k ) = wk.v1;
-                w.v2( k ) = wk.v2;
-                w.v3( k ) = wk.v3;
-                w.v4( k ) = wk.v4;
+                wk = QuadDouble.Dot( QuadDouble.Make( u.v1.v1( j ), u.v1.v2( j ), u.v2.v1( j ), u.v2.v2( j ) ), QuadDouble.Make( v.v1.v1( i ), v.v1.v2( i ), v.v2.v1( i ), v.v2.v2( i ) ) );
+                w.v1.v1( k ) = wk.v1.v1;
+                w.v1.v2( k ) = wk.v1.v2;
+                w.v2.v1( k ) = wk.v2.v1;
+                w.v2.v2( k ) = wk.v2.v2;
 
             end
 
@@ -1477,7 +1477,7 @@ classdef QuadDouble
                 A = Vec( A );
             end
             Size = size( A );
-            A = [ A.v1, A.v2, A.v3, A.v4 ];
+            A = [ A.v1.v1, A.v1.v2, A.v2.v1, A.v2.v2 ];
             [ C, ia, ic ] = unique( A, 'rows', varargin{:} );
             n = Size( 2 );
             C = QuadDouble.Make( C( :, 1 : n ), C( :, ( n + 1 ) : ( 2 * n ) ), C( :, ( 2 * n ) + 1 : ( 3 * n ) ), C( :, ( 3 * n ) + 1 : ( 4 * n ) ) );
@@ -1488,7 +1488,7 @@ classdef QuadDouble
 
         function v = mean( v, Dim )
             if ( nargin < 2 ) || isempty( Dim )
-                Dim = find( size( v.v1 ) > 1, 1 );
+                Dim = find( size( v.v1.v1 ) > 1, 1 );
                 if isempty( Dim )
                     Dim = 1;
                 end
@@ -1496,14 +1496,14 @@ classdef QuadDouble
                 v = Vec( v );
                 Dim = 1;
             end
-            Size = size( v.v1 );
+            Size = size( v.v1.v1 );
             n = prod( Size( Dim ) );
             v = sum( v, Dim ) ./ n;
         end
 
         function v = median( v, Dim )
             if ( nargin < 2 ) || isempty( Dim )
-                Dim = find( size( v.v1 ) > 1, 1 );
+                Dim = find( size( v.v1.v1 ) > 1, 1 );
                 if isempty( Dim )
                     Dim = 1;
                 end
@@ -1511,7 +1511,7 @@ classdef QuadDouble
                 v = Vec( v );
                 Dim = 1;
             end
-            Size = size( v.v1 );
+            Size = size( v.v1.v1 );
             n = prod( Size( Dim ) );
 
             if n == 0
@@ -1527,12 +1527,12 @@ classdef QuadDouble
 
             if mod( n, 2 ) == 1
                 Middle = ( n + 1 ) * 0.5;
-                v = QuadDouble.Make( v.v1( Middle, : ), v.v2( Middle, : ), v.v3( Middle, : ), v.v4( Middle, : ) );
+                v = QuadDouble.Make( v.v1.v1( Middle, : ), v.v1.v2( Middle, : ), v.v2.v1( Middle, : ), v.v2.v2( Middle, : ) );
             else
                 Middle1 = n * 0.5;
                 Middle2 = Middle1 + 1;
-                m1 = QuadDouble.Make( v.v1( Middle1, : ), v.v2( Middle1, : ), v.v3( Middle1, : ), v.v4( Middle1, : ) );
-                m2 = QuadDouble.Make( v.v1( Middle2, : ), v.v2( Middle2, : ), v.v3( Middle2, : ), v.v4( Middle2, : ) );
+                m1 = QuadDouble.Make( v.v1.v1( Middle1, : ), v.v1.v2( Middle1, : ), v.v2.v1( Middle1, : ), v.v2.v2( Middle1, : ) );
+                m2 = QuadDouble.Make( v.v1.v1( Middle2, : ), v.v1.v2( Middle2, : ), v.v2.v1( Middle2, : ), v.v2.v2( Middle2, : ) );
                 v = 0.5 * ( m1 + m2 );
             end
             v = ipermute( reshape( v, [ ones( 1, numel( Dim ) ), Size( NotDim ) ] ), [ Dim, NotDim ] );
@@ -1551,13 +1551,13 @@ classdef QuadDouble
             end
 
             if isempty( Dim )
-                Dim = find( size( v.v1 ) > 1, 1 );
+                Dim = find( size( v.v1.v1 ) > 1, 1 );
                 if isempty( Dim )
                     Dim = 1;
                 end
             end
 
-            Size = size( v.v1 );
+            Size = size( v.v1.v1 );
             n = prod( Size( Dim ) );
 
             if ( n == 0 ) || ( ( n == 1 ) && ( Flag == 0 ) )
@@ -1579,10 +1579,10 @@ classdef QuadDouble
         end
 
         function [ X, Y ] = meshgrid( x, y )
-            [ X1, Y1 ] = meshgrid( x.v1, y.v1 );
-            [ X2, Y2 ] = meshgrid( x.v2, y.v2 );
-            [ X3, Y3 ] = meshgrid( x.v3, y.v3 );
-            [ X4, Y4 ] = meshgrid( x.v4, y.v4 );
+            [ X1, Y1 ] = meshgrid( x.v1.v1, y.v1.v1 );
+            [ X2, Y2 ] = meshgrid( x.v1.v2, y.v1.v2 );
+            [ X3, Y3 ] = meshgrid( x.v2.v1, y.v2.v1 );
+            [ X4, Y4 ] = meshgrid( x.v2.v2, y.v2.v2 );
             X = QuadDouble.Make( X1, X2, X3, X4 );
             Y = QuadDouble.Make( Y1, Y2, Y3, Y4 );
         end
@@ -1615,10 +1615,10 @@ classdef QuadDouble
             y = a + Step .* Indices;
 
             if n > 1
-                y.v1( end ) = b.v1;
-                y.v2( end ) = b.v2;
-                y.v3( end ) = b.v3;
-                y.v4( end ) = b.v4;
+                y.v1.v1( end ) = b.v1.v1;
+                y.v1.v2( end ) = b.v1.v2;
+                y.v2.v1( end ) = b.v2.v1;
+                y.v2.v2( end ) = b.v2.v2;
             end
         end
 
@@ -1673,15 +1673,17 @@ classdef QuadDouble
         end
 
         function v = Plus( a, b )
+            if isa( a, 'BaseExtDouble' ) && ~isa( a, 'QuadDouble' ); a = QuadDouble( a ); end
+            if isa( b, 'BaseExtDouble' ) && ~isa( b, 'QuadDouble' ); b = QuadDouble( b ); end
             if isa( a, 'QuadDouble' )
                 if isa( b, 'QuadDouble' )
-                    [ x1, x2, x3, x4 ] = QuadDouble.QDPlusQD( a.v1, a.v2, a.v3, a.v4, b.v1, b.v2, b.v3, b.v4 );
+                    [ x1, x2, x3, x4 ] = QuadDouble.QDPlusQD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
                 else
-                    [ x1, x2, x3, x4 ] = QuadDouble.QDPlusDouble( a.v1, a.v2, a.v3, a.v4, double( b ) );
+                    [ x1, x2, x3, x4 ] = QuadDouble.QDPlusDouble( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, double( b ) );
                 end
             else
                 if isa( b, 'QuadDouble' )
-                    [ x1, x2, x3, x4 ] = QuadDouble.QDPlusDouble( b.v1, b.v2, b.v3, b.v4, double( a ) );
+                    [ x1, x2, x3, x4 ] = QuadDouble.QDPlusDouble( b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2, double( a ) );
                 else
                     [ x1, x2 ] = QuadDouble.TwoSum( double( a ), double( b ) ); x3 = zeros( size( x1 ) ); x4 = zeros( size( x1 ) );
                 end
@@ -1690,15 +1692,17 @@ classdef QuadDouble
         end
 
         function v = Minus( a, b )
+            if isa( a, 'BaseExtDouble' ) && ~isa( a, 'QuadDouble' ); a = QuadDouble( a ); end
+            if isa( b, 'BaseExtDouble' ) && ~isa( b, 'QuadDouble' ); b = QuadDouble( b ); end
             if isa( a, 'QuadDouble' )
                 if isa( b, 'QuadDouble' )
-                    [ x1, x2, x3, x4 ] = QuadDouble.QDPlusQD( a.v1, a.v2, a.v3, a.v4, -b.v1, -b.v2, -b.v3, -b.v4 );
+                    [ x1, x2, x3, x4 ] = QuadDouble.QDPlusQD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, -b.v1.v1, -b.v1.v2, -b.v2.v1, -b.v2.v2 );
                 else
-                    [ x1, x2, x3, x4 ] = QuadDouble.QDPlusDouble( a.v1, a.v2, a.v3, a.v4, -double( b ) );
+                    [ x1, x2, x3, x4 ] = QuadDouble.QDPlusDouble( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, -double( b ) );
                 end
             else
                 if isa( b, 'QuadDouble' )
-                    [ x1, x2, x3, x4 ] = QuadDouble.QDPlusDouble( -b.v1, -b.v2, -b.v3, -b.v4, double( a ) );
+                    [ x1, x2, x3, x4 ] = QuadDouble.QDPlusDouble( -b.v1.v1, -b.v1.v2, -b.v2.v1, -b.v2.v2, double( a ) );
                 else
                     [ x1, x2 ] = QuadDouble.TwoSum( double( a ), -double( b ) ); x3 = zeros( size( x1 ) ); x4 = zeros( size( x1 ) );
                 end
@@ -1707,15 +1711,17 @@ classdef QuadDouble
         end
 
         function v = Times( a, b )
+            if isa( a, 'BaseExtDouble' ) && ~isa( a, 'QuadDouble' ); a = QuadDouble( a ); end
+            if isa( b, 'BaseExtDouble' ) && ~isa( b, 'QuadDouble' ); b = QuadDouble( b ); end
             if isa( a, 'QuadDouble' )
                 if isa( b, 'QuadDouble' )
-                    [ x1, x2, x3, x4 ] = QuadDouble.QDTimesQD( a.v1, a.v2, a.v3, a.v4, b.v1, b.v2, b.v3, b.v4 );
+                    [ x1, x2, x3, x4 ] = QuadDouble.QDTimesQD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
                 else
-                    [ x1, x2, x3, x4 ] = QuadDouble.QDTimesDouble( a.v1, a.v2, a.v3, a.v4, double( b ) );
+                    [ x1, x2, x3, x4 ] = QuadDouble.QDTimesDouble( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, double( b ) );
                 end
             else
                 if isa( b, 'QuadDouble' )
-                    [ x1, x2, x3, x4 ] = QuadDouble.QDTimesDouble( b.v1, b.v2, b.v3, b.v4, double( a ) );
+                    [ x1, x2, x3, x4 ] = QuadDouble.QDTimesDouble( b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2, double( a ) );
                 else
                     [ x1, x2 ] = QuadDouble.TwoProd( double( a ), double( b ) ); x3 = zeros( size( x1 ) ); x4 = zeros( size( x1 ) );
                 end
@@ -1724,6 +1730,8 @@ classdef QuadDouble
         end
 
         function v = MTimes( a, b )
+            if isa( a, 'BaseExtDouble' ) && ~isa( a, 'QuadDouble' ); a = QuadDouble( a ); end
+            if isa( b, 'BaseExtDouble' ) && ~isa( b, 'QuadDouble' ); b = QuadDouble( b ); end
             [ R, c ] = size( a );
             [ r, C ] = size( b );
             if ( ( R == 1 ) && ( c == 1 ) ) || ( ( r == 1 ) && ( C == 1 ) )
@@ -1733,34 +1741,36 @@ classdef QuadDouble
             v = QuadDouble.Make( zeros( R, C ), zeros( R, C ), zeros( R, C ), zeros( R, C ) );
             if isa( b, 'QuadDouble' )
                 for c = 1 : C
-                    t = QuadDouble.Sum( a .* QuadDouble.Make( b.v1( :, c ).', b.v2( :, c ).', b.v3( :, c ).', b.v4( :, c ).' ), 2 );
-                    v.v1( :, c ) = t.v1;
-                    v.v2( :, c ) = t.v2;
-                    v.v3( :, c ) = t.v3;
-                    v.v4( :, c ) = t.v4;
+                    t = QuadDouble.Sum( a .* QuadDouble.Make( b.v1.v1( :, c ).', b.v1.v2( :, c ).', b.v2.v1( :, c ).', b.v2.v2( :, c ).' ), 2 );
+                    v.v1.v1( :, c ) = t.v1.v1;
+                    v.v1.v2( :, c ) = t.v1.v2;
+                    v.v2.v1( :, c ) = t.v2.v1;
+                    v.v2.v2( :, c ) = t.v2.v2;
                 end
             else
                 for c = 1 : C
                     t = QuadDouble.Sum( a .* b( :, c ).', 2 );
-                    v.v1( :, c ) = t.v1;
-                    v.v2( :, c ) = t.v2;
-                    v.v3( :, c ) = t.v3;
-                    v.v4( :, c ) = t.v4;
+                    v.v1.v1( :, c ) = t.v1.v1;
+                    v.v1.v2( :, c ) = t.v1.v2;
+                    v.v2.v1( :, c ) = t.v2.v1;
+                    v.v2.v2( :, c ) = t.v2.v2;
                 end
             end
         end
 
         function v = RDivide( a, b )
+            if isa( a, 'BaseExtDouble' ) && ~isa( a, 'QuadDouble' ); a = QuadDouble( a ); end
+            if isa( b, 'BaseExtDouble' ) && ~isa( b, 'QuadDouble' ); b = QuadDouble( b ); end
             if isa( a, 'QuadDouble' )
                 if isa( b, 'QuadDouble' )
-                    [ x1, x2, x3, x4 ] = QuadDouble.QDDivQD( a.v1, a.v2, a.v3, a.v4, b.v1, b.v2, b.v3, b.v4 );
+                    [ x1, x2, x3, x4 ] = QuadDouble.QDDivQD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
                 else
-                    [ x1, x2, x3, x4 ] = QuadDouble.QDDivDouble( a.v1, a.v2, a.v3, a.v4, double( b ) );
+                    [ x1, x2, x3, x4 ] = QuadDouble.QDDivDouble( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, double( b ) );
                 end
             else
                 if isa( b, 'QuadDouble' )
                     da = double( a );
-                    [ x1, x2, x3, x4 ] = QuadDouble.QDDivQD( da, zeros( size( da ) ), zeros( size( da ) ), zeros( size( da ) ), b.v1, b.v2, b.v3, b.v4 );
+                    [ x1, x2, x3, x4 ] = QuadDouble.QDDivQD( da, zeros( size( da ) ), zeros( size( da ) ), zeros( size( da ) ), b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
                 else
                     [ x1, x2, x3, x4 ] = QuadDouble.DoubleDivDouble( double( a ), double( b ) );
                 end
@@ -1769,16 +1779,18 @@ classdef QuadDouble
         end
 
         function v = LDivide( b, a )
+            if isa( a, 'BaseExtDouble' ) && ~isa( a, 'QuadDouble' ); a = QuadDouble( a ); end
+            if isa( b, 'BaseExtDouble' ) && ~isa( b, 'QuadDouble' ); b = QuadDouble( b ); end
             if isa( a, 'QuadDouble' )
                 if isa( b, 'QuadDouble' )
-                    [ x1, x2, x3, x4 ] = QuadDouble.QDDivQD( a.v1, a.v2, a.v3, a.v4, b.v1, b.v2, b.v3, b.v4 );
+                    [ x1, x2, x3, x4 ] = QuadDouble.QDDivQD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
                 else
-                    [ x1, x2, x3, x4 ] = QuadDouble.QDDivDouble( a.v1, a.v2, a.v3, a.v4, double( b ) );
+                    [ x1, x2, x3, x4 ] = QuadDouble.QDDivDouble( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, double( b ) );
                 end
             else
                 if isa( b, 'QuadDouble' )
                     da = double( a );
-                    [ x1, x2, x3, x4 ] = QuadDouble.QDDivQD( da, zeros( size( da ) ), zeros( size( da ) ), zeros( size( da ) ), b.v1, b.v2, b.v3, b.v4 );
+                    [ x1, x2, x3, x4 ] = QuadDouble.QDDivQD( da, zeros( size( da ) ), zeros( size( da ) ), zeros( size( da ) ), b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
                 else
                     [ x1, x2, x3, x4 ] = QuadDouble.DoubleDivDouble( double( a ), double( b ) );
                 end
@@ -1825,10 +1837,10 @@ classdef QuadDouble
             [ L, U, p ] = lu( a, 'vector' );
 
             % Permutation and forward elimination
-            v.v1 = v.v1( p, : );
-            v.v2 = v.v2( p, : );
-            v.v3 = v.v3( p, : );
-            v.v4 = v.v4( p, : );
+            v.v1.v1 = v.v1.v1( p, : );
+            v.v1.v2 = v.v1.v2( p, : );
+            v.v2.v1 = v.v2.v1( p, : );
+            v.v2.v2 = v.v2.v2( p, : );
             v = ForwardElimination( v, L );
 
             % Back substitution
@@ -1841,7 +1853,7 @@ classdef QuadDouble
 
         function [ v, Indices ] = Sort( v, Dim, cm, varargin )
             if nargin < 2 || isempty( Dim )
-                Dim = find( size( v.v1 ) > 1, 1 );
+                Dim = find( size( v.v1.v1 ) > 1, 1 );
                 if isempty( Dim )
                     Dim = 1;
                 end
@@ -1865,19 +1877,19 @@ classdef QuadDouble
                         b = angle( v );
                     end
                 end
-                Size = size( v.v1 );
+                Size = size( v.v1.v1 );
                 if any( Size == 0 )
                     Indices = [];
                     return
                 end
                 Blocks = arrayfun( @( x ) ones( x, 1 ), Size, 'UniformOutput', false );
                 Blocks{ Dim } = Size( Dim );
-                xv1 = mat2cell( v.v1, Blocks{:} );
-                xv2 = mat2cell( v.v2, Blocks{:} );
-                xa1 = mat2cell( a.v1, Blocks{:} );
-                xa2 = mat2cell( a.v2, Blocks{:} );
-                xb1 = mat2cell( b.v1, Blocks{:} );
-                xb2 = mat2cell( b.v2, Blocks{:} );
+                xv1 = mat2cell( v.v1.v1, Blocks{:} );
+                xv2 = mat2cell( v.v1.v2, Blocks{:} );
+                xa1 = mat2cell( a.v1.v1, Blocks{:} );
+                xa2 = mat2cell( a.v1.v2, Blocks{:} );
+                xb1 = mat2cell( b.v1.v1, Blocks{:} );
+                xb2 = mat2cell( b.v1.v2, Blocks{:} );
                 Indices = cell( size( xv1 ) );
                 for i = 1 : numel( xv1 )
                     [ ~, Indices{ i } ] = sortrows( [ xa1{ i }( : ), xa2{ i }( : ), xb1{ i }( : ), xb2{ i }( : ) ], varargin{:} );
@@ -1899,12 +1911,12 @@ classdef QuadDouble
         function s = Sum( v, Dim )
             if isa( v, 'QuadDouble' )
                 if nargin < 2 || isempty( Dim )
-                    Dim = find( size( v.v1 ) > 1, 1 );
+                    Dim = find( size( v.v1.v1 ) > 1, 1 );
                     if isempty( Dim )
                         Dim = 1;
                     end
                 end
-                Size = size( v.v1 );
+                Size = size( v.v1.v1 );
                 Length = Size( Dim );
                 if Length == 0
                     Size = max( 1, Size );
@@ -1913,10 +1925,10 @@ classdef QuadDouble
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
-                x1 = mat2cell( v.v1, Blocks{:} );
-                x2 = mat2cell( v.v2, Blocks{:} );
-                x3 = mat2cell( v.v3, Blocks{:} );
-                x4 = mat2cell( v.v4, Blocks{:} );
+                x1 = mat2cell( v.v1.v1, Blocks{:} );
+                x2 = mat2cell( v.v1.v2, Blocks{:} );
+                x3 = mat2cell( v.v2.v1, Blocks{:} );
+                x4 = mat2cell( v.v2.v2, Blocks{:} );
                 s = QuadDouble.Make( x1{ 1 }, x2{ 1 }, x3{ 1 }, x4{ 1 } );
                 for i = 2 : Length
                     s = QuadDouble.Plus( s, QuadDouble.Make( x1{ i }, x2{ i }, x3{ i }, x4{ i } ) );
@@ -1948,12 +1960,12 @@ classdef QuadDouble
         function c = CumSum( v, Dim )
             if isa( v, 'QuadDouble' )
                 if nargin < 2 || isempty( Dim )
-                    Dim = find( size( v.v1 ) > 1, 1 );
+                    Dim = find( size( v.v1.v1 ) > 1, 1 );
                     if isempty( Dim )
                         Dim = 1;
                     end
                 end
-                Size = size( v.v1 );
+                Size = size( v.v1.v1 );
                 Length = Size( Dim );
                 if Length == 0
                     c = QuadDouble.Make( zeros( Size ), zeros( Size ) );
@@ -1961,19 +1973,19 @@ classdef QuadDouble
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
-                x1 = mat2cell( v.v1, Blocks{:} );
-                x2 = mat2cell( v.v2, Blocks{:} );
-                x3 = mat2cell( v.v3, Blocks{:} );
-                x4 = mat2cell( v.v4, Blocks{:} );
+                x1 = mat2cell( v.v1.v1, Blocks{:} );
+                x2 = mat2cell( v.v1.v2, Blocks{:} );
+                x3 = mat2cell( v.v2.v1, Blocks{:} );
+                x4 = mat2cell( v.v2.v2, Blocks{:} );
                 s = QuadDouble.Make( x1{ 1 }, x2{ 1 }, x3{ 1 }, x4{ 1 } );
                 c1 = cell( size( x1 ) );
                 c2 = cell( size( x2 ) );
-                c1{1} = s.v1;
-                c2{1} = s.v2;
+                c1{1} = s.v1.v1;
+                c2{1} = s.v1.v2;
                 for i = 2 : Length
                     s = QuadDouble.Plus( s, QuadDouble.Make( x1{ i }, x2{ i }, x3{ i }, x4{ i } ) );
-                    c1{i} = s.v1;
-                    c2{i} = s.v2;
+                    c1{i} = s.v1.v1;
+                    c2{i} = s.v1.v2;
                 end
             else
                 if nargin < 2 || isempty( Dim )
@@ -1998,8 +2010,8 @@ classdef QuadDouble
                 c2{1} = zeros( size( s ) );
                 for i = 2 : Length
                     s = QuadDouble.Plus( s, x{ i } );
-                    c1{i} = s.v1;
-                    c2{i} = s.v2;
+                    c1{i} = s.v1.v1;
+                    c2{i} = s.v1.v2;
                 end
             end
             c = QuadDouble.Make( cell2mat( c1 ), cell2mat( c2 ) );
@@ -2008,12 +2020,12 @@ classdef QuadDouble
         function c = Diff( v, Dim )
             if isa( v, 'QuadDouble' )
                 if nargin < 2 || isempty( Dim )
-                    Dim = find( size( v.v1 ) > 1, 1 );
+                    Dim = find( size( v.v1.v1 ) > 1, 1 );
                     if isempty( Dim )
                         Dim = 1;
                     end
                 end
-                Size = size( v.v1 );
+                Size = size( v.v1.v1 );
                 Length = Size( Dim );
                 if Length == 0
                     c = QuadDouble.Make( zeros( Size ), zeros( Size ) );
@@ -2021,10 +2033,10 @@ classdef QuadDouble
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
-                x1 = mat2cell( v.v1, Blocks{:} );
-                x2 = mat2cell( v.v2, Blocks{:} );
-                x3 = mat2cell( v.v3, Blocks{:} );
-                x4 = mat2cell( v.v4, Blocks{:} );
+                x1 = mat2cell( v.v1.v1, Blocks{:} );
+                x2 = mat2cell( v.v1.v2, Blocks{:} );
+                x3 = mat2cell( v.v2.v1, Blocks{:} );
+                x4 = mat2cell( v.v2.v2, Blocks{:} );
                 s = QuadDouble.Make( x1{ 1 }, x2{ 1 }, x3{ 1 }, x4{ 1 } );
                 c1 = cell( size( x1 ) );
                 c2 = cell( size( x2 ) );
@@ -2033,8 +2045,8 @@ classdef QuadDouble
                 for i = 2 : Length
                     t = QuadDouble.Make( x1{ i }, x2{ i }, x3{ i }, x4{ i } );
                     d = QuadDouble.Minus( t, s );
-                    c1{i} = d.v1;
-                    c2{i} = d.v2;
+                    c1{i} = d.v1.v1;
+                    c2{i} = d.v1.v2;
                     s = t;
                 end
             else
@@ -2061,8 +2073,8 @@ classdef QuadDouble
                 for i = 2 : Length
                     t = x{ i };
                     d = QuadDouble.Minus( t, s );
-                    c1{i} = d.v1;
-                    c2{i} = d.v2;
+                    c1{i} = d.v1.v1;
+                    c2{i} = d.v1.v2;
                     s = t;
                 end
             end
@@ -2072,12 +2084,12 @@ classdef QuadDouble
         function s = Prod( v, Dim )
             if isa( v, 'QuadDouble' )
                 if nargin < 2 || isempty( Dim )
-                    Dim = find( size( v.v1 ) > 1, 1 );
+                    Dim = find( size( v.v1.v1 ) > 1, 1 );
                     if isempty( Dim )
                         Dim = 1;
                     end
                 end
-                Size = size( v.v1 );
+                Size = size( v.v1.v1 );
                 Length = Size( Dim );
                 if Length == 0
                     Size = max( 1, Size );
@@ -2086,10 +2098,10 @@ classdef QuadDouble
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
-                x1 = mat2cell( v.v1, Blocks{:} );
-                x2 = mat2cell( v.v2, Blocks{:} );
-                x3 = mat2cell( v.v3, Blocks{:} );
-                x4 = mat2cell( v.v4, Blocks{:} );
+                x1 = mat2cell( v.v1.v1, Blocks{:} );
+                x2 = mat2cell( v.v1.v2, Blocks{:} );
+                x3 = mat2cell( v.v2.v1, Blocks{:} );
+                x4 = mat2cell( v.v2.v2, Blocks{:} );
                 s = QuadDouble.Make( x1{ 1 }, x2{ 1 }, x3{ 1 }, x4{ 1 } );
                 for i = 2 : Length
                     s = QuadDouble.Times( s, QuadDouble.Make( x1{ i }, x2{ i }, x3{ i }, x4{ i } ) );
@@ -2121,12 +2133,12 @@ classdef QuadDouble
         function c = CumProd( v, Dim )
             if isa( v, 'QuadDouble' )
                 if nargin < 2 || isempty( Dim )
-                    Dim = find( size( v.v1 ) > 1, 1 );
+                    Dim = find( size( v.v1.v1 ) > 1, 1 );
                     if isempty( Dim )
                         Dim = 1;
                     end
                 end
-                Size = size( v.v1 );
+                Size = size( v.v1.v1 );
                 Length = Size( Dim );
                 if Length == 0
                     c = QuadDouble.Make( zeros( Size ), zeros( Size ) );
@@ -2134,19 +2146,19 @@ classdef QuadDouble
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
-                x1 = mat2cell( v.v1, Blocks{:} );
-                x2 = mat2cell( v.v2, Blocks{:} );
-                x3 = mat2cell( v.v3, Blocks{:} );
-                x4 = mat2cell( v.v4, Blocks{:} );
+                x1 = mat2cell( v.v1.v1, Blocks{:} );
+                x2 = mat2cell( v.v1.v2, Blocks{:} );
+                x3 = mat2cell( v.v2.v1, Blocks{:} );
+                x4 = mat2cell( v.v2.v2, Blocks{:} );
                 s = QuadDouble.Make( x1{ 1 }, x2{ 1 }, x3{ 1 }, x4{ 1 } );
                 c1 = cell( size( x1 ) );
                 c2 = cell( size( x2 ) );
-                c1{1} = s.v1;
-                c2{1} = s.v2;
+                c1{1} = s.v1.v1;
+                c2{1} = s.v1.v2;
                 for i = 2 : Length
                     s = QuadDouble.Times( s, QuadDouble.Make( x1{ i }, x2{ i }, x3{ i }, x4{ i } ) );
-                    c1{i} = s.v1;
-                    c2{i} = s.v2;
+                    c1{i} = s.v1.v1;
+                    c2{i} = s.v1.v2;
                 end
             else
                 if nargin < 2 || isempty( Dim )
@@ -2171,8 +2183,8 @@ classdef QuadDouble
                 c2{1} = zeros( size( s ) );
                 for i = 2 : Length
                     s = QuadDouble.Times( s, x{ i } );
-                    c1{i} = s.v1;
-                    c2{i} = s.v2;
+                    c1{i} = s.v1.v1;
+                    c2{i} = s.v1.v2;
                 end
             end
             c = QuadDouble.Make( cell2mat( c1 ), cell2mat( c2 ) );
@@ -2215,19 +2227,19 @@ classdef QuadDouble
                 end
                 if isa( a, 'QuadDouble' )
                     if nargin < 3 || isempty( Dim )
-                        Dim = find( size( a.v1 ) > 1, 1 );
+                        Dim = find( size( a.v1.v1 ) > 1, 1 );
                         if isempty( Dim )
                             Dim = 1;
                         end
                     end
-                    Size = size( a.v1 );
+                    Size = size( a.v1.v1 );
                     Length = Size( Dim );
                     Blocks = num2cell( Size );
                     Blocks{ Dim } = ones( Length, 1 );
-                    x1 = mat2cell( a.v1, Blocks{:} );
-                    x2 = mat2cell( a.v2, Blocks{:} );
-                    x3 = mat2cell( a.v3, Blocks{:} );
-                    x4 = mat2cell( a.v4, Blocks{:} );
+                    x1 = mat2cell( a.v1.v1, Blocks{:} );
+                    x2 = mat2cell( a.v1.v2, Blocks{:} );
+                    x3 = mat2cell( a.v2.v1, Blocks{:} );
+                    x4 = mat2cell( a.v2.v2, Blocks{:} );
                     s = QuadDouble.Make( x1{ 1 }, x2{ 1 }, x3{ 1 }, x4{ 1 } );
                     Size( Dim ) = 1;
                     i = ones( Size );
@@ -2260,24 +2272,24 @@ classdef QuadDouble
                     b = QuadDouble( b );
                 end
                 [ a, b ] = QuadDouble.ExpandSingleton( a, b );
-                i = ( a.v1 > b.v1 ) | ( ( a.v1 == b.v1 ) & ( a.v2 > b.v2 ) );
+                i = ( a.v1.v1 > b.v1.v1 ) | ( ( a.v1.v1 == b.v1.v1 ) & ( a.v1.v2 > b.v1.v2 ) );
                 s = b;
-                s.v1( i ) = a.v1( i );
-                s.v2( i ) = a.v2( i );
-                s.v3( i ) = a.v3( i );
-                s.v4( i ) = a.v4( i );
+                s.v1.v1( i ) = a.v1.v1( i );
+                s.v1.v2( i ) = a.v1.v2( i );
+                s.v2.v1( i ) = a.v2.v1( i );
+                s.v2.v2( i ) = a.v2.v2( i );
             end
         end
 
         function c = CumMax( v, Dim )
             if isa( v, 'QuadDouble' )
                 if nargin < 3 || isempty( Dim )
-                    Dim = find( size( v.v1 ) > 1, 1 );
+                    Dim = find( size( v.v1.v1 ) > 1, 1 );
                     if isempty( Dim )
                         Dim = 1;
                     end
                 end
-                Size = size( v.v1 );
+                Size = size( v.v1.v1 );
                 Length = Size( Dim );
                 if Length == 0
                     c = QuadDouble.Make( zeros( Size ), zeros( Size ) );
@@ -2285,19 +2297,19 @@ classdef QuadDouble
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
-                x1 = mat2cell( v.v1, Blocks{:} );
-                x2 = mat2cell( v.v2, Blocks{:} );
-                x3 = mat2cell( v.v3, Blocks{:} );
-                x4 = mat2cell( v.v4, Blocks{:} );
+                x1 = mat2cell( v.v1.v1, Blocks{:} );
+                x2 = mat2cell( v.v1.v2, Blocks{:} );
+                x3 = mat2cell( v.v2.v1, Blocks{:} );
+                x4 = mat2cell( v.v2.v2, Blocks{:} );
                 s = QuadDouble.Make( x1{ 1 }, x2{ 1 }, x3{ 1 }, x4{ 1 } );
                 c1 = cell( size( x1 ) );
                 c2 = cell( size( x2 ) );
-                c1{1} = s.v1;
-                c2{1} = s.v2;
+                c1{1} = s.v1.v1;
+                c2{1} = s.v1.v2;
                 for i = 2 : Length
                     s = QuadDouble.Max( s, QuadDouble.Make( x1{ i }, x2{ i }, x3{ i }, x4{ i } ) );
-                    c1{i} = s.v1;
-                    c2{i} = s.v2;
+                    c1{i} = s.v1.v1;
+                    c2{i} = s.v1.v2;
                 end
             else
                 if nargin < 3 || isempty( Dim )
@@ -2322,8 +2334,8 @@ classdef QuadDouble
                 c2{1} = zeros( size( s ) );
                 for i = 2 : Length
                     s = QuadDouble.Max( s, x{ i } );
-                    c1{i} = s.v1;
-                    c2{i} = s.v2;
+                    c1{i} = s.v1.v1;
+                    c2{i} = s.v1.v2;
                 end
             end
             c = QuadDouble.Make( cell2mat( c1 ), cell2mat( c2 ) );
@@ -2333,19 +2345,19 @@ classdef QuadDouble
             if isempty( b )
                 if isa( a, 'QuadDouble' )
                     if nargin < 3 || isempty( Dim )
-                        Dim = find( size( a.v1 ) > 1, 1 );
+                        Dim = find( size( a.v1.v1 ) > 1, 1 );
                         if isempty( Dim )
                             Dim = 1;
                         end
                     end
-                    Size = size( a.v1 );
+                    Size = size( a.v1.v1 );
                     Length = Size( Dim );
                     Blocks = num2cell( Size );
                     Blocks{ Dim } = ones( Length, 1 );
-                    x1 = mat2cell( a.v1, Blocks{:} );
-                    x2 = mat2cell( a.v2, Blocks{:} );
-                    x3 = mat2cell( a.v3, Blocks{:} );
-                    x4 = mat2cell( a.v4, Blocks{:} );
+                    x1 = mat2cell( a.v1.v1, Blocks{:} );
+                    x2 = mat2cell( a.v1.v2, Blocks{:} );
+                    x3 = mat2cell( a.v2.v1, Blocks{:} );
+                    x4 = mat2cell( a.v2.v2, Blocks{:} );
                     s = QuadDouble.Make( x1{ 1 }, x2{ 1 }, x3{ 1 }, x4{ 1 } );
                     Size( Dim ) = 1;
                     i = ones( Size );
@@ -2378,24 +2390,24 @@ classdef QuadDouble
                     b = QuadDouble( b );
                 end
                 [ a, b ] = QuadDouble.ExpandSingleton( a, b );
-                i = ( a.v1 < b.v1 ) | ( ( a.v1 == b.v1 ) & ( a.v2 < b.v2 ) );
+                i = ( a.v1.v1 < b.v1.v1 ) | ( ( a.v1.v1 == b.v1.v1 ) & ( a.v1.v2 < b.v1.v2 ) );
                 s = b;
-                s.v1( i ) = a.v1( i );
-                s.v2( i ) = a.v2( i );
-                s.v3( i ) = a.v3( i );
-                s.v4( i ) = a.v4( i );
+                s.v1.v1( i ) = a.v1.v1( i );
+                s.v1.v2( i ) = a.v1.v2( i );
+                s.v2.v1( i ) = a.v2.v1( i );
+                s.v2.v2( i ) = a.v2.v2( i );
             end
         end
 
         function c = CumMin( v, Dim )
             if isa( v, 'QuadDouble' )
                 if nargin < 3 || isempty( Dim )
-                    Dim = find( size( v.v1 ) > 1, 1 );
+                    Dim = find( size( v.v1.v1 ) > 1, 1 );
                     if isempty( Dim )
                         Dim = 1;
                     end
                 end
-                Size = size( v.v1 );
+                Size = size( v.v1.v1 );
                 Length = Size( Dim );
                 if Length == 0
                     c = QuadDouble.Make( zeros( Size ), zeros( Size ) );
@@ -2403,19 +2415,19 @@ classdef QuadDouble
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
-                x1 = mat2cell( v.v1, Blocks{:} );
-                x2 = mat2cell( v.v2, Blocks{:} );
-                x3 = mat2cell( v.v3, Blocks{:} );
-                x4 = mat2cell( v.v4, Blocks{:} );
+                x1 = mat2cell( v.v1.v1, Blocks{:} );
+                x2 = mat2cell( v.v1.v2, Blocks{:} );
+                x3 = mat2cell( v.v2.v1, Blocks{:} );
+                x4 = mat2cell( v.v2.v2, Blocks{:} );
                 s = QuadDouble.Make( x1{ 1 }, x2{ 1 }, x3{ 1 }, x4{ 1 } );
                 c1 = cell( size( x1 ) );
                 c2 = cell( size( x2 ) );
-                c1{1} = s.v1;
-                c2{1} = s.v2;
+                c1{1} = s.v1.v1;
+                c2{1} = s.v1.v2;
                 for i = 2 : Length
                     s = QuadDouble.Min( s, QuadDouble.Make( x1{ i }, x2{ i }, x3{ i }, x4{ i } ) );
-                    c1{i} = s.v1;
-                    c2{i} = s.v2;
+                    c1{i} = s.v1.v1;
+                    c2{i} = s.v1.v2;
                 end
             else
                 if nargin < 3 || isempty( Dim )
@@ -2440,8 +2452,8 @@ classdef QuadDouble
                 c2{1} = zeros( size( s ) );
                 for i = 2 : Length
                     s = QuadDouble.Min( s, x{ i } );
-                    c1{i} = s.v1;
-                    c2{i} = s.v2;
+                    c1{i} = s.v1.v1;
+                    c2{i} = s.v1.v2;
                 end
             end
             c = QuadDouble.Make( cell2mat( c1 ), cell2mat( c2 ) );
@@ -2475,18 +2487,18 @@ classdef QuadDouble
 
     methods ( Access = private )
         function v = Vec( v )
-            v.v1 = v.v1( : );
-            v.v2 = v.v2( : );
-            v.v3 = v.v3( : );
-            v.v4 = v.v4( : );
+            v.v1.v1 = v.v1.v1( : );
+            v.v1.v2 = v.v1.v2( : );
+            v.v2.v1 = v.v2.v1( : );
+            v.v2.v2 = v.v2.v2( : );
         end
 
         function v = TimesPowerOf2( v, b )
             assert( isa( b, 'double' ) );
-            v.v1 = v.v1 .* b;
-            v.v2 = v.v2 .* b;
-            v.v3 = v.v3 .* b;
-            v.v4 = v.v4 .* b;
+            v.v1.v1 = v.v1.v1 .* b;
+            v.v1.v2 = v.v1.v2 .* b;
+            v.v2.v1 = v.v2.v1 .* b;
+            v.v2.v2 = v.v2.v2 .* b;
         end
 
         function v = ForwardElimination( v, L )
@@ -2497,28 +2509,28 @@ classdef QuadDouble
             if vm < n
                 v = [ v; zeros( n - vm, vn ) ];
             elseif vm > n
-                v.v1( ( n+1 ):vm, : ) = [];
-                v.v2( ( n+1 ):vm, : ) = [];
-                v.v3( ( n+1 ):vm, : ) = [];
-                v.v4( ( n+1 ):vm, : ) = [];
+                v.v1.v1( ( n+1 ):vm, : ) = [];
+                v.v1.v2( ( n+1 ):vm, : ) = [];
+                v.v2.v1( ( n+1 ):vm, : ) = [];
+                v.v2.v2( ( n+1 ):vm, : ) = [];
             end
             if isa( L, 'QuadDouble' )
-                [ v.v1( 1, : ), v.v2( 1, : ), v.v3( 1, : ), v.v4( 1, : ) ] = QuadDouble.QDDivQD( v.v1( 1, : ), v.v2( 1, : ), v.v3( 1, : ), v.v4( 1, : ), L.v1( 1, 1 ), L.v2( 1, 1 ), L.v3( 1, 1 ), L.v4( 1, 1 ) );
+                [ v.v1.v1( 1, : ), v.v1.v2( 1, : ), v.v2.v1( 1, : ), v.v2.v2( 1, : ) ] = QuadDouble.QDDivQD( v.v1.v1( 1, : ), v.v1.v2( 1, : ), v.v2.v1( 1, : ), v.v2.v2( 1, : ), L.v1.v1( 1, 1 ), L.v1.v2( 1, 1 ), L.v2.v1( 1, 1 ), L.v2.v2( 1, 1 ) );
                 for k = 2 : mn
                     j = 1 : k - 1;
-                    [ t1, t2, t3, t4 ] = QuadDouble.QDTimesQD( v.v1( j, : ), v.v2( j, : ), v.v3( j, : ), v.v4( j, : ), L.v1( k, j ).', L.v2( k, j ).', L.v3( k, j ).', L.v4( k, j ).' );
+                    [ t1, t2, t3, t4 ] = QuadDouble.QDTimesQD( v.v1.v1( j, : ), v.v1.v2( j, : ), v.v2.v1( j, : ), v.v2.v2( j, : ), L.v1.v1( k, j ).', L.v1.v2( k, j ).', L.v2.v1( k, j ).', L.v2.v2( k, j ).' );
                     t = QuadDouble.Sum( QuadDouble.Make( t1, t2, t3, t4 ), 1 );
-                    [ t1, t2, t3, t4 ] = QuadDouble.QDPlusQD( v.v1( k, : ), v.v2( k, : ), v.v3( k, : ), v.v4( k, : ), -t.v1, -t.v2, -t.v3, -t.v4 );
-                    [ v.v1( k, : ), v.v2( k, : ), v.v3( k, : ), v.v4( k, : ) ] = QuadDouble.QDDivQD( t1, t2, t3, t4, L.v1( k, k ), L.v2( k, k ), L.v3( k, k ), L.v4( k, k ) );
+                    [ t1, t2, t3, t4 ] = QuadDouble.QDPlusQD( v.v1.v1( k, : ), v.v1.v2( k, : ), v.v2.v1( k, : ), v.v2.v2( k, : ), -t.v1.v1, -t.v1.v2, -t.v2.v1, -t.v2.v2 );
+                    [ v.v1.v1( k, : ), v.v1.v2( k, : ), v.v2.v1( k, : ), v.v2.v2( k, : ) ] = QuadDouble.QDDivQD( t1, t2, t3, t4, L.v1.v1( k, k ), L.v1.v2( k, k ), L.v2.v1( k, k ), L.v2.v2( k, k ) );
                 end
             else
-                [ v.v1( 1, : ), v.v2( 1, : ), v.v3( 1, : ), v.v4( 1, : ) ] = QuadDouble.QDDivDouble( v.v1( 1, : ), v.v2( 1, : ), v.v3( 1, : ), v.v4( 1, : ), L( 1, 1 ) );
+                [ v.v1.v1( 1, : ), v.v1.v2( 1, : ), v.v2.v1( 1, : ), v.v2.v2( 1, : ) ] = QuadDouble.QDDivDouble( v.v1.v1( 1, : ), v.v1.v2( 1, : ), v.v2.v1( 1, : ), v.v2.v2( 1, : ), L( 1, 1 ) );
                 for k = 2 : mn
                     j = 1 : k - 1;
-                    [ t1, t2, t3, t4 ] = QuadDouble.QDTimesDouble( v.v1( j, : ), v.v2( j, : ), v.v3( j, : ), v.v4( j, : ), L( k, j ).' );
+                    [ t1, t2, t3, t4 ] = QuadDouble.QDTimesDouble( v.v1.v1( j, : ), v.v1.v2( j, : ), v.v2.v1( j, : ), v.v2.v2( j, : ), L( k, j ).' );
                     t = QuadDouble.Sum( QuadDouble.Make( t1, t2, t3, t4 ), 1 );
-                    [ t1, t2, t3, t4 ] = QuadDouble.QDPlusQD( v.v1( k, : ), v.v2( k, : ), v.v3( k, : ), v.v4( k, : ), -t.v1, -t.v2, -t.v3, -t.v4 );
-                    [ v.v1( k, : ), v.v2( k, : ), v.v3( k, : ), v.v4( k, : ) ] = QuadDouble.QDDivDouble( t1, t2, t3, t4, L( k, k ) );
+                    [ t1, t2, t3, t4 ] = QuadDouble.QDPlusQD( v.v1.v1( k, : ), v.v1.v2( k, : ), v.v2.v1( k, : ), v.v2.v2( k, : ), -t.v1.v1, -t.v1.v2, -t.v2.v1, -t.v2.v2 );
+                    [ v.v1.v1( k, : ), v.v1.v2( k, : ), v.v2.v1( k, : ), v.v2.v2( k, : ) ] = QuadDouble.QDDivDouble( t1, t2, t3, t4, L( k, k ) );
                 end
             end
         end
@@ -2531,41 +2543,41 @@ classdef QuadDouble
             if vm < n
                 v = [ v; zeros( n - vm, vn ) ];
             elseif vm > n
-                v.v1( ( n+1 ):vm, : ) = [];
-                v.v2( ( n+1 ):vm, : ) = [];
-                v.v3( ( n+1 ):vm, : ) = [];
-                v.v4( ( n+1 ):vm, : ) = [];
+                v.v1.v1( ( n+1 ):vm, : ) = [];
+                v.v1.v2( ( n+1 ):vm, : ) = [];
+                v.v2.v1( ( n+1 ):vm, : ) = [];
+                v.v2.v2( ( n+1 ):vm, : ) = [];
             end
             if isa( U, 'QuadDouble' )
-                [ v.v1( mn, : ), v.v2( mn, : ), v.v3( mn, : ), v.v4( mn, : ) ] = QuadDouble.QDDivQD( v.v1( mn, : ), v.v2( mn, : ), v.v3( mn, : ), v.v4( mn, : ), U.v1( mn, mn ), U.v2( mn, mn ), U.v3( mn, mn ), U.v4( mn, mn ) );
+                [ v.v1.v1( mn, : ), v.v1.v2( mn, : ), v.v2.v1( mn, : ), v.v2.v2( mn, : ) ] = QuadDouble.QDDivQD( v.v1.v1( mn, : ), v.v1.v2( mn, : ), v.v2.v1( mn, : ), v.v2.v2( mn, : ), U.v1.v1( mn, mn ), U.v1.v2( mn, mn ), U.v2.v1( mn, mn ), U.v2.v2( mn, mn ) );
                 for k = mn - 1 : -1 : 1
                     j = k + 1 : n;
-                    [ t1, t2, t3, t4 ] = QuadDouble.QDTimesQD( v.v1( j, : ), v.v2( j, : ), v.v3( j, : ), v.v4( j, : ), U.v1( k, j ).', U.v2( k, j ).', U.v3( k, j ).', U.v4( k, j ).' );
+                    [ t1, t2, t3, t4 ] = QuadDouble.QDTimesQD( v.v1.v1( j, : ), v.v1.v2( j, : ), v.v2.v1( j, : ), v.v2.v2( j, : ), U.v1.v1( k, j ).', U.v1.v2( k, j ).', U.v2.v1( k, j ).', U.v2.v2( k, j ).' );
                     t = QuadDouble.Sum( QuadDouble.Make( t1, t2, t3, t4 ), 1 );
-                    [ t1, t2, t3, t4 ] = QuadDouble.QDPlusQD( v.v1( k, : ), v.v2( k, : ), v.v3( k, : ), v.v4( k, : ), -t.v1, -t.v2, -t.v3, -t.v4 );
-                    [ v.v1( k, : ), v.v2( k, : ), v.v3( k, : ), v.v4( k, : ) ] = QuadDouble.QDDivQD( t1, t2, t3, t4, U.v1( k, k ), U.v2( k, k ), U.v3( k, k ), U.v4( k, k ) );
+                    [ t1, t2, t3, t4 ] = QuadDouble.QDPlusQD( v.v1.v1( k, : ), v.v1.v2( k, : ), v.v2.v1( k, : ), v.v2.v2( k, : ), -t.v1.v1, -t.v1.v2, -t.v2.v1, -t.v2.v2 );
+                    [ v.v1.v1( k, : ), v.v1.v2( k, : ), v.v2.v1( k, : ), v.v2.v2( k, : ) ] = QuadDouble.QDDivQD( t1, t2, t3, t4, U.v1.v1( k, k ), U.v1.v2( k, k ), U.v2.v1( k, k ), U.v2.v2( k, k ) );
                 end
             else
-                [ v.v1( mn, : ), v.v2( mn, : ), v.v3( mn, : ), v.v4( mn, : ) ] = QuadDouble.QDDivDouble( v.v1( mn, : ), v.v2( mn, : ), v.v3( mn, : ), v.v4( mn, : ), U( mn, mn ) );
+                [ v.v1.v1( mn, : ), v.v1.v2( mn, : ), v.v2.v1( mn, : ), v.v2.v2( mn, : ) ] = QuadDouble.QDDivDouble( v.v1.v1( mn, : ), v.v1.v2( mn, : ), v.v2.v1( mn, : ), v.v2.v2( mn, : ), U( mn, mn ) );
                 for k = mn - 1 : -1 : 1
                     j = k + 1 : n;
-                    [ t1, t2, t3, t4 ] = QuadDouble.QDTimesDouble( v.v1( j, : ), v.v2( j, : ), v.v3( j, : ), v.v4( j, : ), U( k, j ).' );
+                    [ t1, t2, t3, t4 ] = QuadDouble.QDTimesDouble( v.v1.v1( j, : ), v.v1.v2( j, : ), v.v2.v1( j, : ), v.v2.v2( j, : ), U( k, j ).' );
                     t = QuadDouble.Sum( QuadDouble.Make( t1, t2, t3, t4 ), 1 );
-                    [ t1, t2, t3, t4 ] = QuadDouble.QDPlusQD( v.v1( k, : ), v.v2( k, : ), v.v3( k, : ), v.v4( k, : ), -t.v1, -t.v2, -t.v3, -t.v4 );
-                    [ v.v1( k, : ), v.v2( k, : ), v.v3( k, : ), v.v4( k, : ) ] = QuadDouble.QDDivDouble( t1, t2, t3, t4, U( k, k ) );
+                    [ t1, t2, t3, t4 ] = QuadDouble.QDPlusQD( v.v1.v1( k, : ), v.v1.v2( k, : ), v.v2.v1( k, : ), v.v2.v2( k, : ), -t.v1.v1, -t.v1.v2, -t.v2.v1, -t.v2.v2 );
+                    [ v.v1.v1( k, : ), v.v1.v2( k, : ), v.v2.v1( k, : ), v.v2.v2( k, : ) ] = QuadDouble.QDDivDouble( t1, t2, t3, t4, U( k, k ) );
                 end
             end
         end
 
         function v = SinTaylor( v )
-            Threshhold = 0.5 .* abs( v.v1( : ) ) .* QuadDouble.eps.v1;
+            Threshhold = 0.5 .* abs( v.v1.v1( : ) ) .* QuadDouble.eps.v1.v1;
             x = - v .* v;
             r = v;
             for i = 3 : 2 : QuadDouble.NInverseFactorial
                 r = r .* x;
                 t = r .* QuadDouble.Make( QuadDouble.InverseFactorial( i, 1 ), QuadDouble.InverseFactorial( i, 2 ), QuadDouble.InverseFactorial( i, 3 ), QuadDouble.InverseFactorial( i, 4 ) );
                 v = v + t;
-                if all( abs( t.v1( : ) ) <= Threshhold )
+                if all( abs( t.v1.v1( : ) ) <= Threshhold )
                     break
                 end
             end
@@ -2580,19 +2592,19 @@ classdef QuadDouble
     methods ( Static, Access = { ?QuadDouble, ?OctDouble } )
         function v = Make( a1, a2, a3, a4 )
             v = QuadDouble;
-            v.v1 = a1;
+            v.v1.v1 = a1;
             if nargin < 2
                 a2 = zeros( size( a1 ) );
             end
-            v.v2 = a2;
+            v.v1.v2 = a2;
             if nargin < 3
                 a3 = zeros( size( a1 ) );
             end
-            v.v3 = a3;
+            v.v2.v1 = a3;
             if nargin < 4
                 a4 = zeros( size( a1 ) );
             end
-            v.v4 = a4;
+            v.v2.v2 = a4;
         end
 
         function [ s1, s2 ] = Normalize( a1, a2 )
@@ -2921,7 +2933,7 @@ classdef QuadDouble
 
         function v = Index( v, s )
             if isa( v, 'QuadDouble' )
-                v = QuadDouble.Make( v.v1( s ), v.v2( s ), v.v3( s ), v.v4( s ) );
+                v = QuadDouble.Make( v.v1.v1( s ), v.v1.v2( s ), v.v2.v1( s ), v.v2.v2( s ) );
             else
                 v = v( s );
             end
@@ -2931,10 +2943,10 @@ classdef QuadDouble
             if isa( v, 'QuadDouble' ) || isa( x, 'QuadDouble' )
                 v = QuadDouble( v );
                 x = QuadDouble( x );
-                v.v1( s ) = x.v1;
-                v.v2( s ) = x.v2;
-                v.v3( s ) = x.v3;
-                v.v4( s ) = x.v4;
+                v.v1.v1( s ) = x.v1.v1;
+                v.v1.v2( s ) = x.v1.v2;
+                v.v2.v1( s ) = x.v2.v1;
+                v.v2.v2( s ) = x.v2.v2;
             else
                 v( s ) = x;
             end

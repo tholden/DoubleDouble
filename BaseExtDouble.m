@@ -1,0 +1,2837 @@
+classdef (Abstract) BaseExtDouble
+
+    properties ( SetAccess = public, GetAccess = public )
+        v1
+        v2
+    end
+
+    methods (Static)
+        function v = Index( v, idx )
+            if isa( v, 'BaseExtDouble' )
+                s = substruct( '()', { idx } );
+                v1Index = subsref( v.v1, s );
+                v2Index = subsref( v.v2, s );
+                v = v.Make( v1Index, v2Index );
+            else
+                v = v( idx );
+            end
+        end
+
+        function v = Assign( v, idx, val )
+            if ~isa( v, 'BaseExtDouble' )
+                if isempty(v)
+                    v = val;
+                    if isa(v, 'BaseExtDouble')
+                        s = substruct( '()', { idx } );
+                        v.v1 = subsasgn( v.v1, s, 0 );
+                        v.v2 = subsasgn( v.v2, s, 0 );
+                    else
+                        return
+                    end
+                else
+                    v(idx) = val;
+                    return
+                end
+            end
+            if ~isa( val, 'BaseExtDouble' )
+                val = v.promote( val );
+            end
+            s = substruct( '()', { idx } );
+            v.v1 = subsasgn( v.v1, s, val.v1 );
+            v.v2 = subsasgn( v.v2, s, val.v2 );
+        end
+    end
+
+    methods (Abstract)
+        v = Make( z, a1, a2 )
+        v = promote( v, a )
+    end
+
+    methods (Sealed)
+
+        function varargout = ToSumOfDoubles( v )
+            varargout = cell( 1, nargout );
+            [ varargout{:} ] = ToSumOfDoubles( v.v1 );
+            FirstEmpty = find( cellfun( @isempty, varargout, 'UniformOutput', true ), 1, 'first' );
+            if ~isempty( FirstEmpty )
+                [ varargout{ FirstEmpty : nargout } ] = ToSumOfDoubles( v.v2 );
+            end
+        end
+
+
+        function disp( v )
+            if isempty( v.v1 )
+                disp( '     []' );
+            else
+                disp( v.v1 );
+            end
+            disp( '     +' );
+            if isempty( v.v2 )
+                disp( '     []' );
+            else
+                disp( v.v2 );
+            end
+            disp( ' ' );
+        end
+
+        function v = double( v )
+            v = v.v1;
+        end
+
+        function v = isscalar( v )
+            v = isscalar( v.v1 );
+        end
+
+        function v = isreal( v )
+            v = isreal( v.v1 ) && isreal( v.v2 );
+        end
+
+        function v = isnumeric( v )
+            v = isnumeric( v.v1 ) && isnumeric( v.v2 );
+        end
+
+        function v = isfinite( v )
+            v = isfinite( v.v1 ) & isfinite( v.v2 );
+        end
+
+        function v = isinf( v )
+            v = isinf( v.v1 ) | isinf( v.v2 );
+        end
+
+        function v = isnan( v )
+            v = isnan( v.v1 ) | isnan( v.v2 );
+        end
+
+        function v = sparse( i, j, v, m, n, nz )
+            if nargin == 0
+                v = i.Make( sparse( [] ), sparse( [] ) );
+            elseif nargin < 3
+                assert( nargin == 1 );
+                v = i;
+                v.v1 = sparse( v.v1 );
+                v.v2 = sparse( v.v2 );
+            elseif nargin == 3
+                v.v1 = sparse( i, j, v.v1 );
+                v.v2 = sparse( i, j, v.v2 );
+            elseif nargin == 4
+                v.v1 = sparse( i, j, v.v1, m, n );
+                v.v2 = sparse( i, j, v.v2, m, n );
+            else
+                v.v1 = sparse( i, j, v.v1, m, n, nz );
+                v.v2 = sparse( i, j, v.v2, m, n, nz );
+            end
+        end
+
+        function v = any( v, varargin )
+            v = any( v ~= 0, varargin{:} );
+        end
+
+        function v = all( v, varargin )
+            v = all( v ~= 0, varargin{:} );
+        end
+
+        function varargout = find( v, varargin )
+            if nargout == 1
+                varargout{ 1 } = find( v ~= 0, varargin{:} );
+            elseif nargout >= 2
+                [ varargout{ 1 }, varargout{ 2 } ] = find( v ~= 0, varargin{:} );
+                if nargout >= 3
+                    LinearIndex = sub2ind( size( v ), varargout{ 1 }, varargout{ 2 } );
+                    varargout{ 3 } = v.Make( v.v1( LinearIndex ), v.v2( LinearIndex ) );
+                end
+            end
+        end
+
+        function v = real( v )
+            v.v1 = real( v.v1 );
+            v.v2 = real( v.v2 );
+        end
+
+        function v = imag( v )
+            v.v1 = imag( v.v1 );
+            v.v2 = imag( v.v2 );
+        end
+
+        function v = conj( v )
+            v.v1 = conj( v.v1 );
+            v.v2 = conj( v.v2 );
+        end
+
+        function v = angle( v )
+            if isreal( v )
+                Select = v >= 0;
+                v.v1( Select ) = 0;
+                v.v2( Select ) = 0;
+                v.v1( ~Select ) = v.pi.v1;
+                v.v2( ~Select ) = v.pi.v2;
+            else
+                v = atan2( imag( v ), real( v ) );
+            end
+        end
+
+        function [ v, varargout ] = size( v, varargin )
+            v = size( v.v1, varargin{:} );
+            if nargout > 1
+                varargout = num2cell( v( 2:end ) );
+                v = v( 1 );
+            end
+        end
+
+        function v = length( v )
+            v = max( size( v ) );
+        end
+
+        function v = numel( v )
+            v = numel( v.v1 );
+        end
+
+        function n = numArgumentsFromSubscript( v, s, IndexingContext )
+            if strcmp( s(1).type, '.' )
+                n = builtin( 'numArgumentsFromSubscript', v, s, IndexingContext );
+            else
+                n = numArgumentsFromSubscript( v.v1, s, IndexingContext );
+            end
+        end
+
+        function v = end( v, k, n )
+            if n == 1
+                v = numel( v.v1 );
+            else
+                v = size( v.v1 );
+                if k <= length( v )
+                    v = v( k );
+                else
+                    v = 1;
+                end
+            end
+        end
+
+        function v = repmat( v, varargin )
+            v = v.Make( repmat( v.v1, varargin{:} ), repmat( v.v2, varargin{:} ) );
+        end
+
+        function v = reshape( v, varargin )
+            v.v1 = reshape( v.v1, varargin{:} );
+            v.v2 = reshape( v.v2, varargin{:} );
+        end
+
+        function v = isequal( a, b, varargin )
+            if any( size( a ) ~= size( b ) )
+                v = false;
+                return
+            end
+            v = a == b;
+            v = all( v(:) );
+            if nargin > 2
+                for i = 1 : length( varargin )
+                    if ~v
+                        break
+                    end
+                    v = v && isequal( a, varargin{i} );
+                end
+            end
+        end
+
+        function v = isempty( v )
+            if builtin('numel', v) ~= 1
+                v = builtin('isempty', v);
+            else
+                v = isempty( v.v1 );
+            end
+        end
+
+        function v = diag( v, k )
+            if nargin < 2
+                v = v.Make( diag( v.v1 ), diag( v.v2 ) );
+            else
+                v = v.Make( diag( v.v1, k ), diag( v.v2, k ) );
+            end
+        end
+
+        function v = tril( v, k )
+            if nargin < 2
+                v = v.Make( tril( v.v1 ), tril( v.v2 ) );
+            else
+                v = v.Make( tril( v.v1, k ), tril( v.v2, k ) );
+            end
+        end
+
+        function v = triu( v, k )
+            if nargin < 2
+                v = v.Make( triu( v.v1 ), triu( v.v2 ) );
+            else
+                v = v.Make( triu( v.v1, k ), triu( v.v2, k ) );
+            end
+        end
+
+        function v = plus( a, b )
+            if isa( a, 'BaseExtDouble' )
+                v = a.Plus( b );
+            else
+                v = b.Plus( a );
+            end
+        end
+
+        function v = minus( a, b )
+            if isa( a, 'BaseExtDouble' )
+                v = a.Minus( b );
+            else
+                v = -( b.Minus( a ) );
+            end
+        end
+
+        function v = uminus( v )
+            v.v1 = -v.v1;
+            v.v2 = -v.v2;
+        end
+
+        function v = uplus( v )
+        end
+
+        function v = times( a, b )
+            if isa( a, 'BaseExtDouble' )
+                v = a.Times( b );
+            else
+                v = b.Times( a );
+            end
+        end
+
+        function v = mtimes( a, b )
+            if ~isa( a, 'BaseExtDouble' )
+                a = b.promote( a );
+            end
+            if ~isa( b, 'BaseExtDouble' )
+                b = a.promote( b );
+            end
+            v = a.MTimes( b );
+        end
+
+        function v = rdivide( a, b )
+            if isa( a, 'BaseExtDouble' )
+                v = a.RDivide( b );
+            else
+                a = b.promote( a );
+                v = a.RDivide( b );
+            end
+        end
+
+        function v = ldivide( a, b )
+            if isa( b, 'BaseExtDouble' )
+                v = b.RDivide( a );
+            else
+                b = a.promote( b );
+                v = b.RDivide( a );
+            end
+        end
+
+        function v = mldivide( a, v )
+            [ Ra, Ca ] = size( a );
+            [ Rv, Cv ] = size( v );
+            if ( ( Ra == 1 ) && ( Ca == 1 ) ) || ( ( Rv == 1 ) && ( Cv == 1 ) )
+                v = a.LDivide( v );
+                return
+            end
+            if ~isa( v, 'BaseExtDouble' )
+                v = a.promote( v );
+            end
+            assert( Ra == Rv );
+            if Ra ~= Ca
+                [ q, a ] = qr( a );
+                v = q' * v;
+                v = v.BackSubstitution( a );
+                return
+            end
+            if v.IsEqualWithExpansion( triu( a, 1 ), 0 )
+                % Lower triangular
+                v = v.ForwardElimination( a );
+                return
+            elseif v.IsEqualWithExpansion( tril( a, -1 ), 0 )
+                % Upper triangular
+                v = v.BackSubstitution( a );
+                return
+            elseif a.IsEqualWithExpansion( a' )
+                [ L, d ] = ldl( a, 'vector_d' );
+                if all( all( isfinite( L ) ) ) && all( isfinite( d ) )
+                    % Positive definite
+                    v = v.ForwardElimination( L );
+                    v = v ./ d;
+                    v = v.BackSubstitution( L' );
+                    return
+                end
+            end
+            % Triangular factorization
+            [ L, U, p ] = lu( a, 'vector' );
+
+            % Permutation and forward elimination
+            v.v1 = v.v1( p, : );
+            v.v2 = v.v2( p, : );
+            v = v.ForwardElimination( L );
+
+            % Back substitution
+            v = v.BackSubstitution( U );
+        end
+
+        function v = mrdivide( v, a )
+            if ~isa( a, 'BaseExtDouble' )
+                a = v.promote( a );
+            end
+            if ~isa( v, 'BaseExtDouble' )
+                v = a.promote( v );
+            end
+            at = a';
+            vt = v';
+            v = MLDivide(at, vt )';
+        end
+
+        function v = power( a, b )
+            if ~isa( a, 'BaseExtDouble' )
+                a = b.promote( a );
+            end
+            if isa( b, 'BaseExtDouble' )
+                b2 = b.TimesPowerOf2( 2 );
+            else
+                b2 = 2 * b;
+            end
+            bHalfInteger = ( double( b2 ) == b2 ) & ( floor( b2 ) == b2 );
+            if ~any( bHalfInteger )
+                v = exp( b .* log( a ) );
+            else
+                [ a, b, bHalfInteger ] = BaseExtDouble.ExpandSingleton( a, b, bHalfInteger );
+                v = a.ones( size( a ) );
+                bNonHalfInteger = find( ~bHalfInteger );
+                bHalfInteger = find( bHalfInteger );
+                v = BaseExtDouble.Assign( v, bNonHalfInteger, exp( BaseExtDouble.Index( b, bNonHalfInteger ) .* log( BaseExtDouble.Index( a, bNonHalfInteger ) ) ) );
+                a = BaseExtDouble.Index( a, bHalfInteger );
+                b = double( BaseExtDouble.Index( b, bHalfInteger ) );
+                Select = find( b < 0 );
+                a = BaseExtDouble.Assign( a, Select, 1 ./ BaseExtDouble.Index( a, Select ) );
+                b = BaseExtDouble.Assign( b, Select, -b( Select ) );
+                vv =  BaseExtDouble.Index( v, bHalfInteger );
+                Select = find( b ~= floor( b ) );
+                vv = BaseExtDouble.Assign( vv, Select, sqrt( BaseExtDouble.Index( a, Select ) ) );
+                Binary = dec2bin( floor( b ) );
+                N = size( Binary, 2 );
+                Power = a;
+                Select = find( Binary( :, end ) == '1' );
+                vv = BaseExtDouble.Assign( vv, Select, BaseExtDouble.Index( a, Select ) );
+                for n = 2 : N
+                    Power = Power .* Power;
+                    Select = find( Binary( :, end + 1 - n ) == '1' );
+                    vv = BaseExtDouble.Assign( vv, Select, BaseExtDouble.Index( vv, Select ) .* BaseExtDouble.Index( Power, Select ) );
+                end
+                v = BaseExtDouble.Assign( v, bHalfInteger, vv );
+            end
+        end
+
+        function v = mpower( a, b )
+            na = numel( a );
+            nb = numel( b );
+            if na <= 1
+                if nb <= 1
+                    v = a .^ b;
+                else
+                    [ v, d ] = eig( b );
+                    d = diag( d );
+                    assert( length( unique( d.v1 ) ) == length( d.v1 ) );
+                    v = v * diag( a .^ d ) / v;
+                end
+            else
+                if nb == 1
+                    [ v, d ] = eig( a );
+                    d = diag( d );
+                    assert( length( unique( d.v1 ) ) == length( d.v1 ) );
+                    v = v * diag( d .^ b ) / v;
+                else
+                    v = DoubleDouble;
+                end
+            end
+        end
+
+        function v = lt( a, b )
+            if isa( a, 'BaseExtDouble' )
+                a1 = a.v1;
+                a2 = a.v2;
+            else
+                a1 = a;
+                a2 = 0;
+            end
+            if isa( b, 'BaseExtDouble' )
+                b1 = b.v1;
+                b2 = b.v2;
+            else
+                b1 = b;
+                b2 = 0;
+            end
+            v = ( a1 < b1 ) | ( ( a1 == b1 ) & ( a2 < b2 ) );
+        end
+
+        function v = gt( a, b )
+            if isa( a, 'BaseExtDouble' )
+                a1 = a.v1;
+                a2 = a.v2;
+            else
+                a1 = a;
+                a2 = 0;
+            end
+            if isa( b, 'BaseExtDouble' )
+                b1 = b.v1;
+                b2 = b.v2;
+            else
+                b1 = b;
+                b2 = 0;
+            end
+            v = ( a1 > b1 ) | ( ( a1 == b1 ) & ( a2 > b2 ) );
+        end
+
+        function v = le( a, b )
+            if isa( a, 'BaseExtDouble' )
+                a1 = a.v1;
+                a2 = a.v2;
+            else
+                a1 = a;
+                a2 = 0;
+            end
+            if isa( b, 'BaseExtDouble' )
+                b1 = b.v1;
+                b2 = b.v2;
+            else
+                b1 = b;
+                b2 = 0;
+            end
+            v = ( a1 < b1 ) | ( ( a1 == b1 ) & ( a2 <= b2 ) );
+        end
+
+        function v = ge( a, b )
+            if isa( a, 'BaseExtDouble' )
+                a1 = a.v1;
+                a2 = a.v2;
+            else
+                a1 = a;
+                a2 = 0;
+            end
+            if isa( b, 'BaseExtDouble' )
+                b1 = b.v1;
+                b2 = b.v2;
+            else
+                b1 = b;
+                b2 = 0;
+            end
+            v = ( a1 > b1 ) | ( ( a1 == b1 ) & ( a2 >= b2 ) );
+        end
+
+        function v = ne( a, b )
+            if isa( a, 'BaseExtDouble' )
+                a1 = a.v1;
+                a2 = a.v2;
+            else
+                a1 = a;
+                a2 = 0;
+            end
+            if isa( b, 'BaseExtDouble' )
+                b1 = b.v1;
+                b2 = b.v2;
+            else
+                b1 = b;
+                b2 = 0;
+            end
+            v = ( a1 ~= b1 ) | ( a2 ~= b2 );
+        end
+
+        function v = eq( a, b )
+            if isa( a, 'BaseExtDouble' )
+                a1 = a.v1;
+                a2 = a.v2;
+            else
+                a1 = a;
+                a2 = 0;
+            end
+            if isa( b, 'BaseExtDouble' )
+                b1 = b.v1;
+                b2 = b.v2;
+            else
+                b1 = b;
+                b2 = 0;
+            end
+            v = ( a1 == b1 ) & ( ~isfinite( a1 ) | ( a2 == b2 ) );
+        end
+
+        function v = colon( a, d, b )
+            if nargin < 3
+                b = d;
+                d = 1;
+            end
+            if ~isa( a, 'BaseExtDouble' )
+                a = a.promote( a );
+            end
+            if ~isa( b, 'BaseExtDouble' )
+                b = a.promote( b );
+            end
+            if ~isa( d, 'DoubleDouble' )
+                d = a.promote( d );
+            end
+            c = double( floor( ( b - a ) ./ d ) );
+            v = a + ( 0:c ) .* d;
+        end
+
+        function v = ctranspose( v )
+            v.v1 = v.v1';
+            v.v2 = v.v2';
+        end
+
+        function v = transpose( v )
+            v.v1 = v.v1.';
+            v.v2 = v.v2.';
+        end
+
+        function v = permute( v, DimOrder )
+            v.v1 = permute( v.v1, DimOrder );
+            v.v2 = permute( v.v2, DimOrder );
+        end
+
+        function v = ipermute( v, DimOrder )
+            v.v1 = ipermute( v.v1, DimOrder );
+            v.v2 = ipermute( v.v2, DimOrder );
+        end
+
+        function v = horzcat( a, b, varargin )
+            if nargin > 2
+                v = horzcat( horzcat( a, b ), varargin{:} );
+            else
+                if ~isa( a, 'BaseExtDouble' )
+                    a = b.promote( a );
+                end
+                if ~isa( b, 'BaseExtDouble' )
+                    b = a.promote( b );
+                end
+                x1 = [ a.v1, b.v1 ];
+                x2 = [ a.v2, b.v2 ];
+                v = a.Make( x1, x2 );
+            end
+        end
+
+        function v = vertcat( a, b, varargin )
+            if nargin > 2
+                v = vertcat( vertcat( a, b ), varargin{:} );
+            else
+                if ~isa( a, 'BaseExtDouble' )
+                    a = b.promote( a );
+                end
+                if ~isa( b, 'BaseExtDouble' )
+                    b = a.promote( b );
+                end
+                x1 = [ a.v1; b.v1 ];
+                x2 = [ a.v2; b.v2 ];
+                v = a.Make( x1, x2 );
+            end
+        end
+
+
+
+
+        function varargout = subsref( v, s )
+
+            if strcmp( s(1).type, '.' )
+                if length(s) > 1
+                    try
+                        temp = builtin('subsref', v, s(1));
+                        [ varargout{ 1 : nargout } ] = subsref( temp, s(2:end) );
+                    catch e
+                        disp('Error in split subsref:');
+                        disp(s(1));
+                        disp(s(2));
+                        rethrow(e);
+                    end
+                else
+                    [ varargout{ 1 : nargout } ] = builtin( 'subsref', v, s );
+                end
+            else
+                v.v1 = subsref( v.v1, s );
+                v.v2 = subsref( v.v2, s );
+                varargout{ 1 } = v;
+            end
+        end
+
+        function v = subsasgn( v, s, b )
+            if strcmp( s(1).type, '.' )
+                if length(s) > 1
+                    temp = builtin('subsref', v, s(1));
+                    temp = subsasgn( temp, s(2:end), b );
+                    v = builtin( 'subsasgn', v, s(1), temp );
+                else
+                    v = builtin( 'subsasgn', v, s, b );
+                end
+            else
+                if ~isa( v, 'BaseExtDouble' )
+                    v = b.promote( v );
+                end
+                if ~isa( b, 'BaseExtDouble' )
+                    b = v.promote( b );
+                end
+                v.v1 = subsasgn( v.v1, s, b.v1 );
+                v.v2 = subsasgn( v.v2, s, b.v2 );
+            end
+        end
+
+        function v = subsindex( v )
+            v = v.v1;
+        end
+
+        function [ v, Indices ] = sort( v, varargin )
+            DimIndex = find( cellfun( @isnumeric, varargin ), 1 );
+            if isempty( DimIndex )
+                Dim = [];
+            else
+                Dim = varargin{ DimIndex };
+                varargin = varargin( [ 1 : ( DimIndex - 1 ), ( DimIndex + 1 ) : end ] );
+            end
+            CMIndex = find( strcmpi( varargin, 'ComparisonMethod' ), 1 );
+            if isempty( CMIndex )
+                cm = [];
+            else
+                cm = varargin{ CMIndex + 1 };
+                varargin = varargin( [ 1 : ( CMIndex - 1 ), ( CMIndex + 2 ) : end ] );
+            end
+            if nargin < 2 || isempty( Dim )
+                Dim = find( size( v.v1 ) > 1, 1 );
+                if isempty( Dim )
+                    Dim = 1;
+                end
+            end
+            if nargin < 3 || isempty( cm )
+                cm = 'auto';
+            end
+            if isa( v, 'BaseExtDouble' )
+                if strcmpi( cm( 1 ), 'r' )
+                    a = real( v );
+                    b = imag( v );
+                elseif ( length( cm ) > 1 ) && strcmpi( cm( 1 : 2 ), 'ab' )
+                    a = abs( v );
+                    b = angle( v );
+                else
+                    if isreal( v )
+                        a = real( v );
+                        b = imag( v );
+                    else
+                        a = abs( v );
+                        b = angle( v );
+                    end
+                end
+                Size = size( v.v1 );
+                if any( Size == 0 )
+                    Indices = [];
+                    return
+                end
+                Blocks = arrayfun( @( x ) ones( x, 1 ), Size, 'UniformOutput', false );
+                Blocks{ Dim } = Size( Dim );
+                xv1 = mat2cell( v.v1, Blocks{:} );
+                xv2 = mat2cell( v.v2, Blocks{:} );
+                xa1 = mat2cell( a.v1, Blocks{:} );
+                xa2 = mat2cell( a.v2, Blocks{:} );
+                xb1 = mat2cell( b.v1, Blocks{:} );
+                xb2 = mat2cell( b.v2, Blocks{:} );
+                Indices = cell( size( xv1 ) );
+                for i = 1 : numel( xv1 )
+                    [ ~, Indices{ i } ] = sortrows( [ xa1{ i }(:), xa2{ i }(:), xb1{ i }(:), xb2{ i }(:) ], varargin{:} );
+                    xv1{ i } = xv1{ i }( Indices{ i } );
+                    xv2{ i } = xv2{ i }( Indices{ i } );
+                end
+                Indices = cell2mat( Indices );
+                v       = v.Make( cell2mat( xv1 ), cell2mat( xv2 ) );
+            else
+                if nargout > 1
+                    [ v, Indices ] = sort( v, Dim, 'ComparisonMethod', cm, varargin{:} );
+                else
+                    v = sort( v, Dim, 'ComparisonMethod', cm, varargin{:} );
+                end
+                v = v.promote( v );
+            end
+        end
+
+        function v = sum( v, Dim )
+            if nargin < 2
+                Dim = [];
+            end
+            if isa( v, 'BaseExtDouble' )
+                if nargin < 2 || isempty( Dim )
+                    Dim = find( size( v.v1 ) > 1, 1 );
+                    if isempty( Dim )
+                        Dim = 1;
+                    end
+                end
+                Size = size( v.v1 );
+                Length = Size( Dim );
+                if Length == 0
+                    Size = max( 1, Size );
+                    v = v.Make( zeros( Size ), zeros( Size ) );
+                    return
+                end
+                Blocks = num2cell( Size );
+                Blocks{ Dim } = ones( Length, 1 );
+                x1 = mat2cell( v.v1, Blocks{:} );
+                x2 = mat2cell( v.v2, Blocks{:} );
+                s = v.Make( x1{ 1 }, x2{ 1 } );
+                for i = 2 : Length
+                    s = s.Plus( v.Make( x1{ i }, x2{ i } ) );
+                end
+            else
+                if nargin < 2 || isempty( Dim )
+                    Dim = find( size( v ) > 1, 1 );
+                    if isempty( Dim )
+                        Dim = 1;
+                    end
+                end
+                Size = size( v );
+                Length = Size( Dim );
+                if Length == 0
+                    Size = max( 1, Size );
+                    v = v.Make( zeros( Size ), zeros( Size ) );
+                    return
+                end
+                Blocks = num2cell( Size );
+                Blocks{ Dim } = ones( Length, 1 );
+                x = mat2cell( v, Blocks{:} );
+                s = x{ 1 };
+                for i = 2 : Length
+                    s = s.Plus( x{ i } );
+                end
+            end
+            v = s;
+        end
+
+        function v = prod( v, Dim )
+            if nargin < 2
+                Dim = [];
+            end
+            if isa( v, 'BaseExtDouble' )
+                if nargin < 2 || isempty( Dim )
+                    Dim = find( size( v.v1 ) > 1, 1 );
+                    if isempty( Dim )
+                        Dim = 1;
+                    end
+                end
+                Size = size( v.v1 );
+                Length = Size( Dim );
+                if Length == 0
+                    Size = max( 1, Size );
+                    v = v.Make( ones( Size ), zeros( Size ) );
+                    return
+                end
+                Blocks = num2cell( Size );
+                Blocks{ Dim } = ones( Length, 1 );
+                x1 = mat2cell( v.v1, Blocks{:} );
+                x2 = mat2cell( v.v2, Blocks{:} );
+                s = v.Make( x1{ 1 }, x2{ 1 } );
+                for i = 2 : Length
+                    s = s.Times( v.Make( x1{ i }, x2{ i } ) );
+                end
+            else
+                if nargin < 2 || isempty( Dim )
+                    Dim = find( size( v ) > 1, 1 );
+                    if isempty( Dim )
+                        Dim = 1;
+                    end
+                end
+                Size = size( v );
+                Length = Size( Dim );
+                if Length == 0
+                    Size = max( 1, Size );
+                    v = v.Make( ones( Size ), zeros( Size ) );
+                    return
+                end
+                Blocks = num2cell( Size );
+                Blocks{ Dim } = ones( Length, 1 );
+                x = mat2cell( v, Blocks{:} );
+                s = x{ 1 };
+                for i = 2 : Length
+                    s = s.Times( x{ i } );
+                end
+            end
+            v = s;
+        end
+
+        function [ s, i ] = max( a, b, Dim )
+            if nargin < 3
+                Dim = [];
+                if nargin < 2
+                    b = [];
+                end
+            end
+            if isempty( b )
+                if isempty( a )
+                    s = a.Make(0,0); s = s(zeros(0,1));
+                    i = [];
+                    return
+                end
+                if isa( a, 'BaseExtDouble' )
+                    if nargin < 3 || isempty( Dim )
+                        Dim = find( size( a.v1 ) > 1, 1 );
+                        if isempty( Dim )
+                            Dim = 1;
+                        end
+                    end
+                    Size = size( a.v1 );
+                    Length = Size( Dim );
+                    Blocks = num2cell( Size );
+                    Blocks{ Dim } = ones( Length, 1 );
+                    x1 = mat2cell( a.v1, Blocks{:} );
+                    x2 = mat2cell( a.v2, Blocks{:} );
+                    s = a.Make( x1{ 1 }, x2{ 1 } );
+                    Size( Dim ) = 1;
+                    i = ones( Size );
+                    for j = 2 : Length
+                        [ s, ii ] = max( a.Make( x1{ j }, x2{ j } ), s );
+                        i( ii ) = j;
+                    end
+                else
+                    if nargin < 3 || isempty( Dim )
+                        Dim = find( size( a ) > 1, 1 );
+                        if isempty( Dim )
+                            Dim = 1;
+                        end
+                    end
+                    Size = size( a );
+                    Length = Size( Dim );
+                    Blocks = num2cell( Size );
+                    Blocks{ Dim } = ones( Length, 1 );
+                    x = mat2cell( a, Blocks{:} );
+                    s = x{ 1 };
+                    for j = 2 : Length
+                        s = max( s, x{ j } );
+                    end
+                end
+            else
+                if ~isa( a, 'BaseExtDouble' )
+                    a = b.promote( a );
+                end
+                if ~isa( b, 'BaseExtDouble' )
+                    b = a.promote( b );
+                end
+                [ a, b ] = BaseExtDouble.ExpandSingleton( a, b );
+                i = ( a.v1 > b.v1 ) | ( ( a.v1 == b.v1 ) & ( a.v2 > b.v2 ) );
+                s = b;
+                s.v1( i ) = a.v1( i );
+                s.v2( i ) = a.v2( i );
+            end
+        end
+
+        function [ s, i ] = min( a, b, Dim )
+            if nargin < 3
+                Dim = [];
+                if nargin < 2
+                    b = [];
+                end
+            end
+            if isempty( b )
+                if isa( a, 'BaseExtDouble' )
+                    if nargin < 3 || isempty( Dim )
+                        Dim = find( size( a.v1 ) > 1, 1 );
+                        if isempty( Dim )
+                            Dim = 1;
+                        end
+                    end
+                    Size = size( a.v1 );
+                    Length = Size( Dim );
+                    Blocks = num2cell( Size );
+                    Blocks{ Dim } = ones( Length, 1 );
+                    x1 = mat2cell( a.v1, Blocks{:} );
+                    x2 = mat2cell( a.v2, Blocks{:} );
+                    s = a.Make( x1{ 1 }, x2{ 1 } );
+                    Size( Dim ) = 1;
+                    i = ones( Size );
+                    for j = 2 : Length
+                        [ s, ii ] = min( a.Make( x1{ j }, x2{ j } ), s );
+                        i( ii ) = j;
+                    end
+                else
+                    if nargin < 3 || isempty( Dim )
+                        Dim = find( size( a ) > 1, 1 );
+                        if isempty( Dim )
+                            Dim = 1;
+                        end
+                    end
+                    Size = size( a );
+                    Length = Size( Dim );
+                    Blocks = num2cell( Size );
+                    Blocks{ Dim } = ones( Length, 1 );
+                    x = mat2cell( a, Blocks{:} );
+                    s = x{ 1 };
+                    for j = 2 : Length
+                        s = min( s, x{ j } );
+                    end
+                end
+            else
+                if ~isa( a, 'BaseExtDouble' )
+                    a = b.promote( a );
+                end
+                if ~isa( b, 'BaseExtDouble' )
+                    b = a.promote( b );
+                end
+                [ a, b ] = BaseExtDouble.ExpandSingleton( a, b );
+                i = ( a.v1 < b.v1 ) | ( ( a.v1 == b.v1 ) & ( a.v2 < b.v2 ) );
+                s = b;
+                s.v1( i ) = a.v1( i );
+                s.v2( i ) = a.v2( i );
+            end
+        end
+
+        function v = cumsum( v, Dim )
+            if nargin < 2
+                Dim = [];
+            end
+            if isa( v, 'BaseExtDouble' )
+                if nargin < 2 || isempty( Dim )
+                    Dim = find( size( v.v1 ) > 1, 1 );
+                    if isempty( Dim )
+                        Dim = 1;
+                    end
+                end
+                Size = size( v.v1 );
+                Length = Size( Dim );
+                if Length == 0
+                    v = v.Make( zeros( Size ), zeros( Size ) );
+                    return
+                end
+                Blocks = num2cell( Size );
+                Blocks{ Dim } = ones( Length, 1 );
+                x1 = mat2cell( v.v1, Blocks{:} );
+                x2 = mat2cell( v.v2, Blocks{:} );
+                s = v.Make( x1{ 1 }, x2{ 1 } );
+                c1 = cell( size( x1 ) );
+                c2 = cell( size( x2 ) );
+                c1{1} = s.v1;
+                c2{1} = s.v2;
+                for i = 2 : Length
+                    s = s.Plus( v.Make( x1{ i }, x2{ i } ) );
+                    c1{i} = s.v1;
+                    c2{i} = s.v2;
+                end
+            else
+                if nargin < 2 || isempty( Dim )
+                    Dim = find( size( v ) > 1, 1 );
+                    if isempty( Dim )
+                        Dim = 1;
+                    end
+                end
+                Size = size( v );
+                Length = Size( Dim );
+                if Length == 0
+                    v = v.Make( zeros( Size ), zeros( Size ) );
+                    return
+                end
+                Blocks = num2cell( Size );
+                Blocks{ Dim } = ones( Length, 1 );
+                x = mat2cell( v, Blocks{:} );
+                s = x{ 1 };
+                c1 = cell( size( x ) );
+                c2 = cell( size( x ) );
+                c1{1} = s;
+                c2{1} = zeros( size( s ) );
+                for i = 2 : Length
+                    s = s.Plus( x{ i } );
+                    c1{i} = s.v1;
+                    c2{i} = s.v2;
+                end
+            end
+            v = v.Make( cell2mat( c1 ), cell2mat( c2 ) );
+        end
+
+        function v = diff( v, Dim )
+            if nargin < 2
+                Dim = [];
+            end
+            if isa( v, 'BaseExtDouble' )
+                if nargin < 2 || isempty( Dim )
+                    Dim = find( size( v.v1 ) > 1, 1 );
+                    if isempty( Dim )
+                        Dim = 1;
+                    end
+                end
+                Size = size( v.v1 );
+                Length = Size( Dim );
+                if Length == 0
+                    v = v.Make( zeros( Size ), zeros( Size ) );
+                    return
+                end
+                Blocks = num2cell( Size );
+                Blocks{ Dim } = ones( Length, 1 );
+                x1 = mat2cell( v.v1, Blocks{:} );
+                x2 = mat2cell( v.v2, Blocks{:} );
+                s = v.Make( x1{ 1 }, x2{ 1 } );
+                c1 = cell( size( x1 ) );
+                c2 = cell( size( x2 ) );
+                c1{1} = [];
+                c2{1} = [];
+                for i = 2 : Length
+                    t = v.Make( x1{ i }, x2{ i } );
+                    d = t.Minus( s );
+                    c1{i} = d.v1;
+                    c2{i} = d.v2;
+                    s = t;
+                end
+            else
+                if nargin < 2 || isempty( Dim )
+                    Dim = find( size( v ) > 1, 1 );
+                    if isempty( Dim )
+                        Dim = 1;
+                    end
+                end
+                Size = size( v );
+                Length = Size( Dim );
+                if Length == 0
+                    v = v.Make( zeros( Size ), zeros( Size ) );
+                    return
+                end
+                Blocks = num2cell( Size );
+                Blocks{ Dim } = ones( Length, 1 );
+                x = mat2cell( v, Blocks{:} );
+                s = x{ 1 };
+                c1 = cell( size( x ) );
+                c2 = cell( size( x ) );
+                c1{1} = [];
+                c2{1} = [];
+                for i = 2 : Length
+                    t = x{ i };
+                    d = t.Minus( s );
+                    c1{i} = d.v1;
+                    c2{i} = d.v2;
+                    s = t;
+                end
+            end
+            v = v.Make( cell2mat( c1 ), cell2mat( c2 ) );
+        end
+
+        function v = cumprod( v, Dim )
+            if nargin < 2
+                Dim = [];
+            end
+            if isa( v, 'BaseExtDouble' )
+                if nargin < 2 || isempty( Dim )
+                    Dim = find( size( v.v1 ) > 1, 1 );
+                    if isempty( Dim )
+                        Dim = 1;
+                    end
+                end
+                Size = size( v.v1 );
+                Length = Size( Dim );
+                if Length == 0
+                    v = v.Make( zeros( Size ), zeros( Size ) );
+                    return
+                end
+                Blocks = num2cell( Size );
+                Blocks{ Dim } = ones( Length, 1 );
+                x1 = mat2cell( v.v1, Blocks{:} );
+                x2 = mat2cell( v.v2, Blocks{:} );
+                s = v.Make( x1{ 1 }, x2{ 1 } );
+                c1 = cell( size( x1 ) );
+                c2 = cell( size( x2 ) );
+                c1{1} = s.v1;
+                c2{1} = s.v2;
+                for i = 2 : Length
+                    s = s.Times( v.Make( x1{ i }, x2{ i } ) );
+                    c1{i} = s.v1;
+                    c2{i} = s.v2;
+                end
+            else
+                if nargin < 2 || isempty( Dim )
+                    Dim = find( size( v ) > 1, 1 );
+                    if isempty( Dim )
+                        Dim = 1;
+                    end
+                end
+                Size = size( v );
+                Length = Size( Dim );
+                if Length == 0
+                    v = v.Make( zeros( Size ), zeros( Size ) );
+                    return
+                end
+                Blocks = num2cell( Size );
+                Blocks{ Dim } = ones( Length, 1 );
+                x = mat2cell( v, Blocks{:} );
+                s = x{ 1 };
+                c1 = cell( size( x ) );
+                c2 = cell( size( x ) );
+                c1{1} = s;
+                c2{1} = zeros( size( s ) );
+                for i = 2 : Length
+                    s = s.Times( x{ i } );
+                    c1{i} = s.v1;
+                    c2{i} = s.v2;
+                end
+            end
+            v = v.Make( cell2mat( c1 ), cell2mat( c2 ) );
+        end
+
+        function v = cummax( v, Dim )
+            if nargin < 3
+                Dim = [];
+            end
+            if isa( v, 'BaseExtDouble' )
+                if nargin < 3 || isempty( Dim )
+                    Dim = find( size( v.v1 ) > 1, 1 );
+                    if isempty( Dim )
+                        Dim = 1;
+                    end
+                end
+                Size = size( v.v1 );
+                Length = Size( Dim );
+                if Length == 0
+                    v = v.Make( zeros( Size ), zeros( Size ) );
+                    return
+                end
+                Blocks = num2cell( Size );
+                Blocks{ Dim } = ones( Length, 1 );
+                x1 = mat2cell( v.v1, Blocks{:} );
+                x2 = mat2cell( v.v2, Blocks{:} );
+                s = v.Make( x1{ 1 }, x2{ 1 } );
+                c1 = cell( size( x1 ) );
+                c2 = cell( size( x2 ) );
+                c1{1} = s.v1;
+                c2{1} = s.v2;
+                for i = 2 : Length
+                    s = s.max( v.Make( x1{ i }, x2{ i } ) );
+                    c1{i} = s.v1;
+                    c2{i} = s.v2;
+                end
+            else
+                if nargin < 3 || isempty( Dim )
+                    Dim = find( size( v ) > 1, 1 );
+                    if isempty( Dim )
+                        Dim = 1;
+                    end
+                end
+                Size = size( v );
+                Length = Size( Dim );
+                if Length == 0
+                    v = v.Make( zeros( Size ), zeros( Size ) );
+                    return
+                end
+                Blocks = num2cell( Size );
+                Blocks{ Dim } = ones( Length, 1 );
+                x = mat2cell( v, Blocks{:} );
+                s = x{ 1 };
+                c1 = cell( size( x ) );
+                c2 = cell( size( x ) );
+                c1{1} = s;
+                c2{1} = zeros( size( s ) );
+                for i = 2 : Length
+                    s = s.max( x{ i } );
+                    c1{i} = s.v1;
+                    c2{i} = s.v2;
+                end
+            end
+            v = v.Make( cell2mat( c1 ), cell2mat( c2 ) );
+        end
+
+        function v = cummin( v, Dim )
+            if nargin < 3
+                Dim = [];
+            end
+            if isa( v, 'BaseExtDouble' )
+                if nargin < 3 || isempty( Dim )
+                    Dim = find( size( v.v1 ) > 1, 1 );
+                    if isempty( Dim )
+                        Dim = 1;
+                    end
+                end
+                Size = size( v.v1 );
+                Length = Size( Dim );
+                if Length == 0
+                    v = v.Make( zeros( Size ), zeros( Size ) );
+                    return
+                end
+                Blocks = num2cell( Size );
+                Blocks{ Dim } = ones( Length, 1 );
+                x1 = mat2cell( v.v1, Blocks{:} );
+                x2 = mat2cell( v.v2, Blocks{:} );
+                s = v.Make( x1{ 1 }, x2{ 1 } );
+                c1 = cell( size( x1 ) );
+                c2 = cell( size( x2 ) );
+                c1{1} = s.v1;
+                c2{1} = s.v2;
+                for i = 2 : Length
+                    s = s.min( v.Make( x1{ i }, x2{ i } ) );
+                    c1{i} = s.v1;
+                    c2{i} = s.v2;
+                end
+            else
+                if nargin < 3 || isempty( Dim )
+                    Dim = find( size( v ) > 1, 1 );
+                    if isempty( Dim )
+                        Dim = 1;
+                    end
+                end
+                Size = size( v );
+                Length = Size( Dim );
+                if Length == 0
+                    v = v.Make( zeros( Size ), zeros( Size ) );
+                    return
+                end
+                Blocks = num2cell( Size );
+                Blocks{ Dim } = ones( Length, 1 );
+                x = mat2cell( v, Blocks{:} );
+                s = x{ 1 };
+                c1 = cell( size( x ) );
+                c2 = cell( size( x ) );
+                c1{1} = s;
+                c2{1} = zeros( size( s ) );
+                for i = 2 : Length
+                    s = s.min( x{ i } );
+                    c1{i} = s.v1;
+                    c2{i} = s.v2;
+                end
+            end
+            v = v.Make( cell2mat( c1 ), cell2mat( c2 ) );
+        end
+
+        function v = dot( a, b, Dim )
+            if nargin < 3
+                Dim = [];
+            end
+            if nargin < 3
+                Dim = [];
+            end
+            if ( length( a ) == numel( a ) ) && ( length( b ) == numel( b ) )
+                a = a.Vec();
+                b = b.Vec();
+            end
+            v = a .* b;
+            v = sum( v, Dim );
+        end
+
+        function v = norm( v, p )
+            if nargin < 2
+                p = 2;
+            end
+            if ( sum( size( v ) ~= 1 ) <= 1 ) || ( numel( p ) ~= 1 )
+                v = abs( v );
+                if ( p == 2 ) || ( numel( p ) ~= 1 )
+                    v = v.Vec();
+                    v = sqrt( sum( v .* v ) );
+                elseif p == Inf
+                    v = max( v );
+                elseif p == -Inf
+                    v = min( v );
+                elseif p == 1
+                    v = sum( v );
+                else
+                    v = ( sum( v .^ p ) ) .^ ( 1 ./ p );
+                end
+            else
+                if ( p == 2 )
+                    v = sqrt( max( eig( v' * v ) ) );
+                elseif p == Inf
+                    v = max( sum( abs( v ), 2 ) );
+                elseif p == 1
+                    v = max( sum( abs( v ), 1 ) );
+                else
+                    v = v.promote( 0 );
+                end
+            end
+        end
+
+        function v = abs( v )
+            if isreal( v )
+                Select = v.v1 < 0;
+                v.v1( Select ) = -v.v1( Select );
+                v.v2( Select ) = -v.v2( Select );
+            else
+                real_v = real( v );
+                imag_v = imag( v );
+                v = sqrt( real_v .* real_v + imag_v .* imag_v );
+            end
+        end
+
+        function v = sign( v )
+            if isreal( v )
+                v = sign( v.v1 );
+            else
+                abs_v = abs( v );
+                [ v.v1, v.v2 ] = v.DDDividedByDD( v.v1, v.v2, abs_v.v1, abs_v.v2, true );
+            end
+        end
+
+        function v = floor( v )
+            x1 = floor( v.v1 );
+            x2 = x1 .* 0;
+            Select = x1 == v.v1;
+            v_sel = BaseExtDouble.Index(v, Select);
+            x2_sel = floor( v_sel.v2 );
+            x2 = BaseExtDouble.Assign(x2, Select, x2_sel);
+            [ x1, x2 ] = v.Normalize( x1, x2 );
+            v = v.Make( x1, x2 );
+        end
+
+        function v = ceil( v )
+            x1 = ceil( v.v1 );
+            x2 = x1 .* 0;
+            Select = x1 == v.v1;
+            v_sel = BaseExtDouble.Index(v, Select);
+            x2_sel = ceil( v_sel.v2 );
+            x2 = BaseExtDouble.Assign(x2, Select, x2_sel);
+            [ x1, x2 ] = v.Normalize( x1, x2 );
+            v = v.Make( x1, x2 );
+        end
+
+        function v = fix( v )
+            x1 = fix( v.v1 );
+            x2 = x1 .* 0;
+            Select = x1 == v.v1;
+            v_sel = BaseExtDouble.Index(v, Select);
+            x2_sel = fix( v_sel.v2 );
+            x2 = BaseExtDouble.Assign(x2, Select, x2_sel);
+            [ x1, x2 ] = v.Normalize( x1, x2 );
+            v = v.Make( x1, x2 );
+        end
+
+        function v = round( v )
+            x1 = round( v.v1 );
+            x2 = x1 .* 0;
+            Select = x1 == v.v1;
+            vSelect = BaseExtDouble.Index(v, Select);
+            x2Select = round( vSelect.v2 );
+            x2 = BaseExtDouble.Assign(x2, Select, x2Select);
+            Select = ( ~Select ) & ( abs( x1 - v.v1 ) == 0.5 ) & ( v.v2 < 0 );
+            x2( Select ) = x2( Select ) - 1;
+            [ x1, x2 ] = v.Normalize( x1, x2 );
+            v = v.Make( x1, x2 );
+        end
+
+        function v = realsqrt( v )
+            Select = v < 0;
+            v.v1( Select ) = NaN;
+            v.v2( Select ) = NaN;
+            Select = v > 0;
+            x = 1 ./ sqrt( v.v1( Select ) );
+            vx = v.v1( Select ) .* x;
+            [ t1_, t2_ ] = v.DoubleTimesDouble( vx, vx );
+            t = v.Make( v.v1( Select ), v.v2( Select ) ) - v.Make( t1_, t2_ );
+            [ t1_, t2_ ] = v.DDPlusDouble( vx, zeros( size( vx ) ), t.v1 .* ( x * 0.5 ) );
+            t = v.Make( t1_, t2_ );
+            v.v1( Select ) = t.v1;
+            v.v2( Select ) = t.v2;
+        end
+
+        function v = sqrt( v )
+            Select = v ~= 0;
+            v_sel = BaseExtDouble.Index(v, Select);
+            x = 1 ./ sqrt( v_sel.v1 );
+            vx = v_sel.v1 .* x;
+            [ t1_, t2_ ] = v.DoubleTimesDouble( vx, vx );
+            t = v_sel - v.Make( t1_, t2_ );
+            [ t1_, t2_ ] = v.DDPlusDouble( vx, zeros( size( vx ) ), t.v1 .* ( x * 0.5 ) );
+            t = v.Make( t1_, t2_ );
+            v = BaseExtDouble.Assign(v, Select, t);
+        end
+
+        function v = sqrtm( v )
+            [ v, d ] = eig( v );
+            d = diag( d );
+            assert( length( unique( d.v1 ) ) == length( d.v1 ) );
+            v = v * diag( sqrt( d ) ) / v;
+        end
+
+        function v = exp( v, expm1Flag )
+            if nargin < 2
+                expm1Flag = false;
+            end
+            if ~isreal( v )
+                [ sin_imag_v, cos_imag_v ] = sincos( imag( v ) );
+                Rotation = cos_imag_v + 1i .* sin_imag_v;
+                if expm1Flag
+                    v = expm1( real( v ) ) .* Rotation + Rotation;
+                else
+                    v = exp( real( v ) ) .* Rotation;
+                end
+                return
+            end
+
+            % Strategy:  We first reduce the size of x by noting that
+            % exp(kr + m * log(2)) = 2^m * exp(r)^k
+            % where m and k are integers.  By choosing m appropriately
+            % we can make |kr| <= log(2) / 2 = 0.347.  Then exp(r) is
+            % evaluated using the familiar Taylor series.  Reducing the
+            % argument substantially speeds up the convergence.
+            k = 512.0;
+            inv_k = 1.0 / k;
+            Threshhold = inv_k .* v.eps.v1;
+
+            m = floor( v.v1 ./ v.log_2.v1 + 0.5 );
+            r = v - v.log_2 .* m;
+            r = r.TimesPowerOf2( inv_k );
+
+            p = r .* r;
+            s = r + p.TimesPowerOf2( 0.5 );
+            p = p .* r;
+            t = p .* v.Make( subsref(v.InverseFactorial, substruct('()', {1, 1})), subsref(v.InverseFactorial, substruct('()', {1, 2})) );
+            for i = 2 : v.NInverseFactorial
+                s = s + t;
+                p = p .* r;
+                t = p .* v.Make( subsref(v.InverseFactorial, substruct('()', {i, 1})), subsref(v.InverseFactorial, substruct('()', {i, 2})) );
+                if all( abs( t.v1(:) ) <= Threshhold )
+                    break
+                end
+            end
+
+            s = s + t;
+
+            s = s.TimesPowerOf2( 2.0 ) + s .* s;
+            s = s.TimesPowerOf2( 2.0 ) + s .* s;
+            s = s.TimesPowerOf2( 2.0 ) + s .* s;
+            s = s.TimesPowerOf2( 2.0 ) + s .* s;
+            s = s.TimesPowerOf2( 2.0 ) + s .* s;
+            s = s.TimesPowerOf2( 2.0 ) + s .* s;
+            s = s.TimesPowerOf2( 2.0 ) + s .* s;
+            s = s.TimesPowerOf2( 2.0 ) + s .* s;
+            s = s.TimesPowerOf2( 2.0 ) + s .* s;
+            if expm1Flag
+                Select = m ~= 0;
+                [ s.v1( Select ), s.v2( Select ) ] = v.DDPlusDouble( s.v1( Select ), s.v2( Select ), 1.0 );
+            else
+                s = s + 1.0;
+            end
+
+            v = v.Make( pow2( s.v1, m ), pow2( s.v2, m ) );
+            if expm1Flag
+                [ v.v1( Select ), v.v2( Select ) ] = v.DDPlusDouble( v.v1( Select ), v.v2( Select ), -1.0 );
+            end
+        end
+
+        function v = expm1( v )
+            v = exp( v, true );
+        end
+
+        function v = expm( v )
+            [ v, d ] = eig( v );
+            d = diag( d );
+            assert( length( unique( d.v1 ) ) == length( d.v1 ) );
+            v = v * diag( exp( d ) ) / v;
+        end
+
+        function x = log( v )
+            x = v.Make( log( v.v1 ), zeros( size( v.v1 ) ) );
+            x = x + v .* exp( -x ) - 1.0;
+            x = x + v .* exp( -x ) - 1.0; % slightly paranoid, but does correct e.g. log(exp(v.promote( -40)))
+        end
+
+        function v = log2( v )
+            v = log( v ) ./ v.log_2;
+        end
+
+        function v = log10( v )
+            v = log( v ) ./ v.log_10;
+        end
+
+        function v = logm( v )
+            [ v, d ] = eig( v );
+            d = diag( d );
+            assert( length( unique( d.v1 ) ) == length( d.v1 ) );
+            v = v * diag( log( d ) ) / v;
+        end
+
+        function v = funm( v, f )
+            [ v, d ] = eig( v );
+            d = diag( d );
+            assert( length( unique( d.v1 ) ) == length( d.v1 ) );
+            v = v * diag( f( d ) ) / v;
+        end
+
+        function [ sin_v, cos_v ] = sincos( v )
+            if ~isreal( v )
+                exp_Piv = exp( v.TimesPowerOf2( 1i ) );
+                exp_Niv = 1 ./ exp_Piv;
+                sin_v = exp_Piv - exp_Niv;
+                sin_v = sin_v.TimesPowerOf2( -0.5i );
+                cos_v = exp_Piv + exp_Niv;
+                cos_v = cos_v.TimesPowerOf2( +0.5 );
+                return
+            end
+            % Strategy.  To compute sin(x), cos(x), we choose integers a, b so that
+            % x = s + a * (pi/2) + b * (pi/16)
+            % and |s| <= pi/32.  Using the fact that
+            % sin(pi/16) = 0.5 * sqrt(2 - sqrt(2 + sqrt(2)))
+            % we can compute sin(x) from sin(s), cos(s).  This greatly increases the convergence of the sine Taylor series.
+
+            z = round( v ./ v.piT2 );
+            r = v - v.piT2 .* z;
+
+            q = floor( r.v1 ./ v.piD2.v1 + 0.5 );
+            t = r - v.piD2 .* q;
+            j = q;
+            abs_j = abs( j );
+
+            q = floor( t.v1 ./ v.piD16.v1 + 0.5 );
+            t = t - v.piD16 .* q;
+            k = q;
+            abs_k = abs( k );
+
+            test = ( j >= -2 ) & ( j <= 2 );
+            assert( all( test(:) ) );
+            test = abs_k <= 4;
+            assert( all( test(:) ) );
+
+            [ sin_t, cos_t ] = t.SinCosTaylor();
+
+            sin_v = sin_t;
+            cos_v = cos_t;
+
+            a = v.Make( v.CosTable( double(abs_k + 1), 1 ), v.CosTable( double(abs_k + 1), 2 ) );
+            b = v.Make( v.SinTable( double(abs_k + 1), 1 ), v.SinTable( double(abs_k + 1), 2 ) );
+
+            a = reshape( a, size( v ) );
+            b = reshape( b, size( v ) );
+
+            a_sin_t = a .* sin_t;
+            b_sin_t = b .* sin_t;
+            a_cos_t = a .* cos_t;
+            b_cos_t = b .* cos_t;
+
+            Select = k > 0;
+            if any(Select(:))
+                a_sin_t_s = BaseExtDouble.Index(a_sin_t, Select);
+                a_cos_t_s = BaseExtDouble.Index(a_cos_t, Select);
+                b_sin_t_s = BaseExtDouble.Index(b_sin_t, Select);
+                b_cos_t_s = BaseExtDouble.Index(b_cos_t, Select);
+                [ t1, t2 ] = v.DDPlusDD( +a_sin_t_s.v1, +a_sin_t_s.v2, +b_cos_t_s.v1, +b_cos_t_s.v2 );
+                sin_v = BaseExtDouble.Assign(sin_v, Select, v.Make(t1, t2));
+                [ t1, t2 ] = v.DDPlusDD( -b_sin_t_s.v1, -b_sin_t_s.v2, +a_cos_t_s.v1, +a_cos_t_s.v2 );
+                cos_v = BaseExtDouble.Assign(cos_v, Select, v.Make(t1, t2));
+            end
+
+            Select = k < 0;
+            if any(Select(:))
+                a_sin_t_s = BaseExtDouble.Index(a_sin_t, Select);
+                a_cos_t_s = BaseExtDouble.Index(a_cos_t, Select);
+                b_sin_t_s = BaseExtDouble.Index(b_sin_t, Select);
+                b_cos_t_s = BaseExtDouble.Index(b_cos_t, Select);
+                [ t1, t2 ] = v.DDPlusDD( +a_sin_t_s.v1, +a_sin_t_s.v2, -b_cos_t_s.v1, -b_cos_t_s.v2 );
+                sin_v = BaseExtDouble.Assign(sin_v, Select, v.Make(t1, t2));
+                [ t1, t2 ] = v.DDPlusDD( +b_sin_t_s.v1, +b_sin_t_s.v2, +a_cos_t_s.v1, +a_cos_t_s.v2 );
+                cos_v = BaseExtDouble.Assign(cos_v, Select, v.Make(t1, t2));
+            end
+
+            Select = j == 1;
+            if any(Select(:))
+                cos_v_s = BaseExtDouble.Index(cos_v, Select);
+                sin_v_s = BaseExtDouble.Index(sin_v, Select);
+                sin_v = BaseExtDouble.Assign(sin_v, Select, cos_v_s);
+                cos_v = BaseExtDouble.Assign(cos_v, Select, -sin_v_s);
+            end
+
+            Select = j == -1;
+            if any(Select(:))
+                cos_v_s = BaseExtDouble.Index(cos_v, Select);
+                sin_v_s = BaseExtDouble.Index(sin_v, Select);
+                sin_v = BaseExtDouble.Assign(sin_v, Select, -cos_v_s);
+                cos_v = BaseExtDouble.Assign(cos_v, Select, sin_v_s);
+            end
+
+            Select = abs_j == 2;
+            if any(Select(:))
+                sin_v_s = BaseExtDouble.Index(sin_v, Select);
+                cos_v_s = BaseExtDouble.Index(cos_v, Select);
+                sin_v = BaseExtDouble.Assign(sin_v, Select, -sin_v_s);
+                cos_v = BaseExtDouble.Assign(cos_v, Select, -cos_v_s);
+            end
+        end
+
+        function v = sin( v )
+            [ v, ~ ] = sincos( v );
+        end
+
+        function v = asin( v )
+            assert( all( abs( v.v1(:) ) <= 1 ) );
+            v = atan2( v, sqrt( max( 1 - v.*v, 0 ) ) );
+        end
+
+        function v = cos( v )
+            [ ~, v ] = sincos( v );
+        end
+
+        function v = acos( v )
+            assert( all( abs( v.v1(:) ) <= 1 ) );
+            v = atan2( sqrt( max( 1 - v.*v, 0 ) ), v );
+        end
+
+        function v = tan( v )
+            [ sin_v, cos_v ] = sincos( v );
+            v = sin_v ./ cos_v;
+        end
+
+        function v = atan( v )
+            v = atan2( v, v.Make( 1, 0 ) );
+        end
+
+        function v = atan2( y, x )
+            r = sqrt( x.*x + y.*y );
+            xx = x ./ r;
+            yy = y ./ r;
+            Select = abs( xx.v1 ) > abs( yy.v1 );
+            v = y.promote( atan2( y.v1, x.v1 ) );
+            [ sin_z, cos_z ] = sincos( v );
+            t = yy;
+
+            if any(Select(:))
+                tSelect = BaseExtDouble.Index(t, Select);
+                sinZSelect = BaseExtDouble.Index(sin_z, Select);
+                cosZSelect = BaseExtDouble.Index(cos_z, Select);
+                [ t1, t2 ] = v.DDPlusDD( tSelect.v1, tSelect.v2, -sinZSelect.v1, -sinZSelect.v2 );
+                [ t1, t2 ] = v.DDDividedByDD( t1, t2, +cosZSelect.v1, +cosZSelect.v2 );
+                t = BaseExtDouble.Assign(t, Select, v.Make(t1, t2));
+            end
+
+            Select = ~Select;
+            if any(Select(:))
+                xxSelect = BaseExtDouble.Index(xx, Select);
+                sinZSelect = BaseExtDouble.Index(sin_z, Select);
+                cosZSelect = BaseExtDouble.Index(cos_z, Select);
+                [ t1, t2 ] = v.DDPlusDD( xxSelect.v1, xxSelect.v2, -cosZSelect.v1, -cosZSelect.v2 );
+                [ t1, t2 ] = v.DDDividedByDD( t1, t2, -sinZSelect.v1, -sinZSelect.v2 );
+                t = BaseExtDouble.Assign(t, Select, v.Make(t1, t2));
+            end
+            v = v + t;
+        end
+
+        function v = sinh( v )
+            exp_v = exp( v );
+            v = exp_v - 1 ./ exp_v;
+            v = v.TimesPowerOf2( 0.5 );
+        end
+
+        function v = asinh( v )
+            v = log( v + sqrt( v.*v + 1 ) );
+        end
+
+        function v = cosh( v )
+            exp_v = exp( v );
+            v = exp_v + 1 ./ exp_v;
+            v = v.TimesPowerOf2( 0.5 );
+        end
+
+        function v = acosh( v )
+            v = log( v + sqrt( v.*v - 1 ) );
+        end
+
+        function [ sinh_v, cosh_v ] = sinhcosh( v )
+            exp_Pv = exp( v );
+            exp_Nv = 1 ./ exp_Pv;
+            sinh_v = exp_Pv - exp_Nv;
+            sinh_v = sinh_v.TimesPowerOf2( 0.5 );
+            cosh_v = exp_Pv + exp_Nv;
+            cosh_v = cosh_v.TimesPowerOf2( 0.5 );
+        end
+
+        function v = tanh( v )
+            [ sinh_v, cosh_v ] = sinhcosh( v );
+            v = sinh_v ./ cosh_v;
+        end
+
+        function v = atanh( v )
+            v = log( ( 1 + v ) ./ ( 1 - v ) );
+            v = v.TimesPowerOf2( 0.5 );
+        end
+
+        function v = mod( v, b )
+            v = v - b .* floor( v ./ b );
+        end
+
+        function v = rem( v, b )
+            v = v - b .* fix( v ./ b );
+        end
+
+        function [ v, U, p ] = lu( v, type )
+            [ m, n ] = size( v );
+            p = 1 : m;
+
+            for k = 1 : min( m, n )
+
+                % Find index of largest element below diagonal in k-th column
+                [ ~, midx ] = max( abs( v.Make( v.v1( k:m, k ), v.v2( k:m, k ) ) ) );
+                midx = midx + k - 1;
+
+                % Skip elimination if column is zero
+                if v.v1( midx, k ) ~= 0 || v.v2( midx, k ) ~= 0
+
+                    % Swap pivot row
+                    if midx ~= k
+                        v.v1( [ k midx ], : ) = v.v1( [ midx k ], : );
+                        v.v2( [ k midx ], : ) = v.v2( [ midx k ], : );
+                        p( [ k midx ] ) = p( [ midx k ] );
+                    end
+
+                    % Compute multipliers
+                    i = k + 1 : m;
+                    [ v.v1( i, k ), v.v2( i, k ) ] = v.DDDividedByDD( v.v1( i, k ), v.v2( i, k ), v.v1( k, k ), v.v2( k, k ) );
+
+                    % Update the remainder of the matrix
+                    j = k + 1 : n;
+                    % A( i, j ) = A( i, j ) - A( i, k ) .* A( k, j );
+                    [ t1, t2 ] = v.DDTimesDD( v.v1( i, k ), v.v2( i, k ), v.v1( k, j ), v.v2( k, j ) );
+                    [ v.v1( i, j ), v.v2( i, j ) ] = v.DDPlusDD( v.v1( i, j ), v.v2( i, j ), -t1, -t2 );
+                end
+            end
+
+            if nargout > 1
+                % Separate result
+                L = tril( v, -1 ) + eye( m, n, 'DoubleDouble' );
+                U = triu( v );
+                if n > m
+                    L.v1 = L.v1( :, 1:m );
+                    L.v2 = L.v2( :, 1:m );
+                elseif n < m
+                    U.v1 = U.v1( 1:n, : );
+                    U.v2 = U.v2( 1:n, : );
+                end
+                v = L;
+
+                if nargout > 2
+                    if nargin < 2 || ~strcmp( type, 'vector' )
+                        pp = eye( m );
+                        pp = pp( p, : );
+                        p = pp;
+                    end
+                else
+                    invp( p ) = 1 : m;
+                    v.v1 = v.v1( invp, : );
+                    v.v2 = v.v2( invp, : );
+                end
+            end
+        end
+
+        function [ q, v ] = qr( v )
+            [ m, n ] = size( v );
+            I = eye( m, 'DoubleDouble' );
+            QT = I;
+            for c = 1 : min( m - 1, n )
+                x = v.Make( v.v1( :, c ), v.v2( :, c ) );
+                x.v1( 1 : ( c - 1 ) ) = 0;
+                x.v2( 1 : ( c - 1 ) ) = 0;
+                alpha = norm( x );
+                sign_x_c = sign( v.Make( x.v1( c ), x.v2( c ) ) );
+                if sign_x_c ~= 0
+                    alpha = -alpha .* sign_x_c;
+                end
+                a = x;
+                [ a.v1( c ), a.v2( c ) ] = v.DDPlusDD( a.v1( c ), a.v2( c ), -alpha.v1, -alpha.v2 );
+                b = a ./ norm( a );
+                if isreal( v )
+                    temp_ = b .* b.';
+                    QTn = I - temp_.TimesPowerOf2( 2 );
+                else
+                    QTn = I - ( 1 + ( x' * b ) ./ ( b' * x ) ) .* ( b .* b' );
+                end
+                QT = QTn * QT;
+                v = QTn * v;
+            end
+            q = QT';
+            v = triu( v );
+        end
+
+        function v = det( v )
+            [ m, n ] = size( v );
+            if m ~= n
+                throw( MException( 'MATLAB:square', 'Matrix must be square.' ) );
+            end
+            [ ~, u, P ] = lu( v );
+            DetP = det( P );
+            if DetP > 0
+                v = prod( diag( u ) );
+            elseif DetP < 0
+                v = -prod( diag( u ) );
+            else
+                v = v.Make( NaN, NaN );
+            end
+        end
+
+        function v = inv( v )
+            n = size( v, 1 );
+            v = v \ v.Make( eye( n ), zeros( n ) );
+        end
+
+        function [ v, p ] = chol( v, type )
+            [ v, d ] = ldl( v, 'vector_d' );
+            v = v .* sqrt( d.' );
+            if any( d < 0 )
+                p = 1;
+            else
+                p = 0;
+            end
+            if nargin < 2 || strcmp( type, 'upper' )
+                v = v.';
+            end
+        end
+
+        function [ L, d ] = ldl( v, type )
+            [ m, n ] = size( v );
+            assert( m == n );
+            L = v.Make( eye( n ), zeros( n ) );
+            x1 = zeros( 1, n );
+            x2 = x1;
+            t1 = x1;
+            t2 = x1;
+            d = v.Make( x1, x1 );
+            x1( 1 ) = v.v1( 1, 1 );
+            x2( 1 ) = v.v2( 1, 1 );
+            d.v1( 1 ) = x1( 1 );
+            d.v2( 1 ) = x2( 1 );
+            idxs = 2 : n;
+            [ L.v1( idxs, 1 ), L.v2( idxs, 1 ) ] = v.DDDividedByDD( v.v1( idxs, 1 ), v.v2( 2 : n, 1 ), x1( 1 ), x2( 1 ) );
+            for j = 2 : n
+                idxs = 1 : j - 1;
+                [ x1( idxs ), x2( idxs ) ] = v.DDTimesDD( conj( L.v1( j, idxs ) ), conj( L.v2( j, idxs ) ), d.v1( idxs ), d.v2( idxs ) );
+                [ t1( idxs ), t2( idxs ) ] = v.DDTimesDD( L.v1( j, idxs ), L.v2( j, idxs ), x1( idxs ), x2( idxs ) );
+                t = sum( v.Make( t1( idxs ), t2( idxs ) ) );
+                [ x1( j ), x2( j ) ] = v.DDPlusDD( v.v1( j, j ), v.v2( j, j ), -t.v1, -t.v2 );
+                d.v1( j ) = x1( j );
+                d.v2( j ) = x2( j );
+                if j < n
+                    jdxs = j + 1 : n;
+                    [ s1, s2 ] = v.DDTimesDD( L.v1( jdxs, idxs ), L.v2( jdxs, idxs ), x1( idxs ), x2( idxs ) );
+                    tt = sum( v.Make( s1, s2 ), 2 );
+                    [ t1( jdxs ), t2( jdxs ) ] = v.DDPlusDD( v.v1( jdxs, j ), v.v2( jdxs, j ), -tt.v1, -tt.v2 );
+                    [ L.v1( jdxs, j ), L.v2( jdxs, j ) ] = v.DDDividedByDD( t1( jdxs ), t2( jdxs ), x1( j ), x2( j ) );
+                end
+            end
+            if nargin < 2 || ~strcmp( type, 'vector_d' )
+                d = diag( d );
+            else
+                d = d.';
+            end
+        end
+
+        function [ v, d ] = eig( x )
+            [ v, d ] = eig( x.v1 );
+            v = x.promote( v );
+            d = x.promote( diag( d ) );
+            C = length( d );
+            I = eye( C, 'DoubleDouble' );
+            for c = 1 : C
+                vi = x.Make( v.v1( :, c ), v.v2( :, c ) );
+                dii = x.Make( d.v1( c, 1 ), d.v2( c, 1 ) );
+                err = Inf;
+                while true
+                    nvi = ( x - dii * I ) \ vi;
+                    nvi = nvi ./ norm( nvi );
+                    if any( ~isfinite( nvi ) )
+                        break
+                    end
+                    vi = nvi;
+                    odii = dii;
+                    xTvi = x * vi;
+                    dii = ( vi' * xTvi ) ./ ( vi' * vi );
+                    oerr = err;
+                    errv = abs( xTvi - dii * vi );
+                    err = sum( errv .* errv );
+                    if err > oerr
+                        % err = oerr;
+                        dii = odii;
+                        break
+                    end
+                    if ( err == 0 ) || ( err == oerr )
+                        break
+                    end
+                end
+                % disp( err );
+                d.v1( c, 1 ) = dii.v1;
+                d.v2( c, 1 ) = dii.v2;
+                v.v1( :, c ) = vi.v1;
+                v.v2( :, c ) = vi.v2;
+            end
+            if nargout < 2
+                v = d;
+            else
+                d = diag( d );
+            end
+        end
+
+        function w = conv( u, v )
+
+            RowVector = size( u, 1 ) == 1 && size( v, 1 ) == 1;
+
+            u = u.Vec();
+            v = u.Vec();
+
+            M = size( u, 1 );
+            N = size( v, 1 );
+
+            K = M + N - 1;
+
+            w = u.zeros( K, 1 );
+
+            for k = 1 : K
+
+                j = max( 1, k + 1 - N ) : min( k, M );
+                i = k - j + 1;
+
+                wk = v.Dot( u.Make( u.v1( j ), u.v2( j ) ), u.Make( v.v1( i ), v.v2( i ) ) );
+                w.v1( k ) = wk.v1;
+                w.v2( k ) = wk.v2;
+
+            end
+
+            if RowVector
+                w = w.';
+            end
+
+        end
+
+        function [ C, ia, ic ] = unique( A, varargin )
+            Rows = strcmpi( varargin, 'rows');
+            if any( Rows )
+                varargin( Rows ) = [];
+                RowFlag = 0;
+            else
+                RowFlag = size( A, 1 ) == 1;
+                A = A.Vec();
+            end
+            Size = size( A );
+            A_orig = A;
+            A = [ A.v1, A.v2 ];
+            [ C, ia, ic ] = unique( A, 'rows', varargin{:} );
+            n = Size( 2 );
+            C = A_orig.Make( C( :, 1:n ), C( :, ( n + 1 ) : ( 2 * n ) ) );
+            if RowFlag
+                C = C.';
+            end
+        end
+
+        function v = mean( v, Dim )
+            if ( nargin < 2 ) || isempty( Dim )
+                Dim = find( size( v.v1 ) > 1, 1 );
+                if isempty( Dim )
+                    Dim = 1;
+                end
+            elseif strcmpi( Dim, 'all' )
+                v = v.Vec();
+                Dim = 1;
+            end
+            Size = size( v.v1 );
+            n = prod( Size( Dim ) );
+            v = sum( v, Dim ) ./ n;
+        end
+
+        function v = median( v, Dim )
+            if ( nargin < 2 ) || isempty( Dim )
+                Dim = find( size( v.v1 ) > 1, 1 );
+                if isempty( Dim )
+                    Dim = 1;
+                end
+            elseif strcmpi( Dim, 'all' )
+                v = v.Vec();
+                Dim = 1;
+            end
+            Size = size( v.v1 );
+            n = prod( Size( Dim ) );
+
+            if n == 0
+                Size( Dim ) = 0;
+                v = v.Make( NaN( Size ), NaN( Size ) );
+                return;
+            end
+
+            NotDim = setdiff( 1 : numel( Size ), Dim );
+            v = reshape( permute( v, [ Dim, NotDim ] ), [ n, Size( NotDim ) ] );
+
+            v = sort( v, 1 );
+
+            if mod( n, 2 ) == 1
+                Middle = ( n + 1 ) * 0.5;
+                v = v.Make( v.v1( Middle, : ), v.v2( Middle, : ) );
+            else
+                Middle1 = n * 0.5;
+                Middle2 = Middle1 + 1;
+                m1 = v.Make( v.v1( Middle1, : ), v.v2( Middle1, : ) );
+                m2 = v.Make( v.v1( Middle2, : ), v.v2( Middle2, : ) );
+                v = 0.5 * ( m1 + m2 );
+            end
+            v = ipermute( reshape( v, [ ones( 1, numel( Dim ) ), Size( NotDim ) ] ), [ Dim, NotDim ] );
+        end
+
+        function v = std( v, varargin )
+            v = sqrt( var( v, varargin{:} ) );
+        end
+
+        function v = var( v, Flag, Dim )
+            if nargin < 3
+                Dim = [];
+                if nargin < 2
+                    Flag = 0;
+                end
+            end
+
+            if isempty( Dim )
+                Dim = find( size( v.v1 ) > 1, 1 );
+                if isempty( Dim )
+                    Dim = 1;
+                end
+            end
+
+            Size = size( v.v1 );
+            n = prod( Size( Dim ) );
+
+            if ( n == 0 ) || ( ( n == 1 ) && ( Flag == 0 ) )
+                Size( Dim ) = 1;
+                v = v.Make( NaN( Size ), NaN( Size ) );
+                return;
+            end
+
+            Mu = mean( v, Dim );
+            v = v - Mu;
+            v = v .* v;
+            v = sum( v, Dim );
+
+            if Flag == 1
+                v = v ./ n;
+            else
+                v = v ./ ( n - 1 );
+            end
+        end
+
+        function [ X, Y ] = meshgrid( x, y )
+            [ X1, Y1 ] = meshgrid( x.v1, y.v1 );
+            [ X2, Y2 ] = meshgrid( x.v2, y.v2 );
+            X = x.Make( X1, X2 );
+            Y = x.Make( Y1, Y2 );
+        end
+
+        function y = linspace( a, b, n )
+            if nargin < 3
+                n = 100;
+            end
+
+            if ~isa( a, 'BaseExtDouble' )
+                a = b.promote( a );
+            end
+
+            if ~isa( b, 'BaseExtDouble' )
+                b = a.promote( b );
+            end
+
+            if n < 1
+                y = a.Make( zeros( 0, 1 ), zeros( 0, 1 ) );
+                return;
+            end
+
+            if n == 1
+                y = b;
+                return;
+            end
+
+            Step = ( b - a ) ./ ( n - 1 );
+            Indices = 0 : ( n - 1 );
+            y = a + Step .* Indices;
+
+            if n > 1
+                y.v1( end ) = b.v1;
+                y.v2( end ) = b.v2;
+            end
+        end
+
+        function v = IsEqualWithExpansion( a, b, varargin )
+            v = a == b;
+            v = all( v(:) );
+            if nargin > 2
+                for i = 1 : length( varargin )
+                    if ~v
+                        break
+                    end
+                    v = v && a.IsEqualWithExpansion( varargin{i} );
+                end
+            end
+        end
+    end
+    methods
+
+        function v = Plus( a, b )
+            if isa( a, 'BaseExtDouble' )
+                if isa( b, 'BaseExtDouble' )
+                    [ x1, x2 ] = DoubleDouble.DDPlusDD( a.v1, a.v2, b.v1, b.v2 );
+                else
+                    [ x1, x2 ] = DoubleDouble.DDPlusDouble( a.v1, a.v2, double( b ) );
+                end
+            else
+                if isa( b, 'BaseExtDouble' )
+                    [ x1, x2 ] = DoubleDouble.DDPlusDouble( b.v1, b.v2, double( a ) );
+                else
+                    [ x1, x2 ] = BaseExtDouble.DoublePlusDouble( double( a ), double( b ) );
+                end
+            end
+            if isa( a, 'BaseExtDouble' )
+                v = a.Make( x1, x2 );
+            else
+                v = b.Make( x1, x2 );
+            end
+        end
+
+        function v = Minus( a, b )
+            if isa( a, 'BaseExtDouble' )
+                if isa( b, 'BaseExtDouble' )
+                    [ x1, x2 ] = DoubleDouble.DDPlusDD( a.v1, a.v2, -b.v1, -b.v2 );
+                else
+                    [ x1, x2 ] = DoubleDouble.DDPlusDouble( a.v1, a.v2, -double( b ) );
+                end
+            else
+                if isa( b, 'BaseExtDouble' )
+                    [ x1, x2 ] = DoubleDouble.DDPlusDouble( -b.v1, -b.v2, double( a ) );
+                else
+                    [ x1, x2 ] = BaseExtDouble.DoublePlusDouble( double( a ), -double( b ) );
+                end
+            end
+            if isa( a, 'BaseExtDouble' )
+                v = a.Make( x1, x2 );
+            else
+                v = b.Make( x1, x2 );
+            end
+        end
+
+        function v = Times( a, b )
+            if isa( a, 'BaseExtDouble' )
+                if isa( b, 'BaseExtDouble' )
+                    [ x1, x2 ] = DoubleDouble.DDTimesDD( a.v1, a.v2, b.v1, b.v2 );
+                else
+                    [ x1, x2 ] = DoubleDouble.DDTimesDouble( a.v1, a.v2, double( b ) );
+                end
+            else
+                if isa( b, 'BaseExtDouble' )
+                    [ x1, x2 ] = DoubleDouble.DDTimesDouble( b.v1, b.v2, double( a ) );
+                else
+                    [ x1, x2 ] = BaseExtDouble.DoubleTimesDouble( double( a ), double( b ) );
+                end
+            end
+            if isa( a, 'BaseExtDouble' )
+                v = a.Make( x1, x2 );
+            else
+                v = b.Make( x1, x2 );
+            end
+        end
+
+        function v = MTimes( a, b )
+            [ R, c ] = size( a );
+            [ r, C ] = size( b );
+            if ( ( R == 1 ) && ( c == 1 ) ) || ( ( r == 1 ) && ( C == 1 ) )
+                v = a.Times( b );
+                return
+            end
+            v = a.Make( zeros( R, C ), zeros( R, C ) );
+            if isa( b, 'BaseExtDouble' )
+                for c = 1 : C
+                    t = sum( a .* b.Make( b.v1( :, c ).', b.v2( :, c ).' ), 2 );
+                    v.v1( :, c ) = t.v1;
+                    v.v2( :, c ) = t.v2;
+                end
+            else
+                for c = 1 : C
+                    t = sum( a .* b( :, c ).', 2 );
+                    v.v1( :, c ) = t.v1;
+                    v.v2( :, c ) = t.v2;
+                end
+            end
+        end
+
+        function v = RDivide( a, b )
+            if isa( a, 'BaseExtDouble' )
+                if isa( b, 'BaseExtDouble' )
+                    [ x1, x2 ] = DoubleDouble.DDDividedByDD( a.v1, a.v2, b.v1, b.v2 );
+                else
+                    [ x1, x2 ] = DoubleDouble.DDDividedByDouble( a.v1, a.v2, double( b ) );
+                end
+            else
+                if isa( b, 'BaseExtDouble' )
+                    da = double( a );
+                    [ x1, x2 ] = DoubleDouble.DDDividedByDD( da, zeros( size( da ) ), b.v1, b.v2 );
+                else
+                    [ x1, x2 ] = BaseExtDouble.DoubleDividedByDouble( double( a ), double( b ) );
+                end
+            end
+            if isa( a, 'BaseExtDouble' )
+                v = a.Make( x1, x2 );
+            else
+                v = b.Make( x1, x2 );
+            end
+        end
+
+        function v = LDivide( b, a )
+            if isa( a, 'BaseExtDouble' )
+                if isa( b, 'BaseExtDouble' )
+                    [ x1, x2 ] = DoubleDouble.DDDividedByDD( a.v1, a.v2, b.v1, b.v2 );
+                else
+                    [ x1, x2 ] = DoubleDouble.DDDividedByDouble( a.v1, a.v2, double( b ) );
+                end
+            else
+                if isa( b, 'BaseExtDouble' )
+                    da = double( a );
+                    [ x1, x2 ] = DoubleDouble.DDDividedByDD( da, zeros( size( da ) ), b.v1, b.v2 );
+                else
+                    [ x1, x2 ] = BaseExtDouble.DoubleDividedByDouble( double( a ), double( b ) );
+                end
+            end
+            if isa( a, 'BaseExtDouble' )
+                v = a.Make( x1, x2 );
+            else
+                v = b.Make( x1, x2 );
+            end
+        end
+
+        function v = MLDivide( a, v )
+            [ Ra, Ca ] = size( a );
+            [ Rv, Cv ] = size( v );
+            if ( ( Ra == 1 ) && ( Ca == 1 ) ) || ( ( Rv == 1 ) && ( Cv == 1 ) )
+                v = a.LDivide( v );
+                return
+            end
+            if ~isa( v, 'BaseExtDouble' )
+                v = DoubleDouble( v );
+            end
+            assert( Ra == Rv );
+            if Ra ~= Ca
+                [ q, a ] = qr( a );
+                v = q' * v;
+                v = BackSubstitution( v, a );
+                return
+            end
+            if BaseExtDouble.IsEqualWithExpansion( triu( a, 1 ), 0 )
+                % Lower triangular
+                v = ForwardElimination( v, a );
+                return
+            elseif BaseExtDouble.IsEqualWithExpansion( tril( a, -1 ), 0 )
+                % Upper triangular
+                v = BackSubstitution( v, a );
+                return
+            elseif BaseExtDouble.IsEqualWithExpansion( a, a' )
+                [ L, d ] = ldl( a, 'vector_d' );
+                if all( all( isfinite( L ) ) ) && all( isfinite( d ) )
+                    % Positive definite
+                    v = ForwardElimination( v, L );
+                    v = v ./ d;
+                    v = BackSubstitution( v, L' );
+                    return
+                end
+            end
+            % Triangular factorization
+            [ L, U, p ] = lu( a, 'vector' );
+
+            % Permutation and forward elimination
+            v.v1 = v.v1( p, : );
+            v.v2 = v.v2( p, : );
+            v = ForwardElimination( v, L );
+
+            % Back substitution
+            v = BackSubstitution( v, U );
+        end
+
+        function v = MRDivide( v, a )
+            v = MLDivide(a', v' )';
+        end
+
+        function [ v, Indices ] = Sort( v, Dim, cm, varargin )
+            if nargin < 2 || isempty( Dim )
+                Dim = find( size( v.v1 ) > 1, 1 );
+                if isempty( Dim )
+                    Dim = 1;
+                end
+            end
+            if nargin < 3 || isempty( cm )
+                cm = 'auto';
+            end
+            if isa( v, 'BaseExtDouble' )
+                if strcmpi( cm( 1 ), 'r' )
+                    a = real( v );
+                    b = imag( v );
+                elseif ( length( cm ) > 1 ) && strcmpi( cm( 1 : 2 ), 'ab' )
+                    a = abs( v );
+                    b = angle( v );
+                else
+                    if isreal( v )
+                        a = real( v );
+                        b = imag( v );
+                    else
+                        a = abs( v );
+                        b = angle( v );
+                    end
+                end
+                Size = size( v.v1 );
+                if any( Size == 0 )
+                    Indices = [];
+                    return
+                end
+                Blocks = arrayfun( @( x ) ones( x, 1 ), Size, 'UniformOutput', false );
+                Blocks{ Dim } = Size( Dim );
+                xv1 = mat2cell( v.v1, Blocks{:} );
+                xv2 = mat2cell( v.v2, Blocks{:} );
+                xa1 = mat2cell( a.v1, Blocks{:} );
+                xa2 = mat2cell( a.v2, Blocks{:} );
+                xb1 = mat2cell( b.v1, Blocks{:} );
+                xb2 = mat2cell( b.v2, Blocks{:} );
+                Indices = cell( size( xv1 ) );
+                for i = 1 : numel( xv1 )
+                    [ ~, Indices{ i } ] = sortrows( [ xa1{ i }(:), xa2{ i }(:), xb1{ i }(:), xb2{ i }(:) ], varargin{:} );
+                    xv1{ i } = xv1{ i }( Indices{ i } );
+                    xv2{ i } = xv2{ i }( Indices{ i } );
+                end
+                Indices = cell2mat( Indices );
+                v       = v.Make( cell2mat( xv1 ), cell2mat( xv2 ) );
+            else
+                if nargout > 1
+                    [ v, Indices ] = sort( v, Dim, 'ComparisonMethod', cm, varargin{:} );
+                else
+                    v = sort( v, Dim, 'ComparisonMethod', cm, varargin{:} );
+                end
+                v = DoubleDouble( v );
+            end
+        end
+
+
+
+        function c = Diff( v, Dim )
+            if isa( v, 'BaseExtDouble' )
+                if nargin < 2 || isempty( Dim )
+                    Dim = find( size( v.v1 ) > 1, 1 );
+                    if isempty( Dim )
+                        Dim = 1;
+                    end
+                end
+                Size = size( v.v1 );
+                Length = Size( Dim );
+                if Length == 0
+                    c = v.Make( zeros( Size ), zeros( Size ) );
+                    return
+                end
+                Blocks = num2cell( Size );
+                Blocks{ Dim } = ones( Length, 1 );
+                x1 = mat2cell( v.v1, Blocks{:} );
+                x2 = mat2cell( v.v2, Blocks{:} );
+                s = v.Make( x1{ 1 }, x2{ 1 } );
+                c1 = cell( size( x1 ) );
+                c2 = cell( size( x2 ) );
+                c1{1} = [];
+                c2{1} = [];
+                for i = 2 : Length
+                    t = v.Make( x1{ i }, x2{ i } );
+                    d = t.Minus( s );
+                    c1{i} = d.v1;
+                    c2{i} = d.v2;
+                    s = t;
+                end
+            else
+                if nargin < 2 || isempty( Dim )
+                    Dim = find( size( v ) > 1, 1 );
+                    if isempty( Dim )
+                        Dim = 1;
+                    end
+                end
+                Size = size( v );
+                Length = Size( Dim );
+                if Length == 0
+                    c = v.Make( zeros( Size ), zeros( Size ) );
+                    return
+                end
+                Blocks = num2cell( Size );
+                Blocks{ Dim } = ones( Length, 1 );
+                x = mat2cell( v, Blocks{:} );
+                s = x{ 1 };
+                c1 = cell( size( x ) );
+                c2 = cell( size( x ) );
+                c1{1} = [];
+                c2{1} = [];
+                for i = 2 : Length
+                    t = x{ i };
+                    d = t.Minus( s );
+                    c1{i} = d.v1;
+                    c2{i} = d.v2;
+                    s = t;
+                end
+            end
+            c = v.Make( cell2mat( c1 ), cell2mat( c2 ) );
+        end
+
+
+
+        function v = Norm( v, p )
+            if ( sum( size( v ) ~= 1 ) <= 1 ) || ( numel( p ) ~= 1 )
+                v = abs( v );
+                if ( nargin < 2 ) || ( p == 2 ) || ( numel( p ) ~= 1 )
+                    v = Vec( v );
+                    v = sqrt( sum( v .* v ) );
+                elseif p == Inf
+                    v = max( v );
+                elseif p == -Inf
+                    v = min( v );
+                elseif p == 1
+                    v = sum( v );
+                else
+                    v = ( sum( v .^ p ) ) .^ ( 1 ./ p );
+                end
+            else
+                if ( nargin < 2 ) || ( p == 2 )
+                    v = sqrt( max( eig( v' * v ) ) );
+                elseif p == Inf
+                    v = max( sum( abs( v ), 2 ) );
+                elseif p == 1
+                    v = max( sum( abs( v ), 1 ) );
+                else
+                    v = DoubleDouble;
+                end
+            end
+        end
+
+        function v = Vec( v )
+            v.v1 = v.v1(:);
+            v.v2 = v.v2(:);
+        end
+
+        function v = TimesPowerOf2( v, b )
+            assert( isa( b, 'double' ) );
+            v.v1 = v.v1 .* b;
+            v.v2 = v.v2 .* b;
+        end
+
+        function v = ForwardElimination( v, L )
+            % For lower triangular L, x = ForwardElimination( b, L ) solves L*x = b.
+            [ m, n ] = size( L );
+            mn = min( m, n );
+            [ vm, vn ] = size( v );
+            if vm < n
+                v = [ v; zeros( n - vm, vn ) ];
+            elseif vm > n
+                v.v1( (n+1):vm, : ) = [];
+                v.v2( (n+1):vm, : ) = [];
+            end
+            if isa( L, 'BaseExtDouble' )
+                [ v.v1( 1, : ), v.v2( 1, : ) ] = DoubleDouble.DDDividedByDD( v.v1( 1, : ), v.v2( 1, : ), L.v1( 1, 1 ), L.v2( 1, 1 ), true );
+                for k = 2 : mn
+                    j = 1 : k - 1;
+                    [ t1, t2 ] = DoubleDouble.DDTimesDD( v.v1( j, : ), v.v2( j, : ), L.v1( k, j ).', L.v2( k, j ).' );
+                    t = sum( v.Make( t1, t2 ), 1 );
+                    [ t1, t2 ] = DoubleDouble.DDPlusDD( v.v1( k, : ), v.v2( k, : ), -t.v1, -t.v2 );
+                    [ v.v1( k, : ), v.v2( k, : ) ] = DoubleDouble.DDDividedByDD( t1, t2, L.v1( k, k ), L.v2( k, k ), true );
+                end
+            else
+                [ v.v1( 1, : ), v.v2( 1, : ) ] = DoubleDouble.DDDividedByDouble( v.v1( 1, : ), v.v2( 1, : ), L( 1, 1 ), true );
+                for k = 2 : mn
+                    j = 1 : k - 1;
+                    [ t1, t2 ] = DoubleDouble.DDTimesDouble( v.v1( j, : ), v.v2( j, : ), L( k, j ).' );
+                    t = sum( v.Make( t1, t2 ), 1 );
+                    [ t1, t2 ] = DoubleDouble.DDPlusDD( v.v1( k, : ), v.v2( k, : ), -t.v1, -t.v2 );
+                    [ v.v1( k, : ), v.v2( k, : ) ] = DoubleDouble.DDDividedByDouble( t1, t2, L( k, k ), true );
+                end
+            end
+        end
+
+        function v = BackSubstitution( v, U )
+            % For upper triangular U, x = BackSubstitution( b, U ) solves U*x = b.
+            [ m, n ] = size( U );
+            mn = min( m, n );
+            [ vm, vn ] = size( v );
+            if vm < n
+                v = [ v; zeros( n - vm, vn ) ];
+            elseif vm > n
+                v.v1( (n+1):vm, : ) = [];
+                v.v2( (n+1):vm, : ) = [];
+            end
+            if isa( U, 'BaseExtDouble' )
+                [ v.v1( mn, : ), v.v2( mn, : ) ] = DoubleDouble.DDDividedByDD( v.v1( mn, : ), v.v2( mn, : ), U.v1( mn, mn ), U.v2( mn, mn ), true );
+                for k = mn - 1 : -1 : 1
+                    j = k + 1 : n;
+                    [ t1, t2 ] = DoubleDouble.DDTimesDD( v.v1( j, : ), v.v2( j, : ), U.v1( k, j ).', U.v2( k, j ).' );
+                    t = sum( v.Make( t1, t2 ), 1 );
+                    [ t1, t2 ] = DoubleDouble.DDPlusDD( v.v1( k, : ), v.v2( k, : ), -t.v1, -t.v2 );
+                    [ v.v1( k, : ), v.v2( k, : ) ] = DoubleDouble.DDDividedByDD( t1, t2, U.v1( k, k ), U.v2( k, k ), true );
+                end
+            else
+                [ v.v1( mn, : ), v.v2( mn, : ) ] = DoubleDouble.DDDividedByDouble( v.v1( mn, : ), v.v2( mn, : ), U( mn, mn ), true );
+                for k = mn - 1 : -1 : 1
+                    j = k + 1 : n;
+                    [ t1, t2 ] = DoubleDouble.DDTimesDouble( v.v1( j, : ), v.v2( j, : ), U( k, j ).' );
+                    t = sum( v.Make( t1, t2 ), 1 );
+                    [ t1, t2 ] = DoubleDouble.DDPlusDD( v.v1( k, : ), v.v2( k, : ), -t.v1, -t.v2 );
+                    [ v.v1( k, : ), v.v2( k, : ) ] = DoubleDouble.DDDividedByDouble( t1, t2, U( k, k ), true );
+                end
+            end
+        end
+
+        function v = SinTaylor( v )
+            Threshhold = 0.5 .* abs( v.v1(:) ) .* v.eps.v1;
+            x = - v .* v;
+            r = v;
+            for i = 1 : 2 : v.NInverseFactorial
+                r = r .* x;
+                t = r .* v.Make( v.InverseFactorial( i, 1 ), v.InverseFactorial( i, 2 ) );
+                v = v + t;
+                if all( abs( t.v1(:) ) <= Threshhold )
+                    break
+                end
+            end
+        end
+
+        function [ sin_v, cos_v ] = SinCosTaylor( v )
+            sin_v = SinTaylor( v );
+            cos_v = sqrt( 1 - sin_v .* sin_v );
+        end
+    end
+
+    methods (Static, Access = public)
+        function [ varargout ] = ExpandSingleton( varargin )
+            l = cellfun( @( x ) length( size( x ) ), varargin, 'UniformOutput', true );
+            n = length( varargin );
+            ss = ones( n, max( l ) );
+            for i = 1 : n
+                ss( i, 1 : l( i ) ) = size( varargin{ i } );
+            end
+            s = max( ss, [], 1 );
+            varargout = cell( 1, n );
+            for i = 1 : n
+                varargout{ i } = repmat( varargin{ i }, s ./ ss( i, : ) );
+            end
+        end
+    end
+
+    methods ( Static, Access = public )
+
+
+        function [ s1, s2 ] = Normalize( a1, a2 )
+            s1 = a1 + a2;
+            t = s1 - a1;
+            s2 = a2 - t;
+        end
+
+        function [ s1, s2 ] = DDPlusDD( a1, a2, b1, b2 )
+            if BaseExtDouble.SingletonExpansionNotSupported
+                [ a1, a2, b1, b2 ] = BaseExtDouble.ExpandSingleton( a1, a2, b1, b2 );
+            end
+            [ s1, s2 ] = BaseExtDouble.DoublePlusDouble( a1, b1 );
+            [ t1, t2 ] = BaseExtDouble.DoublePlusDouble( a2, b2 );
+            s2 = s2 + t1;
+            [ s1, s2 ] = BaseExtDouble.Normalize( s1, s2 );
+            s2 = s2 + t2;
+            [ s1, s2 ] = BaseExtDouble.Normalize( s1, s2 );
+        end
+
+        function [ s1, s2 ] = DDPlusDouble( a1, a2, b )
+            if BaseExtDouble.SingletonExpansionNotSupported
+                [ a1, a2, b ] = BaseExtDouble.ExpandSingleton( a1, a2, b );
+            end
+            [ s1, s2 ] = BaseExtDouble.DoublePlusDouble( a1, b );
+            s2 = s2 + a2;
+            [ s1, s2 ] = BaseExtDouble.Normalize( s1, s2 );
+        end
+
+        function [ s1, s2 ] = DoublePlusDouble( a, b )
+            if BaseExtDouble.SingletonExpansionNotSupported
+                [ a, b ] = BaseExtDouble.ExpandSingleton( a, b );
+            end
+            s1 = a + b;
+            bb = s1 - a;
+            t11 = s1 - bb;
+            t2 = b - bb;
+            t1 = a - t11;
+            s2 = t1 + t2;
+        end
+
+        function [ p1, p2 ] = DDTimesDD( a1, a2, b1, b2 )
+            if BaseExtDouble.SingletonExpansionNotSupported
+                [ a1, a2, b1, b2 ] = BaseExtDouble.ExpandSingleton( a1, a2, b1, b2 );
+            end
+            [ p1, p2 ] = BaseExtDouble.DoubleTimesDouble( a1, b1 );
+            t = a1 .* b2 + a2 .* b1;
+            p2 = p2 + t;
+            [ p1, p2 ] = BaseExtDouble.Normalize( p1, p2 );
+        end
+
+        function [ p1, p2 ] = DDTimesDouble( a1, a2, b )
+            if BaseExtDouble.SingletonExpansionNotSupported
+                [ a1, a2, b ] = BaseExtDouble.ExpandSingleton( a1, a2, b );
+            end
+            [ p1, p2 ] = BaseExtDouble.DoubleTimesDouble( a1, b );
+            p2 = p2 + a2 .* b;
+            [ p1, p2 ] = BaseExtDouble.Normalize( p1, p2 );
+        end
+
+        function [ p1, p2 ] = DoubleTimesDouble( a, b )
+            if BaseExtDouble.SingletonExpansionNotSupported
+                [ a, b ] = BaseExtDouble.ExpandSingleton( a, b );
+            end
+            p1 = a .* b;
+            [ a1, a2 ] = BaseExtDouble.Split( a );
+            [ b1, b2 ] = BaseExtDouble.Split( b );
+            t1 = a1 .* b1 - p1;
+            t2 = t1 + a1 .* b2 + a2 .* b1;
+            p2 = t2 + a2 .* b2;
+        end
+
+        function [ r1, r2 ] = DDDividedByDD( a1, a2, b1, b2, AnySolutionWillDo )
+            if BaseExtDouble.SingletonExpansionNotSupported
+                [ a1, a2, b1, b2 ] = BaseExtDouble.ExpandSingleton( a1, a2, b1, b2 );
+            end
+            if nargin < 5
+                AnySolutionWillDo = false;
+            end
+            q1 = a1 ./ b1;
+            [ p1, p2 ] = DoubleDouble.DDTimesDouble( b1, b2, q1 );
+            [ r1, r2 ] = DoubleDouble.DDPlusDD( a1, a2, -p1, -p2 );
+            q2 = r1 ./ b1;
+            [ p1, p2 ] = DoubleDouble.DDTimesDouble( b1, b2, q2 );
+            [ r1, ~  ] = DoubleDouble.DDPlusDD( r1, r2, -p1, -p2 );
+            q3 = r1 ./ b1;
+            [ q1, q2 ] = BaseExtDouble.Normalize( q1, q2 );
+            [ r1, r2 ] = DoubleDouble.DDPlusDD( q1, q2, q3, zeros( size( q3 ) ) );
+            Select = ( b1 == 0 ) & ( b2 == 0 );
+            if any( Select(:) )
+                if ( isscalar( Select ) ) && ( numel( a1 ) > 1 )
+                    Select = repmat( Select, size( a1 ) );
+                elseif ( numel( Select ) > 1 ) && ( isscalar( a1 ) )
+                    a1 = repmat( a1, size( Select ) );
+                end
+                a1Select = a1( Select );
+                a1SelectSelect = a1Select == 0;
+                a1Select = sign( a1Select ) .* Inf;
+                if AnySolutionWillDo
+                    a1Select( a1SelectSelect ) = 0;
+                end
+                r1( Select ) = a1Select;
+                r2( Select ) = a1Select;
+            end
+            Select = isinf( b1 );
+            if any( Select(:) )
+                if ( isscalar( Select ) ) && ( numel( a1 ) > 1 )
+                    Select = repmat( Select, size( a1 ) );
+                elseif ( numel( Select ) > 1 ) && ( isscalar( a1 ) )
+                    a1 = repmat( a1, size( Select ) );
+                end
+                a1Select = a1( Select );
+                a1SelectSelect = ~isfinite( a1Select );
+                a1Select = 0;
+                a1Select( a1SelectSelect ) = NaN;
+                r1( Select ) = a1Select;
+                r2( Select ) = a1Select;
+            end
+        end
+
+        function [ r1, r2 ] = DDDividedByDouble( a1, a2, b, AnySolutionWillDo )
+            if BaseExtDouble.SingletonExpansionNotSupported
+                [ a1, a2, b ] = BaseExtDouble.ExpandSingleton( a1, a2, b );
+            end
+            if nargin < 4
+                AnySolutionWillDo = false;
+            end
+            r1 = a1 ./ b;
+            [ p1, p2 ] = BaseExtDouble.DoubleTimesDouble( r1, b );
+            [ s, e ] = BaseExtDouble.DoublePlusDouble( a1, -p1 );
+            e = e + a2;
+            e = e - p2;
+            t = s + e;
+            r2 = t ./ b;
+            [ r1, r2 ] = BaseExtDouble.Normalize( r1, r2 );
+            Select = b == 0;
+            if any( Select(:) )
+                if ( isscalar( Select ) ) && ( numel( a1 ) > 1 )
+                    Select = repmat( Select, size( a1 ) );
+                elseif ( numel( Select ) > 1 ) && ( isscalar( a1 ) )
+                    a1 = repmat( a1, size( Select ) );
+                end
+                a1Select = a1( Select );
+                a1SelectSelect = a1Select == 0;
+                a1Select = sign( a1Select ) .* Inf;
+                if AnySolutionWillDo
+                    a1Select( a1SelectSelect ) = 0;
+                end
+                r1( Select ) = a1Select;
+                r2( Select ) = a1Select;
+            end
+            Select = isinf( b );
+            if any( Select(:) )
+                if ( isscalar( Select ) ) && ( numel( a1 ) > 1 )
+                    Select = repmat( Select, size( a1 ) );
+                elseif ( numel( Select ) > 1 ) && ( isscalar( a1 ) )
+                    a1 = repmat( a1, size( Select ) );
+                end
+                a1Select = a1( Select );
+                a1SelectSelect = ~isfinite( a1Select );
+                a1Select = 0;
+                a1Select( a1SelectSelect ) = NaN;
+                r1( Select ) = a1Select;
+                r2( Select ) = a1Select;
+            end
+        end
+
+        function [ r1, r2 ] = DoubleDividedByDouble( a, b, AnySolutionWillDo )
+            if BaseExtDouble.SingletonExpansionNotSupported
+                [ a, b ] = BaseExtDouble.ExpandSingleton( a, b );
+            end
+            if nargin < 3
+                AnySolutionWillDo = false;
+            end
+            r1 = a ./ b;
+            [ p1, p2 ] = BaseExtDouble.DoubleTimesDouble( r1, b );
+            [ s, e ] = BaseExtDouble.DoublePlusDouble( a, -p1 );
+            e = e - p2;
+            t = s + e;
+            r2 = t ./ b;
+            [ r1, r2 ] = BaseExtDouble.Normalize( r1, r2 );
+            Select = b == 0;
+            if any( Select(:) )
+                if ( isscalar( Select ) ) && ( numel( a ) > 1 )
+                    Select = repmat( Select, size( a ) );
+                elseif ( numel( Select ) > 1 ) && ( isscalar( a ) )
+                    a = repmat( a, size( Select ) );
+                end
+                a1Select = a( Select );
+                a1SelectSelect = a1Select == 0;
+                a1Select = sign( a1Select ) .* Inf;
+                if AnySolutionWillDo
+                    a1Select( a1SelectSelect ) = 0;
+                end
+                r1( Select ) = a1Select;
+                r2( Select ) = a1Select;
+            end
+            Select = isinf( b );
+            if any( Select(:) )
+                if ( isscalar( Select ) ) && ( numel( a ) > 1 )
+                    Select = repmat( Select, size( a ) );
+                elseif ( numel( Select ) > 1 ) && ( isscalar( a ) )
+                    a = repmat( a, size( Select ) );
+                end
+                a1Select = a( Select );
+                a1SelectSelect = ~isfinite( a1Select );
+                a1Select = 0;
+                a1Select( a1SelectSelect ) = NaN;
+                r1( Select ) = a1Select;
+                r2( Select ) = a1Select;
+            end
+        end
+
+        function [ a1, a2 ] = Split( a )
+            if isreal( a )
+                Select = ( a > 6.69692879491417e+299 ) | ( a < -6.69692879491417e+299 ); % 2^996
+                a( Select ) = a( Select ) * 3.7252902984619140625e-09; % 2^(-28)
+                t1 = 134217729.0 * a; % 2^27 + 1
+                t2 = t1 - a;
+                a1 = t1 - t2;
+                a2 = a - a1;
+                a1( Select ) = a1( Select ) * 268435456.0; % 2^28
+                a2( Select ) = a2( Select ) * 268435456.0; % 2^28
+            else
+                [ r1, r2 ] = BaseExtDouble.Split( real( a ) );
+                [ i1, i2 ] = BaseExtDouble.Split( imag( a ) );
+                a1 = complex( r1, i1 );
+                a2 = complex( r2, i2 );
+            end
+        end
+    end
+
+
+    properties ( Constant, GetAccess = public )
+        SingletonExpansionNotSupported = ~BaseExtDouble.TestSingletonExpansion();
+    end
+
+    methods ( Static, Access = public )
+        function Supported = TestSingletonExpansion()
+            try
+                a = [ 1, 1 ];
+                b = [ 1; 1 ];
+                c = a + b;
+                Supported = all( [ size( b ), size( c ) ] == 2 );
+            catch
+                Supported = false;
+            end
+        end
+    end
+end
