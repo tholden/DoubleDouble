@@ -5,7 +5,8 @@ classdef (Abstract) BaseExtDouble
         v2
     end
 
-    methods (Static)
+    methods (Sealed)
+
         function v = Index( v, idx )
             if isa( v, 'BaseExtDouble' )
                 s = substruct( '()', { idx } );
@@ -19,9 +20,9 @@ classdef (Abstract) BaseExtDouble
 
         function v = Assign( v, idx, val )
             if ~isa( v, 'BaseExtDouble' )
-                if isempty(v)
+                if isempty( v )
                     v = val;
-                    if isa(v, 'BaseExtDouble')
+                    if isa( v, 'BaseExtDouble' )
                         s = substruct( '()', { idx } );
                         v.v1 = subsasgn( v.v1, s, 0 );
                         v.v2 = subsasgn( v.v2, s, 0 );
@@ -29,7 +30,7 @@ classdef (Abstract) BaseExtDouble
                         return
                     end
                 else
-                    v(idx) = val;
+                    v( idx ) = val;
                     return
                 end
             end
@@ -40,7 +41,10 @@ classdef (Abstract) BaseExtDouble
             v.v1 = subsasgn( v.v1, s, val.v1 );
             v.v2 = subsasgn( v.v2, s, val.v2 );
         end
+
     end
+
+
 
     methods (Abstract)
         v = Make( z, a1, a2 )
@@ -400,26 +404,26 @@ classdef (Abstract) BaseExtDouble
                 v = a.ones( size( a ) );
                 bNonHalfInteger = find( ~bHalfInteger );
                 bHalfInteger = find( bHalfInteger );
-                v = BaseExtDouble.Assign( v, bNonHalfInteger, exp( BaseExtDouble.Index( b, bNonHalfInteger ) .* log( BaseExtDouble.Index( a, bNonHalfInteger ) ) ) );
-                a = BaseExtDouble.Index( a, bHalfInteger );
-                b = double( BaseExtDouble.Index( b, bHalfInteger ) );
+                v =  v.Assign(bNonHalfInteger, exp(  b.Index(bNonHalfInteger ) .* log(  a.Index(bNonHalfInteger ) ) ) );
+                a =  a.Index(bHalfInteger );
+                b = double(  b.Index(bHalfInteger ) );
                 Select = find( b < 0 );
-                a = BaseExtDouble.Assign( a, Select, 1 ./ BaseExtDouble.Index( a, Select ) );
-                b = BaseExtDouble.Assign( b, Select, -b( Select ) );
-                vv =  BaseExtDouble.Index( v, bHalfInteger );
+                a =  a.Assign(Select, 1 ./  a.Index(Select ) );
+                b =  b.Assign(Select, -b( Select ) );
+                vv =   v.Index(bHalfInteger );
                 Select = find( b ~= floor( b ) );
-                vv = BaseExtDouble.Assign( vv, Select, sqrt( BaseExtDouble.Index( a, Select ) ) );
+                vv =  vv.Assign(Select, sqrt(  a.Index(Select ) ) );
                 Binary = dec2bin( floor( b ) );
                 N = size( Binary, 2 );
                 Power = a;
                 Select = find( Binary( :, end ) == '1' );
-                vv = BaseExtDouble.Assign( vv, Select, BaseExtDouble.Index( a, Select ) );
+                vv =  vv.Assign(Select,  a.Index(Select ) );
                 for n = 2 : N
                     Power = Power .* Power;
                     Select = find( Binary( :, end + 1 - n ) == '1' );
-                    vv = BaseExtDouble.Assign( vv, Select, BaseExtDouble.Index( vv, Select ) .* BaseExtDouble.Index( Power, Select ) );
+                    vv =  vv.Assign(Select,  vv.Index(Select ) .*  Power.Index(Select ) );
                 end
-                v = BaseExtDouble.Assign( v, bHalfInteger, vv );
+                v =  v.Assign(bHalfInteger, vv );
             end
         end
 
@@ -1344,9 +1348,9 @@ classdef (Abstract) BaseExtDouble
             x1 = floor( v.v1 );
             x2 = x1 .* 0;
             Select = x1 == v.v1;
-            v_sel = BaseExtDouble.Index(v, Select);
+            v_sel = v.Index(Select);
             x2_sel = floor( v_sel.v2 );
-            x2 = BaseExtDouble.Assign(x2, Select, x2_sel);
+            x2 = x2.Assign(Select, x2_sel);
             [ x1, x2 ] = v.Normalize( x1, x2 );
             v = v.Make( x1, x2 );
         end
@@ -1355,9 +1359,9 @@ classdef (Abstract) BaseExtDouble
             x1 = ceil( v.v1 );
             x2 = x1 .* 0;
             Select = x1 == v.v1;
-            v_sel = BaseExtDouble.Index(v, Select);
+            v_sel = v.Index(Select);
             x2_sel = ceil( v_sel.v2 );
-            x2 = BaseExtDouble.Assign(x2, Select, x2_sel);
+            x2 = x2.Assign(Select, x2_sel);
             [ x1, x2 ] = v.Normalize( x1, x2 );
             v = v.Make( x1, x2 );
         end
@@ -1366,9 +1370,9 @@ classdef (Abstract) BaseExtDouble
             x1 = fix( v.v1 );
             x2 = x1 .* 0;
             Select = x1 == v.v1;
-            v_sel = BaseExtDouble.Index(v, Select);
+            v_sel = v.Index(Select);
             x2_sel = fix( v_sel.v2 );
-            x2 = BaseExtDouble.Assign(x2, Select, x2_sel);
+            x2 = x2.Assign(Select, x2_sel);
             [ x1, x2 ] = v.Normalize( x1, x2 );
             v = v.Make( x1, x2 );
         end
@@ -1377,9 +1381,9 @@ classdef (Abstract) BaseExtDouble
             x1 = round( v.v1 );
             x2 = x1 .* 0;
             Select = x1 == v.v1;
-            vSelect = BaseExtDouble.Index(v, Select);
+            vSelect = v.Index(Select);
             x2Select = round( vSelect.v2 );
-            x2 = BaseExtDouble.Assign(x2, Select, x2Select);
+            x2 = x2.Assign(Select, x2Select);
             Select = ( ~Select ) & ( abs( x1 - v.v1 ) == 0.5 ) & ( v.v2 < 0 );
             x2( Select ) = x2( Select ) - 1;
             [ x1, x2 ] = v.Normalize( x1, x2 );
@@ -1403,14 +1407,14 @@ classdef (Abstract) BaseExtDouble
 
         function v = sqrt( v )
             Select = v ~= 0;
-            v_sel = BaseExtDouble.Index(v, Select);
+            v_sel = v.Index(Select);
             x = 1 ./ sqrt( v_sel.v1 );
             vx = v_sel.v1 .* x;
             [ t1_, t2_ ] = v.DoubleTimesDouble( vx, vx );
             t = v_sel - v.Make( t1_, t2_ );
             [ t1_, t2_ ] = v.EDPlusDouble( vx, zeros( size( vx ) ), t.v1 .* ( x * 0.5 ) );
             t = v.Make( t1_, t2_ );
-            v = BaseExtDouble.Assign(v, Select, t);
+            v = v.Assign(Select, t);
         end
 
         function v = sqrtm( v )
@@ -1577,50 +1581,50 @@ classdef (Abstract) BaseExtDouble
 
             Select = k > 0;
             if any(Select(:))
-                a_sin_t_s = BaseExtDouble.Index(a_sin_t, Select);
-                a_cos_t_s = BaseExtDouble.Index(a_cos_t, Select);
-                b_sin_t_s = BaseExtDouble.Index(b_sin_t, Select);
-                b_cos_t_s = BaseExtDouble.Index(b_cos_t, Select);
+                a_sin_t_s = a_sin_t.Index(Select);
+                a_cos_t_s = a_cos_t.Index(Select);
+                b_sin_t_s = b_sin_t.Index(Select);
+                b_cos_t_s = b_cos_t.Index(Select);
                 [ t1, t2 ] = v.EDPlusED( +a_sin_t_s.v1, +a_sin_t_s.v2, +b_cos_t_s.v1, +b_cos_t_s.v2 );
-                sin_v = BaseExtDouble.Assign(sin_v, Select, v.Make(t1, t2));
+                sin_v = sin_v.Assign(Select, v.Make(t1, t2));
                 [ t1, t2 ] = v.EDPlusED( -b_sin_t_s.v1, -b_sin_t_s.v2, +a_cos_t_s.v1, +a_cos_t_s.v2 );
-                cos_v = BaseExtDouble.Assign(cos_v, Select, v.Make(t1, t2));
+                cos_v = cos_v.Assign(Select, v.Make(t1, t2));
             end
 
             Select = k < 0;
             if any(Select(:))
-                a_sin_t_s = BaseExtDouble.Index(a_sin_t, Select);
-                a_cos_t_s = BaseExtDouble.Index(a_cos_t, Select);
-                b_sin_t_s = BaseExtDouble.Index(b_sin_t, Select);
-                b_cos_t_s = BaseExtDouble.Index(b_cos_t, Select);
+                a_sin_t_s = a_sin_t.Index(Select);
+                a_cos_t_s = a_cos_t.Index(Select);
+                b_sin_t_s = b_sin_t.Index(Select);
+                b_cos_t_s = b_cos_t.Index(Select);
                 [ t1, t2 ] = v.EDPlusED( +a_sin_t_s.v1, +a_sin_t_s.v2, -b_cos_t_s.v1, -b_cos_t_s.v2 );
-                sin_v = BaseExtDouble.Assign(sin_v, Select, v.Make(t1, t2));
+                sin_v = sin_v.Assign(Select, v.Make(t1, t2));
                 [ t1, t2 ] = v.EDPlusED( +b_sin_t_s.v1, +b_sin_t_s.v2, +a_cos_t_s.v1, +a_cos_t_s.v2 );
-                cos_v = BaseExtDouble.Assign(cos_v, Select, v.Make(t1, t2));
+                cos_v = cos_v.Assign(Select, v.Make(t1, t2));
             end
 
             Select = j == 1;
             if any(Select(:))
-                cos_v_s = BaseExtDouble.Index(cos_v, Select);
-                sin_v_s = BaseExtDouble.Index(sin_v, Select);
-                sin_v = BaseExtDouble.Assign(sin_v, Select, cos_v_s);
-                cos_v = BaseExtDouble.Assign(cos_v, Select, -sin_v_s);
+                cos_v_s = cos_v.Index(Select);
+                sin_v_s = sin_v.Index(Select);
+                sin_v = sin_v.Assign(Select, cos_v_s);
+                cos_v = cos_v.Assign(Select, -sin_v_s);
             end
 
             Select = j == -1;
             if any(Select(:))
-                cos_v_s = BaseExtDouble.Index(cos_v, Select);
-                sin_v_s = BaseExtDouble.Index(sin_v, Select);
-                sin_v = BaseExtDouble.Assign(sin_v, Select, -cos_v_s);
-                cos_v = BaseExtDouble.Assign(cos_v, Select, sin_v_s);
+                cos_v_s = cos_v.Index(Select);
+                sin_v_s = sin_v.Index(Select);
+                sin_v = sin_v.Assign(Select, -cos_v_s);
+                cos_v = cos_v.Assign(Select, sin_v_s);
             end
 
             Select = abs_j == 2;
             if any(Select(:))
-                sin_v_s = BaseExtDouble.Index(sin_v, Select);
-                cos_v_s = BaseExtDouble.Index(cos_v, Select);
-                sin_v = BaseExtDouble.Assign(sin_v, Select, -sin_v_s);
-                cos_v = BaseExtDouble.Assign(cos_v, Select, -cos_v_s);
+                sin_v_s = sin_v.Index(Select);
+                cos_v_s = cos_v.Index(Select);
+                sin_v = sin_v.Assign(Select, -sin_v_s);
+                cos_v = cos_v.Assign(Select, -cos_v_s);
             end
         end
 
@@ -1661,22 +1665,22 @@ classdef (Abstract) BaseExtDouble
             t = yy;
 
             if any(Select(:))
-                tSelect = BaseExtDouble.Index(t, Select);
-                sinZSelect = BaseExtDouble.Index(sin_z, Select);
-                cosZSelect = BaseExtDouble.Index(cos_z, Select);
+                tSelect = t.Index(Select);
+                sinZSelect = sin_z.Index(Select);
+                cosZSelect = cos_z.Index(Select);
                 [ t1, t2 ] = v.EDPlusED( tSelect.v1, tSelect.v2, -sinZSelect.v1, -sinZSelect.v2 );
                 [ t1, t2 ] = v.EDDividedByED( t1, t2, +cosZSelect.v1, +cosZSelect.v2 );
-                t = BaseExtDouble.Assign(t, Select, v.Make(t1, t2));
+                t = t.Assign(Select, v.Make(t1, t2));
             end
 
             Select = ~Select;
             if any(Select(:))
-                xxSelect = BaseExtDouble.Index(xx, Select);
-                sinZSelect = BaseExtDouble.Index(sin_z, Select);
-                cosZSelect = BaseExtDouble.Index(cos_z, Select);
+                xxSelect = xx.Index(Select);
+                sinZSelect = sin_z.Index(Select);
+                cosZSelect = cos_z.Index(Select);
                 [ t1, t2 ] = v.EDPlusED( xxSelect.v1, xxSelect.v2, -cosZSelect.v1, -cosZSelect.v2 );
                 [ t1, t2 ] = v.EDDividedByED( t1, t2, -sinZSelect.v1, -sinZSelect.v2 );
-                t = BaseExtDouble.Assign(t, Select, v.Make(t1, t2));
+                t = t.Assign(Select, v.Make(t1, t2));
             end
             v = v + t;
         end
@@ -2156,15 +2160,15 @@ classdef (Abstract) BaseExtDouble
                 v = BackSubstitution( v, a );
                 return
             end
-            if BaseExtDouble.IsEqualWithExpansion( triu( a, 1 ), 0 )
+            if triu( a, 1 ).IsEqualWithExpansion( 0 )
                 % Lower triangular
                 v = ForwardElimination( v, a );
                 return
-            elseif BaseExtDouble.IsEqualWithExpansion( tril( a, -1 ), 0 )
+            elseif tril( a, -1 ).IsEqualWithExpansion( 0 )
                 % Upper triangular
                 v = BackSubstitution( v, a );
                 return
-            elseif BaseExtDouble.IsEqualWithExpansion( a, a' )
+            elseif a.IsEqualWithExpansion( a' )
                 [ L, d ] = ldl( a, 'vector_d' );
                 if all( all( isfinite( L ) ) ) && all( isfinite( d ) )
                     % Positive definite
