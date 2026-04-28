@@ -9,29 +9,31 @@ function Results = RunTests()
     %
     % Returns:
     %   Results - TestResult object containing test outcomes
-    
+
+    addpath( [ fileparts( mfilename( 'fullpath' ) ) filesep '..' ] );
+
     % Import the necessary testing framework
     import matlab.unittest.TestSuite;
     import matlab.unittest.TestRunner;
     import matlab.unittest.plugins.TAPPlugin;
     import matlab.unittest.plugins.ToFile;
-    
+
     % Create a test suite from the DoubleDoubleTest class
     Suite1 = TestSuite.fromClass( ?DoubleDoubleTest );
     Suite2 = TestSuite.fromClass( ?QuadDoubleTest );
     Suite3 = TestSuite.fromClass( ?OctDoubleTest );
     Suite = [ Suite1, Suite2, Suite3 ];
-    
+
     % Create a test runner with verbose output
     Runner = TestRunner.withTextOutput( 'Verbosity', 3 );
-    
+
     % Add TAP plugin to create a TAP-compatible output file
     TapFile = fullfile( pwd, 'TestResults.tap' );
     Runner.addPlugin( TAPPlugin.producingVersion13( ToFile( TapFile ) ) );
-    
+
     % Run the tests
     Results = Runner.run( Suite );
-    
+
     % Display a summary
     disp( ' ' );
     disp( 'Test Summary:' );
@@ -39,7 +41,7 @@ function Results = RunTests()
     disp( [ '  ' num2str( sum( [ Results.Failed ] ) ) ' tests failed' ] );
     disp( [ '  ' num2str( sum( [ Results.Incomplete ] ) ) ' tests skipped' ] );
     disp( [ '  Total time: ' num2str( sum( [ Results.Duration ] ) ) ' seconds' ] );
-    
+
     % If any tests failed, display details
     if sum( [ Results.Failed ] ) > 0
         disp( ' ' );
