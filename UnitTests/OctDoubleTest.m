@@ -86,14 +86,14 @@ classdef OctDoubleTest < matlab.unittest.TestCase
         % Constructor tests
         function TestConstructorEmpty( TestCase )
             A = OctDouble();
-            [ V1, V2, V3, V4, V5, V6, V7, V8 ] = ToSumOfDoubles( A );
+            [ V1, ~, ~, ~, ~, ~, ~, V8 ] = ToSumOfDoubles( A );
             TestCase.verifyEmpty( V1 );
             TestCase.verifyEmpty( V8 );
         end
 
         function TestConstructorScalar( TestCase )
             A = OctDouble( 3.14 );
-            [ V1, V2, V3, V4, V5, V6, V7, V8 ] = ToSumOfDoubles( A );
+            [ V1, ~, ~, ~, ~, ~, ~, V8 ] = ToSumOfDoubles( A );
             TestCase.verifyEqual( V1, 3.14 );
             TestCase.verifyTrue( abs( V2 ) < TestCase.AbsTol );
             TestCase.verifyTrue( abs( V8 ) < TestCase.AbsTol );

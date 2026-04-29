@@ -55,8 +55,8 @@ classdef QuadDoubleSlowTest < matlab.unittest.TestCase
             TestCase.verifyEqual( v4, q4, 'AbsTol', TestCase.AbsTol );
             
             % Test linear algebra routines (LU decomposition)
-            [ L_QD, U_QD, P_QD ] = lu( QD );
-            [ L_QDS, U_QDS, P_QDS ] = lu( QDS );
+            [ L_QD, U_QD, ~ ] = lu( QD );
+            [ L_QDS, U_QDS, ~ ] = lu( QDS );
             
             TestCase.verifyEqual( double( L_QDS - L_QD ), zeros(size(Data) ), 'AbsTol', 1e-28 );
             TestCase.verifyEqual( double( U_QDS - U_QD ), zeros(size(Data) ), 'AbsTol', 1e-28 );

@@ -607,7 +607,7 @@ classdef DoubleDoubleTest < matlab.unittest.TestCase
             AInv = inv( A );
             
             % Verify that A*AInv = I
-            I = A * AInv;
+            I = A * AInv; %#ok<MINV>
             EyeVal = eye( size( I ) );
             TestCase.verifyEqual( double( I ), EyeVal, 'RelTol', TestCase.RelTol );
         end
