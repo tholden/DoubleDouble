@@ -2273,7 +2273,7 @@ classdef (Abstract) BaseExtDouble
 
     end
 
-    methods % Not sealed
+    methods ( Access = protected ) % Not sealed.
 
         function v = Plus( a, b )
             if isa( a, 'BaseExtDouble' )
