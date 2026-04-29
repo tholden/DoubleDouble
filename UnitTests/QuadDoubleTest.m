@@ -2,8 +2,8 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
     % QuadDoubleTest Test suite for QuadDouble class
 
     properties
-        AbsTol = 1e-30;  % Absolute tolerance for comparisons
-        RelTol = 1e-15;  % Relative tolerance for comparisons
+        AbsTol = 1e-60;  % Absolute tolerance for comparisons
+        RelTol = 1e-55;  % Relative tolerance for comparisons
 
         % Test data
         SmallValues;
