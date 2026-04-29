@@ -1748,7 +1748,11 @@ classdef (Abstract) BaseExtDouble
         end
 
         function [ v, U, p ] = lu( v, type )
-            [ v, U, p ] = luExt( v, type );
+            if nargin < 2
+                [ v, U, p ] = luExt( v );
+            else
+                [ v, U, p ] = luExt( v, type );
+            end
         end
 
         function [ q, v ] = qr( v )
