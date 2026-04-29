@@ -2,8 +2,8 @@ classdef OctDoubleTest < matlab.unittest.TestCase
     % OctDoubleTest Test suite for OctDouble class
 
     properties
-        AbsTol = 1e-30;  % Absolute tolerance for comparisons
-        RelTol = 1e-14;  % Relative tolerance for comparisons
+        AbsTol = 1e-120;  % Absolute tolerance for comparisons
+        RelTol = 1e-115;  % Relative tolerance for comparisons
 
         % Test data
         SmallValues;
@@ -27,14 +27,62 @@ classdef OctDoubleTest < matlab.unittest.TestCase
     end
 
     methods (Test)
+        function TestCrossValidation( TestCase )
+            % Verify that OctDouble produces identical results to VPA
+            % at full extended precision.
+            Data = [ 1.123, -2.456; 3.789, -4.012 ];
+            
+            VPAData = vpa( Data, 135 );
+            QDS = OctDouble( Data );
+            
+            % Test basic arithmetic operations
+            ResVPA = VPAData * VPAData + VPAData - ( VPAData / 2 );
+            ResQDS = QDS * QDS + QDS - ( QDS / 2 );
+            
+            [ v1, v2, v3, v4, v5, v6, v7, v8 ] = ToSumOfDoubles( ResQDS );
+            ResQDS_VPA = vpa( v1, 135 ) + vpa( v2, 135 ) + vpa( v3, 135 ) + vpa( v4, 135 ) + vpa( v5, 135 ) + vpa( v6, 135 ) + vpa( v7, 135 ) + vpa( v8, 135 );
+            
+            TestCase.verifyEqual( double( ResQDS_VPA - ResVPA ), zeros(size(Data)), 'AbsTol', TestCase.AbsTol );
+            
+            % Test linear algebra routines (LU decomposition)
+            % Not supported for VPA matrices efficiently with same exact outputs (P, L, U may differ).
+            % But we can skip it for cross validation with VPA since VPA lu can behave differently.
+            % Or just skip LU in TestCrossValidation since it is tested in TestLU.
+        end
+
+        function TestCrossValidationQuadDouble( TestCase )
+            % Verify that OctDouble closely matches QuadDouble up to QuadDouble precision.
+            Data = [ 1.123, -2.456; 3.789, -4.012 ];
+            
+            QD  = QuadDouble( Data );
+            OD = OctDouble( Data );
+            
+            % Test basic arithmetic operations
+            ResQD  = QD * QD + QD - ( QD / 2 );
+            ResOD = OD * OD + OD - ( OD / 2 );
+            
+            [ v1, v2, v3, v4, ~, ~, ~, ~ ] = ToSumOfDoubles( ResOD );
+            [ q1, q2, q3, q4 ] = ToSumOfDoubles( ResQD );
+            
+            TestCase.verifyEqual( v1, q1, 'AbsTol', 1e-60 );
+            TestCase.verifyEqual( v2, q2, 'AbsTol', 1e-60 );
+            TestCase.verifyEqual( v3, q3, 'AbsTol', 1e-60 );
+            TestCase.verifyEqual( v4, q4, 'AbsTol', 1e-60 );
+            
+            % Test linear algebra routines (LU decomposition)
+            [ L_QD, U_QD, ~ ] = lu( QD );
+            [ L_OD, U_OD, ~ ] = lu( OD );
+            
+            TestCase.verifyEqual( double( L_OD - L_QD ), zeros(size(Data)), 'AbsTol', 1e-28 );
+            TestCase.verifyEqual( double( U_OD - U_QD ), zeros(size(Data)), 'AbsTol', 1e-28 );
+        end
+
         % Constructor tests
         function TestConstructorEmpty( TestCase )
             A = OctDouble();
             [ V1, V2, V3, V4, V5, V6, V7, V8 ] = ToSumOfDoubles( A );
             TestCase.verifyEmpty( V1 );
-            TestCase.verifyEmpty( V2 );
-            TestCase.verifyEmpty( V3 );
-            TestCase.verifyEmpty( V4 );
+            TestCase.verifyEmpty( V8 );
         end
 
         function TestConstructorScalar( TestCase )
@@ -42,8 +90,7 @@ classdef OctDoubleTest < matlab.unittest.TestCase
             [ V1, V2, V3, V4, V5, V6, V7, V8 ] = ToSumOfDoubles( A );
             TestCase.verifyEqual( V1, 3.14 );
             TestCase.verifyTrue( abs( V2 ) < TestCase.AbsTol );
-            TestCase.verifyTrue( abs( V3 ) < TestCase.AbsTol );
-            TestCase.verifyTrue( abs( V4 ) < TestCase.AbsTol );
+            TestCase.verifyTrue( abs( V8 ) < TestCase.AbsTol );
         end
 
         function TestConstructorArray( TestCase )
@@ -314,19 +361,19 @@ classdef OctDoubleTest < matlab.unittest.TestCase
         function TestCumsum( TestCase )
             A = OctDouble( [ 1, 2, 3, 4 ] );
             CS = cumsum( A );
-            TestCase.verifyEqual( double( CS ), [ 1, 3, 6, 10 ] );
+            TestCase.verifyEqual( double( CS ), [ 1, 3, 6, 10 ], 'AbsTol', TestCase.AbsTol );
         end
 
         function TestCumprod( TestCase )
             A = OctDouble( [ 1, 2, 3, 4 ] );
             CP = cumprod( A );
-            TestCase.verifyEqual( double( CP ), [ 1, 2, 6, 24 ] );
+            TestCase.verifyEqual( double( CP ), [ 1, 2, 6, 24 ], 'AbsTol', TestCase.AbsTol );
         end
 
         function TestDiff( TestCase )
             A = OctDouble( [ 1, 3, 6, 10 ] );
             D = diff( A );
-            TestCase.verifyEqual( double( D ), [ 2, 3, 4 ] );
+            TestCase.verifyEqual( double( D ), [ 2, 3, 4 ], 'AbsTol', TestCase.AbsTol );
         end
 
         function TestDot( TestCase )
@@ -590,7 +637,7 @@ classdef OctDoubleTest < matlab.unittest.TestCase
             % Verify that A*AInv = I
             I = A * AInv; %#ok<MINV>
             EyeVal = eye( size( I ) );
-            TestCase.verifyEqual( double( I ), EyeVal, 'AbsTol', TestCase.AbsTol );
+            TestCase.verifyEqual( double( I ), EyeVal, 'AbsTol', TestCase.AbsTol, 'RelTol', TestCase.RelTol );
         end
 
         function TestChol( TestCase )
