@@ -1,5 +1,5 @@
-function v = ForwardElimination( v, L )
-    % For lower triangular L, x = ForwardElimination( b, L ) solves L*x = b.
+function v = ForwardEliminationExt( v, L )
+    % For lower triangular L, x = ForwardEliminationExt( b, L ) solves L*x = b.
 
     [ m, n ] = size( L );
     mn = min( m, n );
