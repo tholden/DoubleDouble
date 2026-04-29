@@ -9,7 +9,7 @@ classdef (Abstract) BaseExtDouble
         SingletonExpansionNotSupported = ~BaseExtDouble.TestSingletonExpansion();
     end
 
-    properties ( Abstract )
+    properties ( Abstract, Constant )
         zero
         one
         eps
@@ -23,10 +23,11 @@ classdef (Abstract) BaseExtDouble
         log_10
         SinTable
         CosTable
+        expRescale
+        logSteps
     end
 
     methods (Abstract)
-        v = Rand( v, varargin )
         v = Make( z, a1, a2 )
         v = Promote( v, a )
     end
@@ -769,7 +770,7 @@ classdef (Abstract) BaseExtDouble
                 Length = Size( Dim );
                 if Length == 0
                     Size = max( 1, Size );
-                    v = v.Make( zeros( Size ), zeros( Size ) );
+                    v = zeros( Size, 'like', v );
                     return
                 end
                 Blocks = num2cell( Size );
@@ -791,7 +792,7 @@ classdef (Abstract) BaseExtDouble
                 Length = Size( Dim );
                 if Length == 0
                     Size = max( 1, Size );
-                    v = v.Make( zeros( Size ), zeros( Size ) );
+                    v = zeros( Size, 'like', v );
                     return
                 end
                 Blocks = num2cell( Size );
@@ -820,7 +821,7 @@ classdef (Abstract) BaseExtDouble
                 Length = Size( Dim );
                 if Length == 0
                     Size = max( 1, Size );
-                    v = v.Make( ones( Size ), zeros( Size ) );
+                    v = ones( Size, 'like', v );
                     return
                 end
                 Blocks = num2cell( Size );
@@ -842,7 +843,7 @@ classdef (Abstract) BaseExtDouble
                 Length = Size( Dim );
                 if Length == 0
                     Size = max( 1, Size );
-                    v = v.Make( ones( Size ), zeros( Size ) );
+                    v = ones( Size, 'like', v );
                     return
                 end
                 Blocks = num2cell( Size );
@@ -995,7 +996,7 @@ classdef (Abstract) BaseExtDouble
                 Size = size( v.v1 );
                 Length = Size( Dim );
                 if Length == 0
-                    v = v.Make( zeros( Size ), zeros( Size ) );
+                    v = zeros( Size, 'like', v );
                     return
                 end
                 Blocks = num2cell( Size );
@@ -1022,7 +1023,7 @@ classdef (Abstract) BaseExtDouble
                 Size = size( v );
                 Length = Size( Dim );
                 if Length == 0
-                    v = v.Make( zeros( Size ), zeros( Size ) );
+                    v = zeros( Size, 'like', v );
                     return
                 end
                 Blocks = num2cell( Size );
@@ -1056,7 +1057,7 @@ classdef (Abstract) BaseExtDouble
                 Size = size( v.v1 );
                 Length = Size( Dim );
                 if Length == 0
-                    v = v.Make( zeros( Size ), zeros( Size ) );
+                    v = zeros( Size, 'like', v );
                     return
                 end
                 Blocks = num2cell( Size );
@@ -1085,7 +1086,7 @@ classdef (Abstract) BaseExtDouble
                 Size = size( v );
                 Length = Size( Dim );
                 if Length == 0
-                    v = v.Make( zeros( Size ), zeros( Size ) );
+                    v = zeros( Size, 'like', v );
                     return
                 end
                 Blocks = num2cell( Size );
@@ -1121,7 +1122,7 @@ classdef (Abstract) BaseExtDouble
                 Size = size( v.v1 );
                 Length = Size( Dim );
                 if Length == 0
-                    v = v.Make( zeros( Size ), zeros( Size ) );
+                    v = zeros( Size, 'like', v );
                     return
                 end
                 Blocks = num2cell( Size );
@@ -1148,7 +1149,7 @@ classdef (Abstract) BaseExtDouble
                 Size = size( v );
                 Length = Size( Dim );
                 if Length == 0
-                    v = v.Make( zeros( Size ), zeros( Size ) );
+                    v = zeros( Size, 'like', v );
                     return
                 end
                 Blocks = num2cell( Size );
@@ -1182,7 +1183,7 @@ classdef (Abstract) BaseExtDouble
                 Size = size( v.v1 );
                 Length = Size( Dim );
                 if Length == 0
-                    v = v.Make( zeros( Size ), zeros( Size ) );
+                    v = zeros( Size, 'like', v );
                     return
                 end
                 Blocks = num2cell( Size );
@@ -1209,7 +1210,7 @@ classdef (Abstract) BaseExtDouble
                 Size = size( v );
                 Length = Size( Dim );
                 if Length == 0
-                    v = v.Make( zeros( Size ), zeros( Size ) );
+                    v = zeros( Size, 'like', v );
                     return
                 end
                 Blocks = num2cell( Size );
@@ -1243,7 +1244,7 @@ classdef (Abstract) BaseExtDouble
                 Size = size( v.v1 );
                 Length = Size( Dim );
                 if Length == 0
-                    v = v.Make( zeros( Size ), zeros( Size ) );
+                    v = zeros( Size, 'like', v );
                     return
                 end
                 Blocks = num2cell( Size );
@@ -1270,7 +1271,7 @@ classdef (Abstract) BaseExtDouble
                 Size = size( v );
                 Length = Size( Dim );
                 if Length == 0
-                    v = v.Make( zeros( Size ), zeros( Size ) );
+                    v = zeros( Size, 'like', v );
                     return
                 end
                 Blocks = num2cell( Size );
@@ -1458,7 +1459,8 @@ classdef (Abstract) BaseExtDouble
             % we can make |kr| <= log(2) / 2 = 0.347.  Then exp(r) is
             % evaluated using the familiar Taylor series.  Reducing the
             % argument substantially speeds up the convergence.
-            k = 512.0;
+            NSquare = v.expRescale;
+            k = 2.0 ^ NSquare;
             inv_k = 1.0 / k;
             Threshhold = inv_k .* v.eps.v1;
 
@@ -1469,11 +1471,11 @@ classdef (Abstract) BaseExtDouble
             p = r .* r;
             s = r + p.TimesPowerOf2( 0.5 );
             p = p .* r;
-            t = p .* v.Make( subsref(v.InverseFactorial, substruct('()', {1, 1})), subsref(v.InverseFactorial, substruct('()', {1, 2})) );
+            t = p .* v.Make( Index( v.InverseFactorial, 1, 1 ), Index( v.InverseFactorial, 1, 2 ) );
             for i = 2 : v.NInverseFactorial
                 s = s + t;
                 p = p .* r;
-                t = p .* v.Make( subsref(v.InverseFactorial, substruct('()', {i, 1})), subsref(v.InverseFactorial, substruct('()', {i, 2})) );
+                t = p .* v.Make( Index( v.InverseFactorial, i, 1 ), Index( v.InverseFactorial, i, 2 ) );
                 if all( abs( Index( t.v1, ':' ) ) <= Threshhold )
                     break
                 end
@@ -1481,15 +1483,9 @@ classdef (Abstract) BaseExtDouble
 
             s = s + t;
 
-            s = s.TimesPowerOf2( 2.0 ) + s .* s;
-            s = s.TimesPowerOf2( 2.0 ) + s .* s;
-            s = s.TimesPowerOf2( 2.0 ) + s .* s;
-            s = s.TimesPowerOf2( 2.0 ) + s .* s;
-            s = s.TimesPowerOf2( 2.0 ) + s .* s;
-            s = s.TimesPowerOf2( 2.0 ) + s .* s;
-            s = s.TimesPowerOf2( 2.0 ) + s .* s;
-            s = s.TimesPowerOf2( 2.0 ) + s .* s;
-            s = s.TimesPowerOf2( 2.0 ) + s .* s;
+            for i = 1 : NSquare
+                s = s.TimesPowerOf2( 2.0 ) + s .* s;
+            end
 
             if expm1Flag
                 Select = m ~= 0;
@@ -1521,8 +1517,9 @@ classdef (Abstract) BaseExtDouble
 
         function x = log( v )
             x = v.Make( log( v.v1 ), zeros( size( v.v1 ) ) );
-            x = x + v .* exp( -x ) - 1.0;
-            x = x + v .* exp( -x ) - 1.0; % slightly paranoid, but does correct e.g. log(exp(v.Promote( -40)))
+            for i = 1 : v.logSteps
+                x = x + v .* exp( -x ) - 1.0;
+            end
         end
 
         function v = log2( v )
@@ -1770,7 +1767,7 @@ classdef (Abstract) BaseExtDouble
             elseif DetP < 0
                 v = -prod( diag( u ) );
             else
-                v = v.Make( NaN, NaN );
+                v = v.Make( NaN, NaN ); % scalar NaN, can't use 'like' here
             end
         end
 
@@ -1800,78 +1797,11 @@ classdef (Abstract) BaseExtDouble
         end
 
         function [ v, d ] = eig( x )
-            [ v, d ] = eig( x.v1 );
-            v = x.Promote( v );
-            d = x.Promote( diag( d ) );
-            C = length( d );
-            I = x.Make( eye( C ), zeros( C ) );
-            for c = 1 : C
-                vi = x.Make( Index( v.v1, ':', c  ), Index( v.v2, ':', c  ) );
-                dii = x.Make( Index( d.v1, c, 1 ), Index( d.v2, c, 1 ) );
-                err = Inf;
-                while true
-                    nvi = ( x - dii * I ) \ vi;
-                    nvi = nvi ./ norm( nvi );
-                    if any( ~isfinite( nvi ) )
-                        break
-                    end
-                    vi = nvi;
-                    odii = dii;
-                    xTvi = x * vi;
-                    dii = ( vi' * xTvi ) ./ ( vi' * vi );
-                    oerr = err;
-                    errv = abs( xTvi - dii * vi );
-                    err = sum( errv .* errv );
-                    if err > oerr
-                        % err = oerr;
-                        dii = odii;
-                        break
-                    end
-                    if ( err == 0 ) || ( err == oerr )
-                        break
-                    end
-                end
-                d.v1 = Assign( d.v1, dii.v1, c, 1 );
-                d.v2 = Assign( d.v2, dii.v2, c, 1 );
-                v.v1 = Assign( v.v1, vi.v1, ':', c  );
-                v.v2 = Assign( v.v2, vi.v2, ':', c  );
-            end
-            if nargout < 2
-                v = d;
-            else
-                d = diag( d );
-            end
+            [ v, d ] = eigExt( x );
         end
 
         function w = conv( u, v )
-
-            RowVector = size( u, 1 ) == 1 && size( v, 1 ) == 1;
-
-            u = u.Vec();
-            v = u.Vec();
-
-            M = size( u, 1 );
-            N = size( v, 1 );
-
-            K = M + N - 1;
-
-            w = u.zeros( K, 1 );
-
-            for k = 1 : K
-
-                j = max( 1, k + 1 - N ) : min( k, M );
-                i = k - j + 1;
-
-                wk = v.Dot( u.Make( Index( u.v1, j ), Index( u.v2, j ) ), u.Make( Index( v.v1, i ), Index( v.v2, i ) ) );
-                w.v1 = Assign( w.v1, wk.v1, k );
-                w.v2 = Assign( w.v2, wk.v2, k );
-
-            end
-
-            if RowVector
-                w = w.';
-            end
-
+            w = convExt( u, v );
         end
 
         function [ C, ia, ic ] = unique( A, varargin )
@@ -1924,7 +1854,7 @@ classdef (Abstract) BaseExtDouble
 
             if n == 0
                 Size( Dim ) = 0;
-                v = v.Make( NaN( Size ), NaN( Size ) );
+                v = NaN( Size, 'like', v );
                 return;
             end
 
@@ -1970,7 +1900,7 @@ classdef (Abstract) BaseExtDouble
 
             if ( n == 0 ) || ( ( n == 1 ) && ( Flag == 0 ) )
                 Size( Dim ) = 1;
-                v = v.Make( NaN( Size ), NaN( Size ) );
+                v = NaN( Size, 'like', v );
                 return;
             end
 
@@ -2007,7 +1937,7 @@ classdef (Abstract) BaseExtDouble
             end
 
             if n < 1
-                y = a.Make( zeros( 0, 1 ), zeros( 0, 1 ) );
+                y = zeros( 0, 1, 'like', a );
                 return;
             end
 
@@ -2033,7 +1963,7 @@ classdef (Abstract) BaseExtDouble
                 v = a.Times( b );
                 return
             end
-            v = a.Make( zeros( R, C ), zeros( R, C ) );
+            v = zeros( R, C, 'like', a );
             if isa( b, 'BaseExtDouble' )
                 for c = 1 : C
                     t = sum( a .* b.Make( Index( b.v1, ':', c ).', Index( b.v2, ':', c ).' ), 2 );
@@ -2170,7 +2100,7 @@ classdef (Abstract) BaseExtDouble
                 Size = size( v.v1 );
                 Length = Size( Dim );
                 if Length == 0
-                    c = v.Make( zeros( Size ), zeros( Size ) );
+                    c = zeros( Size, 'like', v );
                     return
                 end
                 Blocks = num2cell( Size );
@@ -2199,7 +2129,7 @@ classdef (Abstract) BaseExtDouble
                 Size = size( v );
                 Length = Size( Dim );
                 if Length == 0
-                    c = v.Make( zeros( Size ), zeros( Size ) );
+                    c = zeros( Size, 'like', v );
                     return
                 end
                 Blocks = num2cell( Size );
