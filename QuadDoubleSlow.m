@@ -205,7 +205,7 @@ classdef QuadDoubleSlow < BaseExtDouble
 
     end
 
-    methods ( Static, Access = public )
+    methods ( Static, Access = { ?QuadDoubleSlow, ?QuadDouble, ?OctDouble } )
 
         function v = MakeStatic( a1, a2 )
             v = QuadDoubleSlow;

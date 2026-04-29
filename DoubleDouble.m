@@ -166,7 +166,7 @@ classdef DoubleDouble < BaseExtDouble
 
     end
 
-    methods ( Static, Access = public )
+    methods ( Static, Access = { ?DoubleDouble, ?QuadDoubleSlow, ?QuadDouble, ?OctDouble } )
 
         function v = MakeStatic( a1, a2 )
             v = DoubleDouble;

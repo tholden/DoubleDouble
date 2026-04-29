@@ -373,7 +373,7 @@ classdef OctDouble < BaseExtDouble
 
     end
 
-    methods ( Static, Access = public )
+    methods ( Static, Access = ?OctDouble )
 
         function v = MakeStatic( a1, a2 )
             v = OctDouble;
