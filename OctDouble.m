@@ -42,14 +42,13 @@ classdef OctDouble < BaseExtDouble
     properties ( Constant, GetAccess = public )
         zero = OctDouble.MakeStatic( QuadDouble.MakeStatic( 0, 0, 0, 0 ), QuadDouble.MakeStatic( 0, 0, 0, 0 ) );
         one = OctDouble.MakeStatic( QuadDouble.MakeStatic( 1, 0, 0, 0 ), QuadDouble.MakeStatic( 0, 0, 0, 0 ) );
-
+        eps = OctDouble.MakeStatic( QuadDouble.MakeStatic( 2.30824465444643394519e-128, 0.00000000000000000000e+00, 0.00000000000000000000e+00, 0.00000000000000000000e+00 ), QuadDouble.MakeStatic( 0.00000000000000000000e+00, 0.00000000000000000000e+00, 0.00000000000000000000e+00, 0.00000000000000000000e+00 ) );
         pi = OctDouble.MakeStatic( QuadDouble.MakeStatic( 3.14159265358979311600e+00, 1.22464679914735320717e-16, -2.99476980971833966589e-33, 1.11245422086336528155e-49 ), QuadDouble.MakeStatic( 5.67223197964031574414e-66, 1.74498621613524860120e-83, 6.02937273224953984001e-100, 1.91012354687998999148e-116 ) );
         log_2 = OctDouble.MakeStatic( QuadDouble.MakeStatic( 6.93147180559945286227e-01, 2.31904681384629955842e-17, 5.70770843841621206578e-34, -3.58243221060181142336e-50 ), QuadDouble.MakeStatic( -1.35216967579886295691e-66, 6.08063874024081390981e-83, 2.89550243323471468856e-99, 2.35138671214564105578e-116 ) );
         log_10 = OctDouble.MakeStatic( QuadDouble.MakeStatic( 2.30258509299404590109e+00, -2.17075622338224935076e-16, -9.98426245446577657012e-33, -4.02335745445020637879e-49 ), QuadDouble.MakeStatic( 1.92889952896933719193e-65, -5.21257011815125512829e-82, -2.60373698986932938056e-98, 8.29741762082190113745e-115 ) );
         piT2 = OctDouble.MakeStatic( QuadDouble.MakeStatic( 6.28318530717958623200e+00, 2.44929359829470641435e-16, -5.98953961943667933177e-33, 2.22490844172673056309e-49 ), QuadDouble.MakeStatic( 1.13444639592806314883e-65, 3.48997243227049720241e-83, 1.20587454644990796800e-99, 3.82024709375997998296e-116 ) );
         piD2 = OctDouble.MakeStatic( QuadDouble.MakeStatic( 1.57079632679489655800e+00, 6.12323399573676603587e-17, -1.49738490485916983294e-33, 5.56227110431682640773e-50 ), QuadDouble.MakeStatic( 2.83611598982015787207e-66, 8.72493108067624300601e-84, 3.01468636612476992000e-100, 9.55061773439994995741e-117 ) );
         piD16 = OctDouble.MakeStatic( QuadDouble.MakeStatic( 1.96349540849362069750e-01, 7.65404249467095754484e-18, -1.87173113107396229118e-34, 6.95283888039603300966e-51 ), QuadDouble.MakeStatic( 3.54514498727519734009e-67, 1.09061638508453037575e-84, 3.76835795765596240000e-101, 1.19382721679999374468e-117 ) );
-        eps = OctDouble.MakeStatic( QuadDouble.MakeStatic( 2.30824465444643394519e-128, 0.00000000000000000000e+00, 0.00000000000000000000e+00, 0.00000000000000000000e+00 ), QuadDouble.MakeStatic( 0.00000000000000000000e+00, 0.00000000000000000000e+00, 0.00000000000000000000e+00, 0.00000000000000000000e+00 ) );
     end
 
     properties ( Constant, GetAccess = public )
@@ -610,9 +609,9 @@ classdef OctDouble < BaseExtDouble
 
             Idx = 2 * abs_k + 1;
             a = v.Make( QuadDouble.MakeStatic( v.CosTable( Idx, 1 ), v.CosTable( Idx, 2 ), v.CosTable( Idx, 3 ), v.CosTable( Idx, 4 ) ), ...
-                        QuadDouble.MakeStatic( v.CosTable( Idx, 5 ), v.CosTable( Idx, 6 ), v.CosTable( Idx, 7 ), v.CosTable( Idx, 8 ) ) );
+                QuadDouble.MakeStatic( v.CosTable( Idx, 5 ), v.CosTable( Idx, 6 ), v.CosTable( Idx, 7 ), v.CosTable( Idx, 8 ) ) );
             b = v.Make( QuadDouble.MakeStatic( v.SinTable( Idx, 1 ), v.SinTable( Idx, 2 ), v.SinTable( Idx, 3 ), v.SinTable( Idx, 4 ) ), ...
-                        QuadDouble.MakeStatic( v.SinTable( Idx, 5 ), v.SinTable( Idx, 6 ), v.SinTable( Idx, 7 ), v.SinTable( Idx, 8 ) ) );
+                QuadDouble.MakeStatic( v.SinTable( Idx, 5 ), v.SinTable( Idx, 6 ), v.SinTable( Idx, 7 ), v.SinTable( Idx, 8 ) ) );
 
             a = reshape( a, size( v ) );
             b = reshape( b, size( v ) );
