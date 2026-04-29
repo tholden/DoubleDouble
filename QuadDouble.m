@@ -67,8 +67,8 @@ classdef QuadDouble < QuadDoubleSlow
             end
         end
 
-        function v = Promote( ~, a )
-            v = QuadDouble( a );
+        function v = Promote( ~, v )
+            v = QuadDouble( v );
         end
 
         function v = Make( ~, a1, a2 )
@@ -82,121 +82,6 @@ classdef QuadDouble < QuadDoubleSlow
             v.v1 = a1;
             v.v2 = a2;
         end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     end
 
@@ -228,24 +113,51 @@ classdef QuadDouble < QuadDoubleSlow
 
     end
 
-
     methods ( Static, Access = public )
+
         function v = MakeStatic( a1, a2, a3, a4 )
             v = QuadDouble;
-            v.v1.v1 = a1;
             if nargin < 2
                 a2 = zeros( size( a1 ) );
             end
-            v.v1.v2 = a2;
+            v.v1 = DoubleDouble.MakeStatic( a1, a2 );
             if nargin < 3
                 a3 = zeros( size( a1 ) );
             end
-            v.v2.v1 = a3;
             if nargin < 4
                 a4 = zeros( size( a1 ) );
             end
-            v.v2.v2 = a4;
+            v.v2 = DoubleDouble.MakeStatic( a3, a4 );
         end
+
+    end
+
+    methods ( Access = protected )
+
+        function v = Plus( a, b )
+            a = QuadDouble.PromoteStatic( a );
+            b = QuadDouble.PromoteStatic( b );
+            [ s0, s1, s2, s3 ] = QuadDouble.QDPlusQD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
+            v = QuadDouble.MakeStatic( s0, s1, s2, s3 );
+        end
+
+        function v = Times( a, b )
+            a = QuadDouble.PromoteStatic( a );
+            b = QuadDouble.PromoteStatic( b );
+            [ s0, s1, s2, s3 ] = QuadDouble.QDTimesQD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
+            v = QuadDouble.MakeStatic( s0, s1, s2, s3 );
+        end
+
+        function v = RDivide( a, b )
+            a = QuadDouble.PromoteStatic( a );
+            b = QuadDouble.PromoteStatic( b );
+            [ s0, s1, s2, s3 ] = QuadDouble.QDDivQD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
+            v = QuadDouble.MakeStatic( s0, s1, s2, s3 );
+        end
+
+    end
+
+    methods ( Static, Access = private )
 
         function [ s1, s2 ] = Normalize( a1, a2 )
             s1 = a1 + a2;
@@ -253,7 +165,9 @@ classdef QuadDouble < QuadDoubleSlow
             s2 = a2 - t;
         end
 
-
+        function v = PromoteStatic( a )
+            v = QuadDouble( a );
+        end
 
         function [ s1, s2 ] = QuickTwoSum( a, b )
             s1 = a + b;
@@ -287,14 +201,14 @@ classdef QuadDouble < QuadDoubleSlow
                 [ a, b ] = QuadDouble.ExpandSingleton( a, b );
             end
             p1 = a .* b;
-            [ a1, a2 ] = QuadDouble.Split( a );
-            [ b1, b2 ] = QuadDouble.Split( b );
+            [ a1, a2 ] = Split( a );
+            [ b1, b2 ] = Split( b );
             p2 = ( ( a1 .* b1 - p1 ) + a1 .* b2 + a2 .* b1 ) + a2 .* b2;
         end
 
         function [ p1, p2 ] = TwoSqr( a )
             p1 = a .* a;
-            [ a1, a2 ] = QuadDouble.Split( a );
+            [ a1, a2 ] = Split( a );
             p2 = ( ( a1 .* a1 - p1 ) + 2 .* a1 .* a2 ) + a2 .* a2;
         end
 
@@ -413,7 +327,9 @@ classdef QuadDouble < QuadDoubleSlow
 
             c0 = s0; c1 = s1; c2 = s2; c3 = s3;
         end
+    end
 
+    methods ( Static, Access = public )
         function [ s0, s1, s2, s3 ] = QDPlusQD( a0, a1, a2, a3, b0, b1, b2, b3 )
             if QuadDouble.SingletonExpansionNotSupported
                 [ a0, b0 ] = QuadDouble.ExpandSingleton( a0, b0 );
@@ -567,5 +483,5 @@ classdef QuadDouble < QuadDoubleSlow
         end
 
     end
-end
 
+end

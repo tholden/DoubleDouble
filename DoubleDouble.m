@@ -60,7 +60,7 @@ classdef DoubleDouble < BaseExtDouble
             DoubleDouble.MakeStatic( 7.64716373181981641e-13,   7.03872877733453001e-30 );
             DoubleDouble.MakeStatic( 4.77947733238738525e-14,   4.39920548583408126e-31 );
             DoubleDouble.MakeStatic( 2.81145725434552060e-15,   1.65088427308614326e-31 );
-        ];
+            ];
 
         NInverseFactorial = 15;
 
@@ -80,7 +80,7 @@ classdef DoubleDouble < BaseExtDouble
             DoubleDouble.MakeStatic( 3.826834323650897818e-01,  -1.005077269646158761e-17 );
             DoubleDouble.MakeStatic( 5.555702330196021776e-01,   4.709410940561676821e-17 );
             DoubleDouble.MakeStatic( 7.071067811865475727e-01,  -4.833646656726456726e-17 );
-        ];
+            ];
 
         CosTable = [
             DoubleDouble.MakeStatic( 1,  0 );
@@ -88,18 +88,10 @@ classdef DoubleDouble < BaseExtDouble
             DoubleDouble.MakeStatic( 9.238795325112867385e-01,   1.764504708433667706e-17 );
             DoubleDouble.MakeStatic( 8.314696123025452357e-01,   1.407385698472802389e-18 );
             DoubleDouble.MakeStatic( 7.071067811865475727e-01,  -4.833646656726456726e-17 );
-        ];
+            ];
     end
 
     methods
-
-        function v = Promote( ~, a )
-            v = DoubleDouble( a );
-        end
-
-        function v = Make( ~, a1, a2 )
-            v = DoubleDouble.MakeStatic( a1, a2 );
-        end
 
         function v = DoubleDouble( in, varargin )
             if nargin == 0
@@ -121,6 +113,14 @@ classdef DoubleDouble < BaseExtDouble
                 v.v1 = double( in );
                 v.v2 = zeros( size( in ) );
             end
+        end
+
+        function v = Promote( ~, v )
+            v = DoubleDouble( v );
+        end
+
+        function v = Make( ~, a1, a2 )
+            v = DoubleDouble.MakeStatic( a1, a2 );
         end
 
     end
@@ -166,8 +166,8 @@ classdef DoubleDouble < BaseExtDouble
 
         function v = MakeStatic( a1, a2 )
             v = DoubleDouble;
-            v.v1 = a1;
-            v.v2 = a2;
+            v.v1 = double( a1 );
+            v.v2 = double( a2 );
         end
 
     end

@@ -34,7 +34,6 @@ classdef (Abstract) BaseExtDouble
 
     methods (Sealed)
 
-
         function v = cat( dim, a, varargin )
             if isempty( varargin )
                 v = a;
