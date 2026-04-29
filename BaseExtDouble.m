@@ -2225,8 +2225,8 @@ classdef (Abstract) BaseExtDouble
         function [ a1, a2 ] = Split( a )
             [ c1, c2 ] = Split( a.v1 );
             [ c3, c4 ] = Split( a.v2 );
-            a1 = a.Make( c1, c2 );
-            a2 = a.Make( c3, c4 );
+            a1 = a.Make( c1, c3 );
+            a2 = a.Make( c2, c4 );
         end
 
         function v = ToRand( v ) % Fills v with random values in place.
