@@ -72,15 +72,7 @@ classdef QuadDouble < QuadDoubleSlow
         end
 
         function v = Make( ~, a1, a2 )
-            v = QuadDouble;
-            if ~isa( a1, 'DoubleDouble' ) && ~isempty( a1 )
-                a1 = DoubleDouble( a1 );
-            end
-            if ~isa( a2, 'DoubleDouble' ) && ~isempty( a2 )
-                a2 = DoubleDouble( a2 );
-            end
-            v.v1 = a1;
-            v.v2 = a2;
+            v = QuadDouble.MakeStatic( a1, a2 );
         end
 
     end
@@ -88,46 +80,46 @@ classdef QuadDouble < QuadDoubleSlow
     methods ( Static )
 
         function v = ones( varargin )
-            v = QuadDouble.MakeStatic( ones( varargin{:}, 'double' ), zeros( varargin{:}, 'double' ), zeros( varargin{:}, 'double' ), zeros( varargin{:}, 'double' ) );
+            v = QuadDouble.MakeStatic( DoubleDouble.ones( varargin{:} ), DoubleDouble.zeros( varargin{:} ) );
         end
 
         function v = zeros( varargin )
-            v = QuadDouble.MakeStatic( zeros( varargin{:}, 'double' ), zeros( varargin{:}, 'double' ), zeros( varargin{:}, 'double' ), zeros( varargin{:}, 'double' ) );
+            v = QuadDouble.MakeStatic( DoubleDouble.zeros( varargin{:} ), DoubleDouble.zeros( varargin{:} ) );
         end
 
         function v = eye( varargin )
-            v = QuadDouble.MakeStatic( eye( varargin{:}, 'double' ), zeros( varargin{:}, 'double' ), zeros( varargin{:}, 'double' ), zeros( varargin{:}, 'double' ) );
+            v = QuadDouble.MakeStatic( DoubleDouble.eye( varargin{:} ), DoubleDouble.zeros( varargin{:} ) );
         end
 
-        function v = nan( varargin )
-            v = QuadDouble.MakeStatic( nan( varargin{:}, 'double' ), nan( varargin{:}, 'double' ), nan( varargin{:}, 'double' ), nan( varargin{:}, 'double' ) );
+        function v = NaN( varargin )
+            v = QuadDouble.MakeStatic( DoubleDouble.NaN( varargin{:} ), DoubleDouble.NaN( varargin{:} ) );
         end
 
-        function v = inf( varargin )
-            v = QuadDouble.MakeStatic( inf( varargin{:}, 'double' ), inf( varargin{:}, 'double' ), inf( varargin{:}, 'double' ), inf( varargin{:}, 'double' ) );
+        function v = Inf( varargin )
+            v = QuadDouble.MakeStatic( DoubleDouble.Inf( varargin{:} ), DoubleDouble.Inf( varargin{:} ) );
         end
 
         function v = randi( imax, varargin )
-            v = QuadDouble.MakeStatic( randi( imax, varargin{:}, 'double' ), zeros( varargin{:}, 'double' ), zeros( varargin{:}, 'double' ), zeros( varargin{:}, 'double' ) );
+            v = QuadDouble.MakeStatic( DoubleDouble( randi( imax, varargin{:}, 'double' ) ), DoubleDouble.zeros( varargin{:} ) );
         end
 
     end
 
     methods ( Static, Access = public )
 
-        function v = MakeStatic( a1, a2, a3, a4 )
+        function v = MakeStatic( a1, a2 )
             v = QuadDouble;
+            if ~isa( a1, 'DoubleDouble' )
+                a1 = DoubleDouble( a1 );
+            end
             if nargin < 2
-                a2 = zeros( size( a1 ) );
+                a2 = DoubleDouble.zeros( size( a1 ) );
             end
-            v.v1 = DoubleDouble.MakeStatic( a1, a2 );
-            if nargin < 3
-                a3 = zeros( size( a1 ) );
+            if ~isa( a2, 'DoubleDouble' )
+                a2 = DoubleDouble( a2 );
             end
-            if nargin < 4
-                a4 = zeros( size( a1 ) );
-            end
-            v.v2 = DoubleDouble.MakeStatic( a3, a4 );
+            v.v1 = a1;
+            v.v2 = a2;
         end
 
     end
@@ -138,21 +130,21 @@ classdef QuadDouble < QuadDoubleSlow
             a = QuadDouble.PromoteStatic( a );
             b = QuadDouble.PromoteStatic( b );
             [ s0, s1, s2, s3 ] = QuadDouble.QDPlusQD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
-            v = QuadDouble.MakeStatic( s0, s1, s2, s3 );
+            v = QuadDouble.MakeStatic( DoubleDouble.MakeStatic( s0, s1 ), DoubleDouble.MakeStatic( s2, s3 ) );
         end
 
         function v = Times( a, b )
             a = QuadDouble.PromoteStatic( a );
             b = QuadDouble.PromoteStatic( b );
             [ s0, s1, s2, s3 ] = QuadDouble.QDTimesQD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
-            v = QuadDouble.MakeStatic( s0, s1, s2, s3 );
+            v = QuadDouble.MakeStatic( DoubleDouble.MakeStatic( s0, s1 ), DoubleDouble.MakeStatic( s2, s3 ) );
         end
 
         function v = RDivide( a, b )
             a = QuadDouble.PromoteStatic( a );
             b = QuadDouble.PromoteStatic( b );
             [ s0, s1, s2, s3 ] = QuadDouble.QDDivQD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
-            v = QuadDouble.MakeStatic( s0, s1, s2, s3 );
+            v = QuadDouble.MakeStatic( DoubleDouble.MakeStatic( s0, s1 ), DoubleDouble.MakeStatic( s2, s3 ) );
         end
 
     end
