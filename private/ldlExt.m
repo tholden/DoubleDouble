@@ -1,5 +1,4 @@
-function [ L, D ] = ldlExt( A, type )
-    % Type-agnostic LDL decomposition
+function [ L, D ] = ldlExt( A, type ) % Type-agnostic LDL decomposition
 
     [ m, n ] = size( A );
     assert( m == n, 'Matrix must be square.' );

@@ -1,4 +1,5 @@
 function w = convExt( u, v )
+
     RowVector = size( u, 1 ) == 1 && size( v, 1 ) == 1;
 
     u = u.Vec();
@@ -24,4 +25,5 @@ function w = convExt( u, v )
     if RowVector
         w = w.';
     end
+
 end

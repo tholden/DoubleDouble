@@ -1,5 +1,4 @@
-function v = BackSubstitutionExt( v, U )
-    % For upper triangular U, x = BackSubstitutionExt( b, U ) solves U*x = b.
+function v = BackSubstitutionExt( v, U ) % For upper triangular U, x = BackSubstitutionExt( b, U ) solves U*x = b.
 
     [ m, n ] = size( U );
     mn = min( m, n );

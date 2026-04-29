@@ -1,4 +1,5 @@
 function [ v, d ] = eigExt( x )
+
     [ v, d ] = eig( x.v1 );
     v = x.Promote( v );
     d = x.Promote( diag( d ) );
@@ -6,6 +7,7 @@ function [ v, d ] = eigExt( x )
     I = eye( C, 'like', x );
 
     for c = 1 : C
+
         vi = v( :, c );
         dii = d( c, 1 );
         err = Inf;
@@ -34,6 +36,7 @@ function [ v, d ] = eigExt( x )
 
         d( c, 1 ) = dii;
         v( :, c ) = vi;
+
     end
 
     if nargout < 2
@@ -41,4 +44,5 @@ function [ v, d ] = eigExt( x )
     else
         d = diag( d );
     end
+
 end

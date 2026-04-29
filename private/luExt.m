@@ -1,4 +1,5 @@
 function [ v, U, p ] = luExt( v, type )
+
     [ m, n ] = size( v );
     p = 1 : m;
 
@@ -49,4 +50,5 @@ function [ v, U, p ] = luExt( v, type )
             v = v( invp, : );
         end
     end
+
 end
