@@ -1,7 +1,9 @@
 classdef DoubleDoubleTest < matlab.unittest.TestCase
+
     % DoubleDoubleTest Test suite for DoubleDouble class
     
     properties
+
         AbsTol = 1e-30;  % Absolute tolerance for comparisons
         RelTol = 1e-15;  % Relative tolerance for comparisons
         
@@ -11,9 +13,11 @@ classdef DoubleDoubleTest < matlab.unittest.TestCase
         LargeValues;
         ComplexValues;
         MatrixValues;
+
     end
     
-    methods (TestMethodSetup)
+    methods ( TestMethodSetup )
+
         function CreateTestData( TestCase )
             % Create test data for use in tests
             TestCase.SmallValues = DoubleDouble( [ 1e-10, 2e-10, 3e-10 ] );
@@ -24,9 +28,28 @@ classdef DoubleDoubleTest < matlab.unittest.TestCase
             % Create matrix test data
             TestCase.MatrixValues = DoubleDouble( [ 1, 2, 3; 4, 5, 6; 7, 8, 9 ] );
         end
+
     end
     
-    methods (Test)
+    methods ( Test )
+
+        function TestCrossValidationVPA( TestCase )
+            % Verify that DoubleDouble is accurate compared to VPA
+            Data = [ 1.123, -2.456; 3.789, -4.012 ];
+            
+            VPAData = vpa( sym(Data, 'f'), 135 );
+            DD = DoubleDouble( Data );
+            
+            % Test basic arithmetic operations
+            ResVPA = VPAData * VPAData + VPAData - ( VPAData / 2 );
+            ResDD  = DD * DD + DD - ( DD / 2 );
+            
+            [ v1, v2 ] = ToSumOfDoubles( ResDD );
+            ResDD_VPA = vpa( v1, 135 ) + vpa( v2, 135 );
+            
+            TestCase.verifyEqual( double( ResDD_VPA - ResVPA ), zeros(size(Data)), 'AbsTol', 1e-30 );
+        end
+
         % Constructor tests
         function TestConstructorEmpty( TestCase )
             A = DoubleDouble();
@@ -715,5 +738,7 @@ classdef DoubleDoubleTest < matlab.unittest.TestCase
             A = DoubleDouble.randn( 2, 3 );
             TestCase.verifyEqual( size( A ), [ 2, 3 ] );
         end
+
     end
+
 end

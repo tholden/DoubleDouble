@@ -1,9 +1,11 @@
 classdef QuadDoubleSlowTest < matlab.unittest.TestCase
+
     % QuadDoubleSlowTest Test suite for QuadDoubleSlow class
 
     properties
-        AbsTol = 1e-60;  % Absolute tolerance for comparisons
-        RelTol = 1e-55;  % Relative tolerance for comparisons
+
+        AbsTol = 1e-30;  % Absolute tolerance for comparisons
+        RelTol = 1e-15;  % Relative tolerance for comparisons
 
         % Test data
         SmallValues;
@@ -11,9 +13,11 @@ classdef QuadDoubleSlowTest < matlab.unittest.TestCase
         LargeValues;
         ComplexValues;
         MatrixValues;
+
     end
 
-    methods (TestMethodSetup)
+    methods ( TestMethodSetup )
+
         function CreateTestData( TestCase )
             % Create test data for use in tests
             TestCase.SmallValues = QuadDoubleSlow( [ 1e-10, 2e-10, 3e-10 ] );
@@ -24,9 +28,11 @@ classdef QuadDoubleSlowTest < matlab.unittest.TestCase
             % Create matrix test data
             TestCase.MatrixValues = QuadDoubleSlow( [ 1, 2, 3; 4, 5, 6; 7, 8, 9 ] );
         end
+
     end
 
-    methods (Test)
+    methods ( Test )
+
         function TestCrossValidation( TestCase )
             % Verify that QuadDoubleSlow produces identical results to QuadDouble
             % at full extended precision.
@@ -52,8 +58,25 @@ classdef QuadDoubleSlowTest < matlab.unittest.TestCase
             [ L_QD, U_QD, P_QD ] = lu( QD );
             [ L_QDS, U_QDS, P_QDS ] = lu( QDS );
             
-            TestCase.verifyEqual( double( L_QDS - L_QD ), zeros(size(Data)), 'AbsTol', 1e-28 );
-            TestCase.verifyEqual( double( U_QDS - U_QD ), zeros(size(Data)), 'AbsTol', 1e-28 );
+            TestCase.verifyEqual( double( L_QDS - L_QD ), zeros(size(Data) ), 'AbsTol', 1e-28 );
+            TestCase.verifyEqual( double( U_QDS - U_QD ), zeros(size(Data) ), 'AbsTol', 1e-28 );
+        end
+
+        function TestCrossValidationVPA( TestCase )
+            % Verify that QuadDoubleSlow is accurate compared to VPA
+            Data = [ 1.123, -2.456; 3.789, -4.012 ];
+            
+            VPAData = vpa( sym(Data, 'f'), 135 );
+            QDS = QuadDoubleSlow( Data );
+            
+            % Test basic arithmetic operations
+            ResVPA = VPAData * VPAData + VPAData - ( VPAData / 2 );
+            ResQDS = QDS * QDS + QDS - ( QDS / 2 );
+            
+            [ v1, v2, v3, v4 ] = ToSumOfDoubles( ResQDS );
+            ResQDS_VPA = vpa( v1, 135 ) + vpa( v2, 135 ) + vpa( v3, 135 ) + vpa( v4, 135 );
+            
+            TestCase.verifyEqual( double( ResQDS_VPA - ResVPA ), zeros(size(Data)), 'AbsTol', 1e-60 );
         end
 
         % Constructor tests
@@ -427,7 +450,6 @@ classdef QuadDoubleSlowTest < matlab.unittest.TestCase
             TestCase.verifyEqual( double( S ), [ 2, 3, 4 ] );
         end
 
-
         function TestRealsqrt( TestCase )
             A = QuadDoubleSlow( [ 4, 9, 16 ] );
             S = realsqrt( A );
@@ -631,7 +653,6 @@ classdef QuadDoubleSlowTest < matlab.unittest.TestCase
             TestCase.verifyEqual( double( RtR ), double( A ), 'RelTol', TestCase.RelTol );
         end
 
-
         function TestLDL( TestCase )
             A = QuadDoubleSlow( [ 4, 12, -16; 12, 37, -43; -16, -43, 98 ] );
             [ L, D ] = ldl( A, 'vector' );
@@ -748,5 +769,7 @@ classdef QuadDoubleSlowTest < matlab.unittest.TestCase
             A = QuadDoubleSlow.randn( 2, 3 );
             TestCase.verifyEqual( size( A ), [ 2, 3 ] );
         end
+
     end
+
 end

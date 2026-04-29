@@ -38,11 +38,11 @@
 classdef DoubleDouble < BaseExtDouble
 
     properties ( Constant, GetAccess = public )
+
         zero = DoubleDouble.MakeStatic( 0, 0 );
         one = DoubleDouble.MakeStatic( 1, 0 );
         tiny = DoubleDouble.MakeStatic( 4.93038065763132e-32, 0 );
         pi = DoubleDouble.MakeStatic( 3.141592653589793116e+00, 1.224646799147353207e-16 );
-
 
         InverseFactorial = [
             DoubleDouble.MakeStatic( 1.66666666666666657e-01,   9.25185853854297066e-18 );
@@ -89,6 +89,7 @@ classdef DoubleDouble < BaseExtDouble
             DoubleDouble.MakeStatic( 8.314696123025452357e-01,   1.407385698472802389e-18 );
             DoubleDouble.MakeStatic( 7.071067811865475727e-01,  -4.833646656726456726e-17 );
             ];
+
     end
 
     methods
@@ -161,7 +162,6 @@ classdef DoubleDouble < BaseExtDouble
 
     end
 
-
     methods ( Static, Access = public )
 
         function v = MakeStatic( a1, a2 )
@@ -171,4 +171,5 @@ classdef DoubleDouble < BaseExtDouble
         end
 
     end
+
 end

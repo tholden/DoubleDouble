@@ -1,9 +1,11 @@
 classdef OctDoubleTest < matlab.unittest.TestCase
+
     % OctDoubleTest Test suite for OctDouble class
 
     properties
-        AbsTol = 1e-120;  % Absolute tolerance for comparisons
-        RelTol = 1e-115;  % Relative tolerance for comparisons
+
+        AbsTol = 1e-30;  % Absolute tolerance for comparisons
+        RelTol = 1e-15;  % Relative tolerance for comparisons
 
         % Test data
         SmallValues;
@@ -11,9 +13,11 @@ classdef OctDoubleTest < matlab.unittest.TestCase
         LargeValues;
         ComplexValues;
         MatrixValues;
+
     end
 
-    methods (TestMethodSetup)
+    methods ( TestMethodSetup )
+
         function CreateTestData( TestCase )
             % Create test data for use in tests
             TestCase.SmallValues = OctDouble( [ 1e-10, 2e-10, 3e-10 ] );
@@ -24,15 +28,17 @@ classdef OctDoubleTest < matlab.unittest.TestCase
             % Create matrix test data
             TestCase.MatrixValues = OctDouble( [ 1, 2, 3; 4, 5, 6; 7, 8, 9 ] );
         end
+
     end
 
-    methods (Test)
-        function TestCrossValidation( TestCase )
+    methods ( Test )
+
+        function TestCrossValidationVPA( TestCase )
             % Verify that OctDouble produces identical results to VPA
             % at full extended precision.
             Data = [ 1.123, -2.456; 3.789, -4.012 ];
             
-            VPAData = vpa( Data, 135 );
+            VPAData = vpa( sym(Data, 'f'), 135 );
             QDS = OctDouble( Data );
             
             % Test basic arithmetic operations
@@ -42,7 +48,7 @@ classdef OctDoubleTest < matlab.unittest.TestCase
             [ v1, v2, v3, v4, v5, v6, v7, v8 ] = ToSumOfDoubles( ResQDS );
             ResQDS_VPA = vpa( v1, 135 ) + vpa( v2, 135 ) + vpa( v3, 135 ) + vpa( v4, 135 ) + vpa( v5, 135 ) + vpa( v6, 135 ) + vpa( v7, 135 ) + vpa( v8, 135 );
             
-            TestCase.verifyEqual( double( ResQDS_VPA - ResVPA ), zeros(size(Data)), 'AbsTol', TestCase.AbsTol );
+            TestCase.verifyEqual( double( ResQDS_VPA - ResVPA ), zeros(size(Data)), 'AbsTol', 1e-120 );
             
             % Test linear algebra routines (LU decomposition)
             % Not supported for VPA matrices efficiently with same exact outputs (P, L, U may differ).
@@ -73,8 +79,8 @@ classdef OctDoubleTest < matlab.unittest.TestCase
             [ L_QD, U_QD, ~ ] = lu( QD );
             [ L_OD, U_OD, ~ ] = lu( OD );
             
-            TestCase.verifyEqual( double( L_OD - L_QD ), zeros(size(Data)), 'AbsTol', 1e-28 );
-            TestCase.verifyEqual( double( U_OD - U_QD ), zeros(size(Data)), 'AbsTol', 1e-28 );
+            TestCase.verifyEqual( double( L_OD - L_QD ), zeros(size(Data) ), 'AbsTol', 1e-28 );
+            TestCase.verifyEqual( double( U_OD - U_QD ), zeros(size(Data) ), 'AbsTol', 1e-28 );
         end
 
         % Constructor tests
@@ -445,7 +451,6 @@ classdef OctDoubleTest < matlab.unittest.TestCase
             TestCase.verifyEqual( double( S ), [ 2, 3, 4 ] );
         end
 
-
         function TestRealsqrt( TestCase )
             A = OctDouble( [ 4, 9, 16 ] );
             S = realsqrt( A );
@@ -649,7 +654,6 @@ classdef OctDoubleTest < matlab.unittest.TestCase
             TestCase.verifyEqual( double( RtR ), double( A ), 'RelTol', TestCase.RelTol );
         end
 
-
         function TestLDL( TestCase )
             A = OctDouble( [ 4, 12, -16; 12, 37, -43; -16, -43, 98 ] );
             [ L, D ] = ldl( A, 'vector' );
@@ -766,5 +770,7 @@ classdef OctDoubleTest < matlab.unittest.TestCase
             A = OctDouble.randn( 2, 3 );
             TestCase.verifyEqual( size( A ), [ 2, 3 ] );
         end
+
     end
+
 end

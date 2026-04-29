@@ -40,6 +40,7 @@
 classdef QuadDouble < QuadDoubleSlow
 
     methods
+
         function v = QuadDouble( in, varargin )
             if nargin == 0
                 return
@@ -187,7 +188,6 @@ classdef QuadDouble < QuadDoubleSlow
             b = t2 + t3;
         end
 
-
         function [ p1, p2 ] = TwoProd( a, b )
             if QuadDouble.SingletonExpansionNotSupported
                 [ a, b ] = QuadDouble.ExpandSingleton( a, b );
@@ -255,7 +255,6 @@ classdef QuadDouble < QuadDoubleSlow
             s0 = c0;
             s1 = c2;
 
-
             s2 = zeros( size( s0 ) );
             s3 = zeros( size( s0 ) );
 
@@ -319,9 +318,11 @@ classdef QuadDouble < QuadDoubleSlow
 
             c0 = s0; c1 = s1; c2 = s2; c3 = s3;
         end
+
     end
 
     methods ( Static, Access = public )
+
         function [ s0, s1, s2, s3 ] = QDPlusQD( a0, a1, a2, a3, b0, b1, b2, b3 )
             if QuadDouble.SingletonExpansionNotSupported
                 [ a0, b0 ] = QuadDouble.ExpandSingleton( a0, b0 );

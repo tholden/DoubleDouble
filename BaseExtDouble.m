@@ -1,15 +1,20 @@
 classdef (Abstract) BaseExtDouble
 
     properties ( SetAccess = public, GetAccess = public )
+
         v1
         v2
+
     end
 
     properties ( Constant, GetAccess = public )
+
         SingletonExpansionNotSupported = ~BaseExtDouble.TestSingletonExpansion();
+
     end
 
     properties ( Abstract, Constant )
+
         zero
         one
         tiny
@@ -25,14 +30,17 @@ classdef (Abstract) BaseExtDouble
         CosTable
         ExpRescale
         LogSteps
+
     end
 
-    methods (Abstract)
+    methods ( Abstract )
+
         v = Make( z, a1, a2 )
         v = Promote( v, a )
+
     end
 
-    methods (Sealed)
+    methods ( Sealed )
 
         function v = cat( dim, a, varargin )
             if isempty( varargin )
@@ -102,8 +110,6 @@ classdef (Abstract) BaseExtDouble
             v.v2 = Assign( v.v2, Value.v2, varargin{:} );
         end
 
-
-
         function varargout = ToSumOfDoubles( v )
             varargout = cell( 1, nargout );
             [ varargout{:} ] = ToSumOfDoubles( v.v1 );
@@ -112,7 +118,6 @@ classdef (Abstract) BaseExtDouble
                 [ varargout{ FirstEmpty : nargout } ] = ToSumOfDoubles( v.v2 );
             end
         end
-
 
         function disp( v )
             if isempty( v.v1 )
@@ -650,9 +655,6 @@ classdef (Abstract) BaseExtDouble
             v.v2 = ipermute( v.v2, DimOrder );
         end
 
-
-
-
         function v = subsref( v, s )
             if strcmp( s(1).type, '.' )
                 v = builtin( 'subsref', v, s );
@@ -867,7 +869,7 @@ classdef (Abstract) BaseExtDouble
             end
             if isempty( b )
                 if isempty( a )
-                    s = a.Make(0,0); s = s(zeros(0,1));
+                    s = a.Make(0,0); s = s(zeros(0,1) );
                     i = [];
                     return
                 end
@@ -1455,7 +1457,7 @@ classdef (Abstract) BaseExtDouble
             end
 
             % Strategy:  We first reduce the size of x by noting that
-            % exp(kr + m * log(2)) = 2^m * exp(r)^k
+            % exp(kr + m * log(2) ) = 2^m * exp(r)^k
             % where m and k are integers.  By choosing m appropriately
             % we can make |kr| <= log(2) / 2 = 0.347.  Then exp(r) is
             % evaluated using the familiar Taylor series.  Reducing the
@@ -1558,7 +1560,7 @@ classdef (Abstract) BaseExtDouble
             % Strategy.  To compute sin(x), cos(x), we choose integers a, b so that
             % x = s + a * (pi/2) + b * (pi/16)
             % and |s| <= pi/32.  Using the fact that
-            % sin(pi/16) = 0.5 * sqrt(2 - sqrt(2 + sqrt(2)))
+            % sin(pi/16) = 0.5 * sqrt(2 - sqrt(2 + sqrt(2) ))
             % we can compute sin(x) from sin(s), cos(s).  This greatly increases the convergence of the sine Taylor series.
 
             z = round( v ./ v.piT2 );
@@ -1596,7 +1598,7 @@ classdef (Abstract) BaseExtDouble
             b_cos_t = b .* cos_t;
 
             Select = k > 0;
-            if any(Select(:))
+            if any(Select(:) )
                 a_sin_t_s = a_sin_t.Index(Select);
                 a_cos_t_s = a_cos_t.Index(Select);
                 b_sin_t_s = b_sin_t.Index(Select);
@@ -1606,7 +1608,7 @@ classdef (Abstract) BaseExtDouble
             end
 
             Select = k < 0;
-            if any(Select(:))
+            if any(Select(:) )
                 a_sin_t_s = a_sin_t.Index(Select);
                 a_cos_t_s = a_cos_t.Index(Select);
                 b_sin_t_s = b_sin_t.Index(Select);
@@ -1616,7 +1618,7 @@ classdef (Abstract) BaseExtDouble
             end
 
             Select = j == 1;
-            if any(Select(:))
+            if any(Select(:) )
                 cos_v_s = cos_v.Index(Select);
                 sin_v_s = sin_v.Index(Select);
                 sin_v = sin_v.Assign( cos_v_s, Select );
@@ -1624,7 +1626,7 @@ classdef (Abstract) BaseExtDouble
             end
 
             Select = j == -1;
-            if any(Select(:))
+            if any(Select(:) )
                 cos_v_s = cos_v.Index(Select);
                 sin_v_s = sin_v.Index(Select);
                 sin_v = sin_v.Assign( -cos_v_s, Select );
@@ -1632,7 +1634,7 @@ classdef (Abstract) BaseExtDouble
             end
 
             Select = abs_j == 2;
-            if any(Select(:))
+            if any(Select(:) )
                 sin_v_s = sin_v.Index(Select);
                 cos_v_s = cos_v.Index(Select);
                 sin_v = sin_v.Assign( -sin_v_s, Select );
@@ -1676,7 +1678,7 @@ classdef (Abstract) BaseExtDouble
             [ sin_z, cos_z ] = sincos( v );
             t = yy;
 
-            if any(Select(:))
+            if any(Select(:) )
                 tSelect = t.Index(Select);
                 sinZSelect = sin_z.Index(Select);
                 cosZSelect = cos_z.Index(Select);
@@ -1684,7 +1686,7 @@ classdef (Abstract) BaseExtDouble
             end
 
             Select = ~Select;
-            if any(Select(:))
+            if any(Select(:) )
                 xxSelect = xx.Index(Select);
                 sinZSelect = sin_z.Index(Select);
                 cosZSelect = cos_z.Index(Select);
@@ -2084,8 +2086,6 @@ classdef (Abstract) BaseExtDouble
             end
         end
 
-
-
         function c = Diff( v, Dim )
             if isa( v, 'BaseExtDouble' )
                 if nargin < 2 || isempty( Dim )
@@ -2180,7 +2180,6 @@ classdef (Abstract) BaseExtDouble
             v.v1 = Vec( v.v1 );
             v.v2 = Vec( v.v2 );
         end
-
 
         function v = pow2( v, b )
             if nargin == 1
@@ -2332,11 +2331,9 @@ classdef (Abstract) BaseExtDouble
             end
         end
 
-
     end
 
     methods ( Static, Access = private )
-
 
         function [ s1, s2 ] = Normalize( a1, a2 )
             s1 = a1 + a2;
@@ -2551,7 +2548,6 @@ classdef (Abstract) BaseExtDouble
 
     end
 
-
     methods ( Static, Access = public )
 
         function Supported = TestSingletonExpansion()
@@ -2601,6 +2597,7 @@ classdef (Abstract) BaseExtDouble
                 end
             end
         end
+
     end
 
 end

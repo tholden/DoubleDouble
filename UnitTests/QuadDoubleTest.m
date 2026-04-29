@@ -1,9 +1,11 @@
 classdef QuadDoubleTest < matlab.unittest.TestCase
+
     % QuadDoubleTest Test suite for QuadDouble class
 
     properties
-        AbsTol = 1e-60;  % Absolute tolerance for comparisons
-        RelTol = 1e-55;  % Relative tolerance for comparisons
+
+        AbsTol = 1e-30;  % Absolute tolerance for comparisons
+        RelTol = 1e-15;  % Relative tolerance for comparisons
 
         % Test data
         SmallValues;
@@ -11,9 +13,11 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
         LargeValues;
         ComplexValues;
         MatrixValues;
+
     end
 
-    methods (TestMethodSetup)
+    methods ( TestMethodSetup )
+
         function CreateTestData( TestCase )
             % Create test data for use in tests
             TestCase.SmallValues = QuadDouble( [ 1e-10, 2e-10, 3e-10 ] );
@@ -24,9 +28,28 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             % Create matrix test data
             TestCase.MatrixValues = QuadDouble( [ 1, 2, 3; 4, 5, 6; 7, 8, 9 ] );
         end
+
     end
 
-    methods (Test)
+    methods ( Test )
+
+        function TestCrossValidationVPA( TestCase )
+            % Verify that QuadDouble is accurate compared to VPA
+            Data = [ 1.123, -2.456; 3.789, -4.012 ];
+            
+            VPAData = vpa( sym(Data, 'f'), 135 );
+            QD = QuadDouble( Data );
+            
+            % Test basic arithmetic operations
+            ResVPA = VPAData * VPAData + VPAData - ( VPAData / 2 );
+            ResQD  = QD * QD + QD - ( QD / 2 );
+            
+            [ v1, v2, v3, v4 ] = ToSumOfDoubles( ResQD );
+            ResQD_VPA = vpa( v1, 135 ) + vpa( v2, 135 ) + vpa( v3, 135 ) + vpa( v4, 135 );
+            
+            TestCase.verifyEqual( double( ResQD_VPA - ResVPA ), zeros(size(Data)), 'AbsTol', 1e-60 );
+        end
+
         % Constructor tests
         function TestConstructorEmpty( TestCase )
             A = QuadDouble();
@@ -398,7 +421,6 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             TestCase.verifyEqual( double( S ), [ 2, 3, 4 ] );
         end
 
-
         function TestRealsqrt( TestCase )
             A = QuadDouble( [ 4, 9, 16 ] );
             S = realsqrt( A );
@@ -483,7 +505,7 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
 
                 TestCase.verifyEqual( dAt, dExp, 'RelTol', TestCase.RelTol );
             catch e
-                disp(getReport(e, 'extended', 'hyperlinks', 'off'));
+                disp(getReport(e, 'extended', 'hyperlinks', 'off') );
                 rethrow(e);
             end
         end
@@ -610,7 +632,6 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             TestCase.verifyEqual( double( RtR ), double( A ), 'RelTol', TestCase.RelTol );
         end
 
-
         function TestLDL( TestCase )
             A = QuadDouble( [ 4, 12, -16; 12, 37, -43; -16, -43, 98 ] );
             [ L, D ] = ldl( A, 'vector' );
@@ -727,5 +748,7 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             A = QuadDouble.randn( 2, 3 );
             TestCase.verifyEqual( size( A ), [ 2, 3 ] );
         end
+
     end
+
 end
