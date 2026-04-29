@@ -64,6 +64,9 @@ classdef DoubleDouble < BaseExtDouble
 
         NInverseFactorial = 15;
 
+        expRescale = 9;
+        logSteps = 2;
+
         piT2   = DoubleDouble.MakeStatic( 6.283185307179586232e+00,  2.449293598294706414e-16 );
         piD2   = DoubleDouble.MakeStatic( 1.570796326794896558e+00,  6.123233995736766036e-17 );
         piD16  = DoubleDouble.MakeStatic( 1.963495408493620697e-01,  7.654042494670957545e-18 );
