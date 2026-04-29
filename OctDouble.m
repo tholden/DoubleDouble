@@ -576,6 +576,80 @@ classdef OctDouble < BaseExtDouble
 
 
 
+        function [ sin_v, cos_v ] = sincos( v )
+            if ~isreal( v )
+                exp_Piv = exp( v.TimesPowerOf2( 1i ) );
+                exp_Niv = 1 ./ exp_Piv;
+                sin_v = ( exp_Piv - exp_Niv ).TimesPowerOf2( -0.5i );
+                cos_v = ( exp_Piv + exp_Niv ).TimesPowerOf2( +0.5 );
+                return
+            end
+
+            z = round( v ./ v.piT2 );
+            r = v - v.piT2 .* z;
+
+            q = floor( double( r.v1 ) ./ double( v.piD2.v1 ) + 0.5 );
+            t = r - v.piD2 .* q;
+            j = q;
+            abs_j = abs( j );
+
+            q = floor( double( t.v1 ) ./ double( v.piD16.v1 ) + 0.5 );
+            t = t - v.piD16 .* q;
+            k = q;
+            abs_k = abs( k );
+
+            test = ( j >= -2 ) & ( j <= 2 );
+            assert( all( test(:) ) );
+            test = abs_k <= 4;
+            assert( all( test(:) ) );
+
+            [ sin_t, cos_t ] = t.SinCosTaylor();
+
+            sin_v = sin_t;
+            cos_v = cos_t;
+
+            Idx = 2 * abs_k + 1;
+            a = v.Make( QuadDouble.MakeStatic( v.CosTable( Idx, 1 ), v.CosTable( Idx, 2 ), v.CosTable( Idx, 3 ), v.CosTable( Idx, 4 ) ), ...
+                        QuadDouble.MakeStatic( v.CosTable( Idx, 5 ), v.CosTable( Idx, 6 ), v.CosTable( Idx, 7 ), v.CosTable( Idx, 8 ) ) );
+            b = v.Make( QuadDouble.MakeStatic( v.SinTable( Idx, 1 ), v.SinTable( Idx, 2 ), v.SinTable( Idx, 3 ), v.SinTable( Idx, 4 ) ), ...
+                        QuadDouble.MakeStatic( v.SinTable( Idx, 5 ), v.SinTable( Idx, 6 ), v.SinTable( Idx, 7 ), v.SinTable( Idx, 8 ) ) );
+
+            a = reshape( a, size( v ) );
+            b = reshape( b, size( v ) );
+
+            a_sin_t = a .* sin_t;
+            b_sin_t = b .* sin_t;
+            a_cos_t = a .* cos_t;
+            b_cos_t = b .* cos_t;
+
+            Select = k > 0;
+            if any( Select(:) )
+                sin_v( Select ) = +a_sin_t( Select ) + b_cos_t( Select );
+                cos_v( Select ) = -b_sin_t( Select ) + a_cos_t( Select );
+            end
+
+            Select = k < 0;
+            if any( Select(:) )
+                sin_v( Select ) = +a_sin_t( Select ) - b_cos_t( Select );
+                cos_v( Select ) = +b_sin_t( Select ) + a_cos_t( Select );
+            end
+
+            Select = j == 1;
+            if any( Select(:) )
+                [ sin_v( Select ), cos_v( Select ) ] = deal( +cos_v( Select ), -sin_v( Select ) );
+            end
+
+            Select = j == -1;
+            if any( Select(:) )
+                [ sin_v( Select ), cos_v( Select ) ] = deal( -cos_v( Select ), +sin_v( Select ) );
+            end
+
+            Select = abs_j == 2;
+            if any( Select(:) )
+                [ sin_v( Select ), cos_v( Select ) ] = deal( -sin_v( Select ), -cos_v( Select ) );
+            end
+        end
+
     end
 
     methods ( Static )
