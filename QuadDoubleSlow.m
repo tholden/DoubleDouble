@@ -155,12 +155,16 @@ classdef QuadDoubleSlow < BaseExtDouble
             end
         end
 
-        function v = Make( ~, a1, a2 )
-            v = QuadDoubleSlow.MakeStatic( a1, a2 );
-        end
-
         function v = Promote( ~, v )
             v = QuadDoubleSlow( v );
+        end
+
+    end
+
+    methods ( Access = protected )
+
+        function v = Make( ~, a1, a2 )
+            v = QuadDoubleSlow.MakeStatic( a1, a2 );
         end
 
     end

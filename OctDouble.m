@@ -328,6 +328,10 @@ classdef OctDouble < BaseExtDouble
             v = OctDouble( a );
         end
 
+    end
+
+    methods ( Access = protected )
+
         function v = Make( ~, a1, a2 )
             v = OctDouble.MakeStatic( a1, a2 );
         end
@@ -366,10 +370,6 @@ classdef OctDouble < BaseExtDouble
         function v = randi( imax, varargin )
             v = OctDouble.MakeStatic( QuadDouble( randi( imax, varargin{:}, 'double' ) ), QuadDouble( zeros( varargin{:}, 'double' ) ) );
         end
-
-    end
-
-    methods ( Access = public )
 
     end
 

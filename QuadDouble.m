@@ -71,10 +71,6 @@ classdef QuadDouble < QuadDoubleSlow
             v = QuadDouble( v );
         end
 
-        function v = Make( ~, a1, a2 )
-            v = QuadDouble.MakeStatic( a1, a2 );
-        end
-
     end
 
     methods ( Static )
@@ -125,6 +121,10 @@ classdef QuadDouble < QuadDoubleSlow
     end
 
     methods ( Access = protected )
+
+        function v = Make( ~, a1, a2 )
+            v = QuadDouble.MakeStatic( a1, a2 );
+        end
 
         function v = Plus( a, b )
             a = QuadDouble.PromoteStatic( a );
@@ -320,7 +320,7 @@ classdef QuadDouble < QuadDoubleSlow
 
     end
 
-    methods ( Static, Access = public )
+    methods ( Static, Access = protected )
 
         function [ s0, s1, s2, s3 ] = QDPlusQD( a0, a1, a2, a3, b0, b1, b2, b3 )
             if QuadDouble.SingletonExpansionNotSupported

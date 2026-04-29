@@ -120,6 +120,10 @@ classdef DoubleDouble < BaseExtDouble
             v = DoubleDouble( v );
         end
 
+    end
+
+    methods ( Access = protected )
+
         function v = Make( ~, a1, a2 )
             v = DoubleDouble.MakeStatic( a1, a2 );
         end

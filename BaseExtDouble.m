@@ -35,8 +35,13 @@ classdef (Abstract) BaseExtDouble
 
     methods ( Abstract )
 
-        v = Make( z, a1, a2 )
         v = Promote( v, a )
+
+    end
+
+    methods ( Abstract, Access = protected )
+
+        v = Make( z, a1, a2 )
 
     end
 
@@ -1952,29 +1957,6 @@ classdef (Abstract) BaseExtDouble
             end
         end
 
-        function v = MTimes( a, b )
-            [ R, c ] = size( a );
-            [ r, C ] = size( b );
-            if ( ( R == 1 ) && ( c == 1 ) ) || ( ( r == 1 ) && ( C == 1 ) )
-                v = a.Times( b );
-                return
-            end
-            v = zeros( R, C, 'like', a );
-            if isa( b, 'BaseExtDouble' )
-                for c = 1 : C
-                    t = sum( a .* b.Make( Index( b.v1, ':', c ).', Index( b.v2, ':', c ).' ), 2 );
-                    v.v1 = Assign( v.v1, t.v1, ':', c );
-                    v.v2 = Assign( v.v2, t.v2, ':', c );
-                end
-            else
-                for c = 1 : C
-                    t = sum( a .* b( :, c ).', 2 );
-                    v.v1 = Assign( v.v1, t.v1, ':', c );
-                    v.v2 = Assign( v.v2, t.v2, ':', c );
-                end
-            end
-        end
-
         function v = Vec( v )
             v.v1 = Vec( v.v1 );
             v.v2 = Vec( v.v2 );
@@ -2002,6 +1984,40 @@ classdef (Abstract) BaseExtDouble
             end
         end
 
+        function [ a1, a2 ] = Split( a )
+            [ c1, c2 ] = Split( a.v1 );
+            [ c3, c4 ] = Split( a.v2 );
+            a1 = a.Make( c1, c3 );
+            a2 = a.Make( c2, c4 );
+        end
+
+    end
+
+    methods ( Sealed, Access = protected )
+
+        function v = MTimes( a, b )
+            [ R, c ] = size( a );
+            [ r, C ] = size( b );
+            if ( ( R == 1 ) && ( c == 1 ) ) || ( ( r == 1 ) && ( C == 1 ) )
+                v = a.Times( b );
+                return
+            end
+            v = zeros( R, C, 'like', a );
+            if isa( b, 'BaseExtDouble' )
+                for c = 1 : C
+                    t = sum( a .* b.Make( Index( b.v1, ':', c ).', Index( b.v2, ':', c ).' ), 2 );
+                    v.v1 = Assign( v.v1, t.v1, ':', c );
+                    v.v2 = Assign( v.v2, t.v2, ':', c );
+                end
+            else
+                for c = 1 : C
+                    t = sum( a .* b( :, c ).', 2 );
+                    v.v1 = Assign( v.v1, t.v1, ':', c );
+                    v.v2 = Assign( v.v2, t.v2, ':', c );
+                end
+            end
+        end
+
         function v = SinTaylor( v )
             Threshold = 0.5 .* abs( Index( v.v1, ':' ) ) .* v.tiny.v1;
             x = - v .* v;
@@ -2019,13 +2035,6 @@ classdef (Abstract) BaseExtDouble
         function [ sin_v, cos_v ] = SinCosTaylor( v )
             sin_v = SinTaylor( v );
             cos_v = sqrt( 1 - sin_v .* sin_v );
-        end
-
-        function [ a1, a2 ] = Split( a )
-            [ c1, c2 ] = Split( a.v1 );
-            [ c3, c4 ] = Split( a.v2 );
-            a1 = a.Make( c1, c3 );
-            a2 = a.Make( c2, c4 );
         end
 
         function v = ToRand( v ) % Fills v with random values in place.
@@ -2071,7 +2080,7 @@ classdef (Abstract) BaseExtDouble
 
     end
 
-    methods ( Access = protected ) % Not sealed.
+    methods ( Access = protected ) % Not sealed, overridden in QuadDouble.
 
         function v = Plus( a, b )
             if isa( a, 'BaseExtDouble' )
@@ -2347,7 +2356,7 @@ classdef (Abstract) BaseExtDouble
 
     end
 
-    methods ( Static, Access = public )
+    methods ( Static, Access = protected )
 
         function Supported = TestSingletonExpansion()
             try
