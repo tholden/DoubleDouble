@@ -12,7 +12,7 @@ classdef (Abstract) BaseExtDouble
     properties ( Abstract, Constant )
         zero
         one
-        eps
+        tiny
         pi
         InverseFactorial
         NInverseFactorial
@@ -23,8 +23,8 @@ classdef (Abstract) BaseExtDouble
         log_10
         SinTable
         CosTable
-        expRescale
-        logSteps
+        ExpRescale
+        LogSteps
     end
 
     methods (Abstract)
@@ -456,7 +456,9 @@ classdef (Abstract) BaseExtDouble
                 v = a.ones( size( a ) );
                 bNonHalfInteger = find( ~bHalfInteger );
                 bHalfInteger = find( bHalfInteger );
-                v =  v.Assign(exp(  b(bNonHalfInteger ) .* log(  a.Index(bNonHalfInteger ) ) ), bNonHalfInteger  );
+                if ~isempty( bNonHalfInteger )
+                    v =  v.Assign(exp(  b(bNonHalfInteger ) .* log(  a.Index(bNonHalfInteger ) ) ), bNonHalfInteger  );
+                end
                 a =  a.Index(bHalfInteger );
                 b = double(  b(bHalfInteger ) );
                 Select = find( b < 0 );
@@ -1459,10 +1461,10 @@ classdef (Abstract) BaseExtDouble
             % we can make |kr| <= log(2) / 2 = 0.347.  Then exp(r) is
             % evaluated using the familiar Taylor series.  Reducing the
             % argument substantially speeds up the convergence.
-            NSquare = v.expRescale;
+            NSquare = v.ExpRescale;
             k = 2.0 ^ NSquare;
             inv_k = 1.0 / k;
-            Threshhold = inv_k .* v.eps.v1;
+            Threshold = inv_k .* v.tiny.v1;
 
             m = floor( v.v1 ./ v.log_2.v1 + 0.5 );
             r = v - v.log_2 .* m;
@@ -1471,12 +1473,12 @@ classdef (Abstract) BaseExtDouble
             p = r .* r;
             s = r + p.TimesPowerOf2( 0.5 );
             p = p .* r;
-            t = p .* v.Make( Index( v.InverseFactorial, 1, 1 ), Index( v.InverseFactorial, 1, 2 ) );
+            t = p .* v.InverseFactorial.Index( 1 );
             for i = 2 : v.NInverseFactorial
                 s = s + t;
                 p = p .* r;
-                t = p .* v.Make( Index( v.InverseFactorial, i, 1 ), Index( v.InverseFactorial, i, 2 ) );
-                if all( abs( Index( t.v1, ':' ) ) <= Threshhold )
+                t = p .* v.InverseFactorial.Index( i );
+                if all( abs( Index( t.v1, ':' ) ) <= Threshold )
                     break
                 end
             end
@@ -1517,7 +1519,7 @@ classdef (Abstract) BaseExtDouble
 
         function x = log( v )
             x = v.Make( log( v.v1 ), zeros( size( v.v1 ) ) );
-            for i = 1 : v.logSteps
+            for i = 1 : v.LogSteps
                 x = x + v .* exp( -x ) - 1.0;
             end
         end
@@ -1583,8 +1585,8 @@ classdef (Abstract) BaseExtDouble
             sin_v = sin_t;
             cos_v = cos_t;
 
-            a = v.Make( v.CosTable( double(abs_k + 1), 1 ), v.CosTable( double(abs_k + 1), 2 ) );
-            b = v.Make( v.SinTable( double(abs_k + 1), 1 ), v.SinTable( double(abs_k + 1), 2 ) );
+            a = v.CosTable.Index( double(abs_k + 1) );
+            b = v.SinTable.Index( double(abs_k + 1) );
 
             a = reshape( a, size( v ) );
             b = reshape( b, size( v ) );
@@ -1600,10 +1602,8 @@ classdef (Abstract) BaseExtDouble
                 a_cos_t_s = a_cos_t.Index(Select);
                 b_sin_t_s = b_sin_t.Index(Select);
                 b_cos_t_s = b_cos_t.Index(Select);
-                [ t1, t2 ] = v.EDPlusED( +a_sin_t_s.v1, +a_sin_t_s.v2, +b_cos_t_s.v1, +b_cos_t_s.v2 );
-                sin_v = sin_v.Assign( v.Make(t1, t2), Select );
-                [ t1, t2 ] = v.EDPlusED( -b_sin_t_s.v1, -b_sin_t_s.v2, +a_cos_t_s.v1, +a_cos_t_s.v2 );
-                cos_v = cos_v.Assign( v.Make(t1, t2), Select );
+                sin_v = sin_v.Assign( a_sin_t_s + b_cos_t_s, Select );
+                cos_v = cos_v.Assign( a_cos_t_s - b_sin_t_s, Select );
             end
 
             Select = k < 0;
@@ -1612,10 +1612,8 @@ classdef (Abstract) BaseExtDouble
                 a_cos_t_s = a_cos_t.Index(Select);
                 b_sin_t_s = b_sin_t.Index(Select);
                 b_cos_t_s = b_cos_t.Index(Select);
-                [ t1, t2 ] = v.EDPlusED( +a_sin_t_s.v1, +a_sin_t_s.v2, -b_cos_t_s.v1, -b_cos_t_s.v2 );
-                sin_v = sin_v.Assign( v.Make(t1, t2), Select );
-                [ t1, t2 ] = v.EDPlusED( +b_sin_t_s.v1, +b_sin_t_s.v2, +a_cos_t_s.v1, +a_cos_t_s.v2 );
-                cos_v = cos_v.Assign( v.Make(t1, t2), Select );
+                sin_v = sin_v.Assign( a_sin_t_s - b_cos_t_s, Select );
+                cos_v = cos_v.Assign( a_cos_t_s + b_sin_t_s, Select );
             end
 
             Select = j == 1;
@@ -1683,9 +1681,7 @@ classdef (Abstract) BaseExtDouble
                 tSelect = t.Index(Select);
                 sinZSelect = sin_z.Index(Select);
                 cosZSelect = cos_z.Index(Select);
-                [ t1, t2 ] = v.EDPlusED( tSelect.v1, tSelect.v2, -sinZSelect.v1, -sinZSelect.v2 );
-                [ t1, t2 ] = v.EDDividedByED( t1, t2, +cosZSelect.v1, +cosZSelect.v2 );
-                t = t.Assign( v.Make(t1, t2), Select );
+                t = t.Assign( ( tSelect - sinZSelect ) ./ cosZSelect, Select );
             end
 
             Select = ~Select;
@@ -1693,9 +1689,7 @@ classdef (Abstract) BaseExtDouble
                 xxSelect = xx.Index(Select);
                 sinZSelect = sin_z.Index(Select);
                 cosZSelect = cos_z.Index(Select);
-                [ t1, t2 ] = v.EDPlusED( xxSelect.v1, xxSelect.v2, -cosZSelect.v1, -cosZSelect.v2 );
-                [ t1, t2 ] = v.EDDividedByED( t1, t2, -sinZSelect.v1, -sinZSelect.v2 );
-                t = t.Assign( v.Make(t1, t2), Select );
+                t = t.Assign( ( xxSelect - cosZSelect ) ./ ( -sinZSelect ), Select );
             end
             v = v + t;
         end
@@ -2212,14 +2206,14 @@ classdef (Abstract) BaseExtDouble
         end
 
         function v = SinTaylor( v )
-            Threshhold = 0.5 .* abs( Index( v.v1, ':' ) ) .* v.eps.v1;
+            Threshold = 0.5 .* abs( Index( v.v1, ':' ) ) .* v.tiny.v1;
             x = - v .* v;
             r = v;
             for i = 1 : 2 : v.NInverseFactorial
                 r = r .* x;
-                t = r .* v.Make( v.InverseFactorial( i, 1 ), v.InverseFactorial( i, 2 ) );
+                t = r .* v.InverseFactorial.Index( i );
                 v = v + t;
-                if all( abs( Index( t.v1, ':' ) ) <= Threshhold )
+                if all( abs( Index( t.v1, ':' ) ) <= Threshold )
                     break
                 end
             end
@@ -2240,7 +2234,7 @@ classdef (Abstract) BaseExtDouble
         function v = ToRand( v ) % Fills v with random values in place.
             Size = size( v.v1 );
             v.v1 = rand( Size, 'like', v.v1 );
-            v.v2 = eps( v.v1 ) .* ( rand( Size, 'like', v.v1 ) - 0.5 );
+            v.v2 = v.tiny.v1 .* ( rand( Size, 'like', v.v1 ) - 0.5 );
         end
 
         function v = ToRandn( v ) % Fills v with normal random values in place.
