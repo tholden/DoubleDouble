@@ -440,7 +440,7 @@ classdef (Abstract) BaseExtDouble
             end
             at = a';
             vt = v';
-            v = MLDivide(at, vt )';
+            v = ( at \ vt )';
         end
 
         function v = power( a, b )
@@ -623,7 +623,7 @@ classdef (Abstract) BaseExtDouble
                 d = 1;
             end
             if ~isa( a, 'BaseExtDouble' )
-                a = a.Promote( a );
+                a = b.Promote( a );
             end
             if ~isa( b, 'BaseExtDouble' )
                 b = a.Promote( b );
@@ -1173,11 +1173,11 @@ classdef (Abstract) BaseExtDouble
         end
 
         function v = cummax( v, Dim )
-            if nargin < 3
+            if nargin < 2
                 Dim = [];
             end
             if isa( v, 'BaseExtDouble' )
-                if nargin < 3 || isempty( Dim )
+                if nargin < 2 || isempty( Dim )
                     Dim = find( size( v.v1 ) > 1, 1 );
                     if isempty( Dim )
                         Dim = 1;
@@ -1204,7 +1204,7 @@ classdef (Abstract) BaseExtDouble
                     c2{i} = s.v2;
                 end
             else
-                if nargin < 3 || isempty( Dim )
+                if nargin < 2 || isempty( Dim )
                     Dim = find( size( v ) > 1, 1 );
                     if isempty( Dim )
                         Dim = 1;
@@ -1234,11 +1234,11 @@ classdef (Abstract) BaseExtDouble
         end
 
         function v = cummin( v, Dim )
-            if nargin < 3
+            if nargin < 2
                 Dim = [];
             end
             if isa( v, 'BaseExtDouble' )
-                if nargin < 3 || isempty( Dim )
+                if nargin < 2 || isempty( Dim )
                     Dim = find( size( v.v1 ) > 1, 1 );
                     if isempty( Dim )
                         Dim = 1;
@@ -1265,7 +1265,7 @@ classdef (Abstract) BaseExtDouble
                     c2{i} = s.v2;
                 end
             else
-                if nargin < 3 || isempty( Dim )
+                if nargin < 2 || isempty( Dim )
                     Dim = find( size( v ) > 1, 1 );
                     if isempty( Dim )
                         Dim = 1;
@@ -1295,9 +1295,6 @@ classdef (Abstract) BaseExtDouble
         end
 
         function v = dot( a, b, Dim )
-            if nargin < 3
-                Dim = [];
-            end
             if nargin < 3
                 Dim = [];
             end
@@ -1974,204 +1971,6 @@ classdef (Abstract) BaseExtDouble
                     t = sum( a .* b( :, c ).', 2 );
                     v.v1 = Assign( v.v1, t.v1, ':', c );
                     v.v2 = Assign( v.v2, t.v2, ':', c );
-                end
-            end
-        end
-
-        function v = MLDivide( a, v )
-            [ Ra, Ca ] = size( a );
-            [ Rv, Cv ] = size( v );
-            if ( ( Ra == 1 ) && ( Ca == 1 ) ) || ( ( Rv == 1 ) && ( Cv == 1 ) )
-                v = a.LDivide( v );
-                return
-            end
-            if ~isa( v, 'BaseExtDouble' )
-                v = BaseExtDouble( v );
-            end
-            assert( Ra == Rv );
-            if Ra ~= Ca
-                [ q, a ] = qr( a );
-                v = q' * v;
-                v = BackSubstitutionExt( v, a );
-                return
-            end
-            if BaseExtDouble.IsEqualWithExpansion( triu( a, 1 ), 0 )
-                % Lower triangular
-                v = ForwardEliminationExt( v, a );
-                return
-            elseif BaseExtDouble.IsEqualWithExpansion( tril( a, -1 ), 0 )
-                % Upper triangular
-                v = BackSubstitutionExt( v, a );
-                return
-            elseif BaseExtDouble.IsEqualWithExpansion( a, a' )
-                [ L, d ] = ldl( a, 'vector_d' );
-                if all( all( isfinite( L ) ) ) && all( isfinite( d ) )
-                    % Positive definite
-                    v = ForwardEliminationExt( v, L );
-                    v = v ./ d;
-                    v = BackSubstitutionExt( v, L' );
-                    return
-                end
-            end
-            % Triangular factorization
-            [ L, U, p ] = lu( a, 'vector' );
-
-            % Permutation and forward elimination
-            v.v1 = Index( v.v1, p, ':' );
-            v.v2 = Index( v.v2, p, ':' );
-            v = ForwardEliminationExt( v, L );
-
-            % Back substitution
-            v = BackSubstitutionExt( v, U );
-        end
-
-        function v = MRDivide( v, a )
-            v = MLDivide(a', v' )';
-        end
-
-        function [ v, Indices ] = Sort( v, Dim, cm, varargin )
-            if nargin < 2 || isempty( Dim )
-                Dim = find( size( v.v1 ) > 1, 1 );
-                if isempty( Dim )
-                    Dim = 1;
-                end
-            end
-            if nargin < 3 || isempty( cm )
-                cm = 'auto';
-            end
-            if isa( v, 'BaseExtDouble' )
-                if strcmpi( cm( 1 ), 'r' )
-                    a = real( v );
-                    b = imag( v );
-                elseif ( length( cm ) > 1 ) && strcmpi( cm( 1 : 2 ), 'ab' )
-                    a = abs( v );
-                    b = angle( v );
-                else
-                    if isreal( v )
-                        a = real( v );
-                        b = imag( v );
-                    else
-                        a = abs( v );
-                        b = angle( v );
-                    end
-                end
-                Size = size( v.v1 );
-                if any( Size == 0 )
-                    Indices = [];
-                    return
-                end
-                Blocks = arrayfun( @( x ) ones( x, 1 ), Size, 'UniformOutput', false );
-                Blocks{ Dim } = Size( Dim );
-                xv1 = mat2cell( v.v1, Blocks{:} );
-                xv2 = mat2cell( v.v2, Blocks{:} );
-                xa1 = mat2cell( a.v1, Blocks{:} );
-                xa2 = mat2cell( a.v2, Blocks{:} );
-                xb1 = mat2cell( b.v1, Blocks{:} );
-                xb2 = mat2cell( b.v2, Blocks{:} );
-                Indices = cell( size( xv1 ) );
-                for i = 1 : numel( xv1 )
-                    [ ~, Indices{ i } ] = sortrows( [ xa1{ i }(:), xa2{ i }(:), xb1{ i }(:), xb2{ i }(:) ], varargin{:} );
-                    xv1{ i } = xv1{ i }( Indices{ i } );
-                    xv2{ i } = xv2{ i }( Indices{ i } );
-                end
-                Indices = cell2mat( Indices );
-                v       = v.Make( cell2mat( xv1 ), cell2mat( xv2 ) );
-            else
-                if nargout > 1
-                    [ v, Indices ] = sort( v, Dim, 'ComparisonMethod', cm, varargin{:} );
-                else
-                    v = sort( v, Dim, 'ComparisonMethod', cm, varargin{:} );
-                end
-                v = BaseExtDouble( v );
-            end
-        end
-
-        function c = Diff( v, Dim )
-            if isa( v, 'BaseExtDouble' )
-                if nargin < 2 || isempty( Dim )
-                    Dim = find( size( v.v1 ) > 1, 1 );
-                    if isempty( Dim )
-                        Dim = 1;
-                    end
-                end
-                Size = size( v.v1 );
-                Length = Size( Dim );
-                if Length == 0
-                    c = zeros( Size, 'like', v );
-                    return
-                end
-                Blocks = num2cell( Size );
-                Blocks{ Dim } = ones( Length, 1 );
-                x1 = mat2cell( v.v1, Blocks{:} );
-                x2 = mat2cell( v.v2, Blocks{:} );
-                s = v.Make( x1{ 1 }, x2{ 1 } );
-                c1 = cell( size( x1 ) );
-                c2 = cell( size( x2 ) );
-                c1{1} = [];
-                c2{1} = [];
-                for i = 2 : Length
-                    t = v.Make( x1{ i }, x2{ i } );
-                    d = t.Minus( s );
-                    c1{i} = d.v1;
-                    c2{i} = d.v2;
-                    s = t;
-                end
-            else
-                if nargin < 2 || isempty( Dim )
-                    Dim = find( size( v ) > 1, 1 );
-                    if isempty( Dim )
-                        Dim = 1;
-                    end
-                end
-                Size = size( v );
-                Length = Size( Dim );
-                if Length == 0
-                    c = zeros( Size, 'like', v );
-                    return
-                end
-                Blocks = num2cell( Size );
-                Blocks{ Dim } = ones( Length, 1 );
-                x = mat2cell( v, Blocks{:} );
-                s = x{ 1 };
-                c1 = cell( size( x ) );
-                c2 = cell( size( x ) );
-                c1{1} = [];
-                c2{1} = [];
-                for i = 2 : Length
-                    t = x{ i };
-                    d = t.Minus( s );
-                    c1{i} = d.v1;
-                    c2{i} = d.v2;
-                    s = t;
-                end
-            end
-            c = v.Make( cell2mat( c1 ), cell2mat( c2 ) );
-        end
-
-        function v = Norm( v, p )
-            if ( sum( size( v ) ~= 1 ) <= 1 ) || ( numel( p ) ~= 1 )
-                v = abs( v );
-                if ( nargin < 2 ) || ( p == 2 ) || ( numel( p ) ~= 1 )
-                    v = Vec( v );
-                    v = sqrt( sum( v .* v ) );
-                elseif p == Inf
-                    v = max( v );
-                elseif p == -Inf
-                    v = min( v );
-                elseif p == 1
-                    v = sum( v );
-                else
-                    v = ( sum( v .^ p ) ) .^ ( 1 ./ p );
-                end
-            else
-                if ( nargin < 2 ) || ( p == 2 )
-                    v = sqrt( max( eig( v' * v ) ) );
-                elseif p == Inf
-                    v = max( sum( abs( v ), 2 ) );
-                elseif p == 1
-                    v = max( sum( abs( v ), 1 ) );
-                else
-                    v = BaseExtDouble;
                 end
             end
         end

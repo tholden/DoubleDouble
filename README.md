@@ -15,7 +15,7 @@ The library provides four extended precision classes, each building upon the las
 
 ## Features
 
-The classes natively support almost all standard MATLAB operations, seamlessly integrating into existing codebases. Because they inherit from `BaseExtDouble`, operations scale polymorphicly across all precision tiers:
+The classes natively support almost all standard MATLAB operations, seamlessly integrating into existing codebases. Because they inherit from `BaseExtDouble`, operations scale polymorphically across all precision tiers:
 
 - **Basic Arithmetic**: `+`, `-`, `.*`, `./`, `.\`, `.^`
 - **Linear Algebra**: `lu`, `qr`, `chol`, `ldl`, `inv`, `det`, `eig`, `mldivide` (`\`), `mrdivide` (`/`), `dot`, `norm`

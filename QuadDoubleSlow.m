@@ -149,7 +149,6 @@ classdef QuadDoubleSlow < BaseExtDouble
             elseif isa( in, 'DoubleDouble' )
                 v.v1 = in;
                 v.v2 = DoubleDouble( zeros( size( in ) ) );
-
             else
                 v.v1 = DoubleDouble( in );
                 v.v2 = DoubleDouble( zeros( size( in ) ) );

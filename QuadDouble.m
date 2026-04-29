@@ -61,7 +61,6 @@ classdef QuadDouble < QuadDoubleSlow
                 if length( C ) < 4 || isempty( C{ 4 } ); C{ 4 } = zeros( size( C{ 1 } ) ); end
                 v.v1 = DoubleDouble.MakeStatic( C{ 1 }, C{ 2 } );
                 v.v2 = DoubleDouble.MakeStatic( C{ 3 }, C{ 4 } );
-
             else
                 v.v1 = DoubleDouble.MakeStatic( double( in ), zeros( size( in ) ) );
                 v.v2 = DoubleDouble.MakeStatic( zeros( size( in ) ), zeros( size( in ) ) );

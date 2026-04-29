@@ -770,6 +770,61 @@ classdef QuadDoubleSlowTest < matlab.unittest.TestCase
             TestCase.verifyEqual( size( A ), [ 2, 3 ] );
         end
 
+        % Regression tests for bugs found in code review
+        function TestCummaxCumminWithDim( TestCase )
+            % Bug #2: cummax/cummin ignored the Dim argument
+            A = QuadDoubleSlow( [ 1, 3; 4, 2 ] );
+
+            % cummax along dim 1 (columns)
+            CM1 = cummax( A, 1 );
+            TestCase.verifyEqual( double( CM1 ), [ 1, 3; 4, 3 ] );
+
+            % cummax along dim 2 (rows)
+            CM2 = cummax( A, 2 );
+            TestCase.verifyEqual( double( CM2 ), [ 1, 3; 4, 4 ] );
+
+            % cummin along dim 1 (columns)
+            Cm1 = cummin( A, 1 );
+            TestCase.verifyEqual( double( Cm1 ), [ 1, 3; 1, 2 ] );
+
+            % cummin along dim 2 (rows)
+            Cm2 = cummin( A, 2 );
+            TestCase.verifyEqual( double( Cm2 ), [ 1, 1; 4, 2 ] );
+        end
+
+        function TestColonMixedTypes( TestCase )
+            % Bug #3: colon with plain double start and ExtDouble end
+            A = QuadDoubleSlow( 1 ) : 5;
+            TestCase.verifyEqual( double( A ), 1 : 5 );
+            TestCase.verifyTrue( isa( A, 'QuadDoubleSlow' ) );
+
+            B = QuadDoubleSlow( 1 ) : 0.5 : 3;
+            TestCase.verifyEqual( double( B ), 1 : 0.5 : 3 );
+            TestCase.verifyTrue( isa( B, 'QuadDoubleSlow' ) );
+        end
+
+        function TestConv( TestCase )
+            % Bug #4: conv crashed due to u.Dot call
+            U = QuadDoubleSlow( [ 1, 2, 3 ] );
+            V = QuadDoubleSlow( [ 1, 1 ] );
+            W = conv( U, V );
+            TestCase.verifyEqual( double( W ), conv( [ 1, 2, 3 ], [ 1, 1 ] ) );
+        end
+
+        function TestMrdivideMatrix( TestCase )
+            % Bug #5/6: mrdivide for matrices (A / B)
+            A = QuadDoubleSlow( [ 3, 1; 1, 2 ] );
+            B = QuadDoubleSlow( [ 1, 0; 0, 1 ] );
+            X = A / B;
+            TestCase.verifyEqual( double( X ), double( A ), 'RelTol', TestCase.RelTol );
+
+            % Non-trivial case: A / B where B is not identity
+            C = QuadDoubleSlow( [ 2, 1; 1, 3 ] );
+            X2 = A / C;
+            % Verify: X2 * C = A
+            TestCase.verifyEqual( double( X2 * C ), double( A ), 'RelTol', TestCase.RelTol );
+        end
+
     end
 
 end
