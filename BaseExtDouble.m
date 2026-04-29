@@ -2265,7 +2265,7 @@ classdef (Abstract) BaseExtDouble
             v = Assign( v, R .* C, ':', 1 );
             v = Assign( v, R .* S, ':', 2 );
             if Expanded
-                v = Assign( v, [], N );
+                v = Assign( Vec( v ), [], N );
             end
             v = reshape( v, Size );
         end
