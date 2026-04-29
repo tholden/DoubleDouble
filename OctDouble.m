@@ -619,6 +619,10 @@ classdef OctDouble < BaseExtDouble
             v = OctDouble.MakeStatic( QuadDouble(t), QuadDouble(eps( t ) .* ( rand( varargin{:}, 'double' ) - 0.5 )) );
         end
 
+        function v = Rand( ~, varargin )
+            v = OctDouble.rand( varargin{:} );
+        end
+
 
         function v = randi( imax, varargin )
             v = OctDouble.MakeStatic( QuadDouble(randi( imax, varargin{:}, 'double' )), QuadDouble(zeros( varargin{:}, 'double' )) );
@@ -1098,10 +1102,10 @@ classdef OctDouble < BaseExtDouble
     methods ( Static, Access = public )
         function v = MakeStatic( a1, a2 )
             v = OctDouble;
-            if ~isa( a1, 'QuadDouble' ) && ~isempty( a1 )
+            if ~isa( a1, 'QuadDouble' )
                 a1 = QuadDouble( a1 );
             end
-            if ~isa( a2, 'QuadDouble' ) && ~isempty( a2 )
+            if ~isa( a2, 'QuadDouble' )
                 a2 = QuadDouble( a2 );
             end
             v.v1 = a1;
@@ -1121,16 +1125,5 @@ classdef OctDouble < BaseExtDouble
 
 
 
-        function Supported = TestSingletonExpansion
-            a = ones( 2, 1 );
-            b = [];
-            c = [];
-            try
-                b = a + a.';
-                c = a .* a.';
-            catch
-            end
-            Supported = all( [ size( b ), size( c ) ] == 2 );
-        end
     end
 end

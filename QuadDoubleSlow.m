@@ -57,8 +57,6 @@ classdef QuadDoubleSlow < BaseExtDouble
         log_10 = QuadDoubleSlow.MakeStatic( DoubleDouble.MakeStatic(2.30258509299404590109e+00, -2.17075622338224935076e-16), DoubleDouble.MakeStatic(-9.98426245446577657012e-33, -4.02335745445020637879e-49 ) );
 
         InverseFactorial = [
-            1.00000000000000000000e+00, 0.00000000000000000000e+00, 0.00000000000000000000e+00, 0.00000000000000000000e+00;
-            5.00000000000000000000e-01, 0.00000000000000000000e+00, 0.00000000000000000000e+00, 0.00000000000000000000e+00;
             1.66666666666666657415e-01, 9.25185853854297065662e-18, 5.13581318503262865639e-34, 2.85094902409834186429e-50;
             4.16666666666666643537e-02, 2.31296463463574266415e-18, 1.28395329625815716410e-34, 7.12737256024585466073e-51;
             8.33333333333333321769e-03, 1.15648231731787138023e-19, 1.60494162032269652194e-36, 2.22730392507682967421e-53;
@@ -109,7 +107,7 @@ classdef QuadDoubleSlow < BaseExtDouble
             3.28794941663315801371e-65, 5.33225140364648136571e-82, 8.32419386223677346691e-99, 6.67478974686111897684e-115;
             ];
 
-        NInverseFactorial = 50;
+        NInverseFactorial = 48;
 
         SinTable = [
             0.00000000000000000000e+00, 0.00000000000000000000e+00, 0.00000000000000000000e+00, 0.00000000000000000000e+00;
@@ -328,6 +326,10 @@ classdef QuadDoubleSlow < BaseExtDouble
         function v = rand( varargin )
             t = rand( varargin{:}, 'double' );
             v = QuadDoubleSlow.MakeStatic( DoubleDouble(t), DoubleDouble(eps( t ) .* ( rand( varargin{:}, 'double' ) - 0.5 )) );
+        end
+
+        function v = Rand( ~, varargin )
+            v = QuadDoubleSlow.rand( varargin{:} );
         end
 
 
@@ -826,18 +828,5 @@ classdef QuadDoubleSlow < BaseExtDouble
 
 
 
-
-
-        function Supported = TestSingletonExpansion
-            a = ones( 2, 1 );
-            b = [];
-            c = [];
-            try
-                b = a + a.';
-                c = a .* a.';
-            catch
-            end
-            Supported = all( [ size( b ), size( c ) ] == 2 );
-        end
     end
 end

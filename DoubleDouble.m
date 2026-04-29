@@ -42,9 +42,7 @@ classdef DoubleDouble < BaseExtDouble
         one = DoubleDouble.MakeStatic( 1, 0 );
         eps = DoubleDouble.MakeStatic( 4.93038065763132e-32, 0 );
         pi = DoubleDouble.MakeStatic( 3.141592653589793116e+00, 1.224646799147353207e-16 );
-    end
 
-    properties ( Constant, GetAccess = public )
 
         InverseFactorial = [
             1.66666666666666657e-01,  9.25185853854297066e-18;
@@ -126,8 +124,6 @@ classdef DoubleDouble < BaseExtDouble
 
     methods ( Static )
 
-        %% I am happy that these should not be in the base class.
-
         function v = ones( varargin )
             v = DoubleDouble.MakeStatic( ones( varargin{:}, 'double' ), zeros( varargin{:}, 'double' ) );
         end
@@ -149,21 +145,15 @@ classdef DoubleDouble < BaseExtDouble
         end
 
         function v = rand( varargin )
-            t = rand( varargin{:}, 'double' );
-            v = DoubleDouble.MakeStatic( t, eps( t ) .* ( rand( varargin{:}, 'double' ) - 0.5 ) );
+            v = ToRand( zeros( varargin{:} ) );
+        end
+
+        function v = randn( varargin )
+            v = ToRandn( zeros( varargin{:} ) );
         end
 
         function v = randi( imax, varargin )
             v = DoubleDouble.MakeStatic( randi( imax, varargin{:}, 'double' ), zeros( varargin{:}, 'double' ) );
-        end
-
-
-
-        %% The following should have the implementations in the base class (non-static, sealed), and the static functions should be trivial wrappers.
-
-        function v = randn( varargin )
-            v = DoubleDouble;
-            v = v.Randn( varargin{:} );
         end
 
     end
@@ -176,13 +166,6 @@ classdef DoubleDouble < BaseExtDouble
             v.v1 = a1;
             v.v2 = a2;
         end
-
-
-
-
-
-
-
 
     end
 end
