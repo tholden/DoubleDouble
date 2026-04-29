@@ -181,12 +181,12 @@ classdef QuadDoubleSlow < BaseExtDouble
             v = QuadDoubleSlow.MakeStatic( DoubleDouble(eye( varargin{:}, 'double' )), DoubleDouble(zeros( varargin{:}, 'double' )) );
         end
 
-        function v = nan( varargin )
-            v = QuadDoubleSlow.MakeStatic( DoubleDouble(nan( varargin{:}, 'double' )), DoubleDouble(nan( varargin{:}, 'double' )) );
+        function v = NaN( varargin )
+            v = QuadDoubleSlow.MakeStatic( DoubleDouble.NaN( varargin{:} ), DoubleDouble.NaN( varargin{:} ) );
         end
 
-        function v = inf( varargin )
-            v = QuadDoubleSlow.MakeStatic( DoubleDouble(inf( varargin{:}, 'double' )), DoubleDouble(inf( varargin{:}, 'double' )) );
+        function v = Inf( varargin )
+            v = QuadDoubleSlow.MakeStatic( DoubleDouble.Inf( varargin{:} ), DoubleDouble.Inf( varargin{:} ) );
         end
 
         function v = randn( varargin )
