@@ -139,12 +139,12 @@ classdef DoubleDouble < BaseExtDouble
             v = DoubleDouble.MakeStatic( eye( varargin{:}, 'double' ), zeros( varargin{:}, 'double' ) );
         end
 
-        function v = nan( varargin )
-            v = DoubleDouble.MakeStatic( nan( varargin{:}, 'double' ), nan( varargin{:}, 'double' ) );
+        function v = NaN( varargin )
+            v = DoubleDouble.MakeStatic( NaN( varargin{:}, 'double' ), NaN( varargin{:}, 'double' ) );
         end
 
-        function v = inf( varargin )
-            v = DoubleDouble.MakeStatic( inf( varargin{:}, 'double' ), inf( varargin{:}, 'double' ) );
+        function v = Inf( varargin )
+            v = DoubleDouble.MakeStatic( Inf( varargin{:}, 'double' ), Inf( varargin{:}, 'double' ) );
         end
 
         function v = rand( varargin )
