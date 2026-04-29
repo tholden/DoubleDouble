@@ -148,11 +148,11 @@ classdef DoubleDouble < BaseExtDouble
         end
 
         function v = rand( varargin )
-            v = ToRand( zeros( varargin{:} ) );
+            v = ToRand( DoubleDouble.zeros( varargin{:} ) );
         end
 
         function v = randn( varargin )
-            v = ToRandn( zeros( varargin{:} ) );
+            v = ToRandn( DoubleDouble.zeros( varargin{:} ) );
         end
 
         function v = randi( imax, varargin )
