@@ -122,9 +122,6 @@ classdef QuadDouble < QuadDoubleSlow
             if ~isa( a1, 'DoubleDouble' )
                 a1 = DoubleDouble( a1 );
             end
-            if nargin < 2
-                a2 = DoubleDouble.zeros( size( a1 ) );
-            end
             if ~isa( a2, 'DoubleDouble' )
                 a2 = DoubleDouble( a2 );
             end
