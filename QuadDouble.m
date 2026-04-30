@@ -330,7 +330,7 @@ classdef QuadDouble < QuadDoubleSlow
 
     methods ( Static, Access = protected )
 
-        function [ s0, s1, s2, s3 ] = QDPlusQD( a0, a1, a2, a3, b0, b1, b2, b3 ) % This is the "sloppy" version from QD C++, as the IEEE version requires loops.
+        function [ s0, s1, s2, s3 ] = QDPlusQD( a0, a1, a2, a3, b0, b1, b2, b3 ) % This is the "sloppy" version from QD C++, as the IEEE version requires loops, with a slight accuracy improvement in the final steps.
             if QuadDouble.SingletonExpansionNotSupported
                 [ a0, b0 ] = QuadDouble.ExpandSingleton( a0, b0 );
                 [ a1, b1 ] = QuadDouble.ExpandSingleton( a1, b1 );
