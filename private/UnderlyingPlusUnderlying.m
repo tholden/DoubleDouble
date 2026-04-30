@@ -1,0 +1,8 @@
+function [ s1, s2 ] = UnderlyingPlusUnderlying( a, b )
+    s1 = a + b;
+    bb = s1 - a;
+    t11 = s1 - bb;
+    t2 = b - bb;
+    t1 = a - t11;
+    s2 = t1 + t2;
+end

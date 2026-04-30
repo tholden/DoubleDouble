@@ -1,4 +1,4 @@
-classdef (Abstract) BaseExtDouble
+classdef ( Abstract ) BaseExtDouble
 
     properties ( SetAccess = protected, GetAccess = public )
 
@@ -7,14 +7,9 @@ classdef (Abstract) BaseExtDouble
 
     end
 
-    properties ( Constant, GetAccess = public )
-
-        SingletonExpansionNotSupported = ~BaseExtDouble.TestSingletonExpansion();
-
-    end
-
     properties ( Abstract, Constant )
 
+        empty
         zero
         one
         tiny
@@ -35,7 +30,9 @@ classdef (Abstract) BaseExtDouble
 
     methods ( Abstract )
 
-        v = Promote( v, a )
+        v = Promote( a, v )
+
+        n = PromotionOrder( v )
 
     end
 
@@ -249,7 +246,7 @@ classdef (Abstract) BaseExtDouble
         end
 
         function n = numArgumentsFromSubscript( v, s, IndexingContext )
-            if strcmp( s(1).type, '.' )
+            if strcmp( s( 1 ).type, '.' )
                 n = builtin( 'numArgumentsFromSubscript', v, s, IndexingContext );
             else
                 n = numArgumentsFromSubscript( v.v1, s, IndexingContext );
@@ -284,7 +281,7 @@ classdef (Abstract) BaseExtDouble
                 return
             end
             v = a == b;
-            v = all( v(:) );
+            v = all( v( : ) );
             if nargin > 2
                 for i = 1 : length( varargin )
                     if ~v
@@ -296,8 +293,8 @@ classdef (Abstract) BaseExtDouble
         end
 
         function v = isempty( v )
-            if builtin('numel', v) ~= 1
-                v = builtin('isempty', v);
+            if builtin( 'numel', v ) ~= 1
+                v = builtin( 'isempty', v );
             else
                 v = isempty( v.v1 );
             end
@@ -404,15 +401,15 @@ classdef (Abstract) BaseExtDouble
                 v = BackSubstitutionExt( v, a );
                 return
             end
-            if BaseExtDouble.IsEqualWithExpansion( triu( a, 1 ), 0 )
+            if IsEqualWithExpansion( triu( a, 1 ), 0 )
                 % Lower triangular
                 v = ForwardEliminationExt( v, a );
                 return
-            elseif BaseExtDouble.IsEqualWithExpansion( tril( a, -1 ), 0 )
+            elseif IsEqualWithExpansion( tril( a, -1 ), 0 )
                 % Upper triangular
                 v = BackSubstitutionExt( v, a );
                 return
-            elseif BaseExtDouble.IsEqualWithExpansion( a, a' )
+            elseif IsEqualWithExpansion( a, a' )
                 [ L, d ] = ldl( a, 'vector_d' );
                 if all( all( isfinite( L ) ) ) && all( isfinite( d ) )
                     % Positive definite
@@ -459,32 +456,32 @@ classdef (Abstract) BaseExtDouble
             if ~any( bHalfInteger )
                 v = exp( b .* log( a ) );
             else
-                [ a, b, bHalfInteger ] = BaseExtDouble.ExpandSingleton( a, b, bHalfInteger );
+                [ a, b, bHalfInteger ] = ExpandSingleton( a, b, bHalfInteger );
                 v = a.ones( size( a ) );
                 bNonHalfInteger = find( ~bHalfInteger );
                 bHalfInteger = find( bHalfInteger );
                 if ~isempty( bNonHalfInteger )
-                    v =  v.Assign(exp(  b(bNonHalfInteger ) .* log(  a.Index(bNonHalfInteger ) ) ), bNonHalfInteger  );
+                    v =  v.Assign( exp( b( bNonHalfInteger ) .* log( a.Index( bNonHalfInteger ) ) ), bNonHalfInteger );
                 end
-                a =  a.Index(bHalfInteger );
-                b = double(  b(bHalfInteger ) );
+                a =  a.Index( bHalfInteger );
+                b = double( b( bHalfInteger ) );
                 Select = find( b < 0 );
-                a =  a.Assign(1 ./  a.Index(Select ), Select );
-                b(Select) = -b( Select );
-                vv =   v.Index(bHalfInteger );
+                a =  a.Assign( 1 ./  a.Index( Select ), Select );
+                b( Select ) = -b( Select );
+                vv =   v.Index( bHalfInteger );
                 Select = find( b ~= floor( b ) );
-                vv =  vv.Assign( sqrt(  a.Index(Select ) ), Select  );
+                vv =  vv.Assign( sqrt( a.Index( Select ) ), Select );
                 Binary = dec2bin( floor( b ) );
                 N = size( Binary, 2 );
                 Power = a;
                 Select = find( Binary( :, end ) == '1' );
-                vv =  vv.Assign( a.Index(Select ), Select );
+                vv =  vv.Assign( a.Index( Select ), Select );
                 for n = 2 : N
                     Power = Power .* Power;
                     Select = find( Binary( :, end + 1 - n ) == '1' );
-                    vv =  vv.Assign( vv.Index(Select ) .*  Power.Index(Select ), Select );
+                    vv =  vv.Assign( vv.Index( Select ) .*  Power.Index( Select ), Select );
                 end
-                v =  v.Assign(vv, bHalfInteger );
+                v =  v.Assign( vv, bHalfInteger );
             end
         end
 
@@ -659,7 +656,7 @@ classdef (Abstract) BaseExtDouble
         end
 
         function v = subsref( v, s )
-            if strcmp( s(1).type, '.' )
+            if strcmp( s( 1 ).type, '.' )
                 v = builtin( 'subsref', v, s );
             else
                 v.v1 = Index( v.v1, s.subs{:} );
@@ -668,7 +665,7 @@ classdef (Abstract) BaseExtDouble
         end
 
         function v = subsasgn( v, s, b )
-            if strcmp( s(1).type, '.' )
+            if strcmp( s( 1 ).type, '.' )
                 if length( s ) > 1
                     v = builtin( 'subsasgn', v, s( 1 ), subsasgn( builtin( 'subsref', v, s( 1 ) ), s( 2 : end ), b ) );
                 else
@@ -745,7 +742,7 @@ classdef (Abstract) BaseExtDouble
                 xb2 = mat2cell( b.v2, Blocks{:} );
                 Indices = cell( size( xv1 ) );
                 for i = 1 : numel( xv1 )
-                    [ ~, Indices{ i } ] = sortrows( [ xa1{ i }(:), xa2{ i }(:), xb1{ i }(:), xb2{ i }(:) ], varargin{:} );
+                    [ ~, Indices{ i } ] = sortrows( [ xa1{ i }( : ), xa2{ i }( : ), xb1{ i }( : ), xb2{ i }( : ) ], varargin{:} );
                     xv1{ i } = Index( xv1{ i }, Indices{ i } );
                     xv2{ i } = Index( xv2{ i }, Indices{ i } );
                 end
@@ -872,7 +869,7 @@ classdef (Abstract) BaseExtDouble
             end
             if isempty( b )
                 if isempty( a )
-                    s = a.Make(0,0); s = s(zeros(0,1) );
+                    s = a.Make( 0,0 ); s = s( zeros( 0,1 ) );
                     i = [];
                     return
                 end
@@ -920,7 +917,7 @@ classdef (Abstract) BaseExtDouble
                 if ~isa( b, 'BaseExtDouble' )
                     b = a.Promote( b );
                 end
-                [ a, b ] = BaseExtDouble.ExpandSingleton( a, b );
+                [ a, b ] = ExpandSingleton( a, b );
                 i = ( a.v1 > b.v1 ) | ( ( a.v1 == b.v1 ) & ( a.v2 > b.v2 ) );
                 s = b;
                 s.v1 = Assign( s.v1, Index( a.v1, i ), i );
@@ -980,7 +977,7 @@ classdef (Abstract) BaseExtDouble
                 if ~isa( b, 'BaseExtDouble' )
                     b = a.Promote( b );
                 end
-                [ a, b ] = BaseExtDouble.ExpandSingleton( a, b );
+                [ a, b ] = ExpandSingleton( a, b );
                 i = ( a.v1 < b.v1 ) | ( ( a.v1 == b.v1 ) & ( a.v2 < b.v2 ) );
                 s = b;
                 s.v1 = Assign( s.v1, Index( a.v1, i ), i );
@@ -1302,8 +1299,8 @@ classdef (Abstract) BaseExtDouble
                 Dim = [];
             end
             if ( length( a ) == numel( a ) ) && ( length( b ) == numel( b ) )
-                a = a.Vec();
-                b = b.Vec();
+                a = a.Vec( );
+                b = b.Vec( );
             end
             v = a .* b;
             v = sum( v, Dim );
@@ -1316,7 +1313,7 @@ classdef (Abstract) BaseExtDouble
             if ( sum( size( v ) ~= 1 ) <= 1 ) || ( numel( p ) ~= 1 )
                 v = abs( v );
                 if ( p == 2 ) || ( numel( p ) ~= 1 )
-                    v = v.Vec();
+                    v = v.Vec( );
                     v = sqrt( sum( v .* v ) );
                 elseif p == Inf
                     v = max( v );
@@ -1365,7 +1362,7 @@ classdef (Abstract) BaseExtDouble
             x1 = floor( v.v1 );
             x2 = x1 .* 0;
             Select = x1 == v.v1;
-            v_sel = v.Index(Select);
+            v_sel = v.Index( Select );
             x2_sel = floor( v_sel.v2 );
             x2 = Assign( x2, x2_sel, Select );
             [ x1, x2 ] = v.Normalize( x1, x2 );
@@ -1376,7 +1373,7 @@ classdef (Abstract) BaseExtDouble
             x1 = ceil( v.v1 );
             x2 = x1 .* 0;
             Select = x1 == v.v1;
-            v_sel = v.Index(Select);
+            v_sel = v.Index( Select );
             x2_sel = ceil( v_sel.v2 );
             x2 = Assign( x2, x2_sel, Select );
             [ x1, x2 ] = v.Normalize( x1, x2 );
@@ -1387,7 +1384,7 @@ classdef (Abstract) BaseExtDouble
             x1 = fix( v.v1 );
             x2 = x1 .* 0;
             Select = x1 == v.v1;
-            v_sel = v.Index(Select);
+            v_sel = v.Index( Select );
             x2_sel = fix( v_sel.v2 );
             x2 = Assign( x2, x2_sel, Select );
             [ x1, x2 ] = v.Normalize( x1, x2 );
@@ -1398,7 +1395,7 @@ classdef (Abstract) BaseExtDouble
             x1 = round( v.v1 );
             x2 = x1 .* 0;
             Select = x1 == v.v1;
-            vSelect = v.Index(Select);
+            vSelect = v.Index( Select );
             x2Select = round( vSelect.v2 );
             x2 = Assign( x2, x2Select, Select );
             Select = ( ~Select ) & ( abs( x1 - v.v1 ) == 0.5 ) & ( v.v2 < 0 );
@@ -1414,7 +1411,7 @@ classdef (Abstract) BaseExtDouble
             Select = v > 0;
             x = 1 ./ sqrt( Index( v.v1, Select ) );
             vx = Index( v.v1, Select ) .* x;
-            [ t1_, t2_ ] = v.DoubleTimesUnderlying( vx, vx );
+            [ t1_, t2_ ] = v.UnderlyingTimesUnderlying( vx, vx );
             t = v.Make( Index( v.v1, Select ), Index( v.v2, Select ) ) - v.Make( t1_, t2_ );
             [ t1_, t2_ ] = v.EDPlusUnderlying( vx, zeros( size( vx ) ), t.v1 .* ( x * 0.5 ) );
             t = v.Make( t1_, t2_ );
@@ -1424,14 +1421,14 @@ classdef (Abstract) BaseExtDouble
 
         function v = sqrt( v )
             Select = v ~= 0;
-            v_sel = v.Index(Select);
+            v_sel = v.Index( Select );
             x = 1 ./ sqrt( v_sel.v1 );
             vx = v_sel.v1 .* x;
-            [ t1_, t2_ ] = v.DoubleTimesUnderlying( vx, vx );
+            [ t1_, t2_ ] = v.UnderlyingTimesUnderlying( vx, vx );
             t = v_sel - v.Make( t1_, t2_ );
             [ t1_, t2_ ] = v.EDPlusUnderlying( vx, zeros( size( vx ) ), t.v1 .* ( x * 0.5 ) );
             t = v.Make( t1_, t2_ );
-            v = v.Assign(t, Select);
+            v = v.Assign( t, Select );
         end
 
         function v = sqrtm( v )
@@ -1457,9 +1454,9 @@ classdef (Abstract) BaseExtDouble
             end
 
             % Strategy:  We first reduce the size of x by noting that
-            % exp(kr + m * log(2) ) = 2^m * exp(r)^k
+            % exp( kr + m * log( 2 ) ) = 2^m * exp( r )^k
             % where m and k are integers.  By choosing m appropriately
-            % we can make |kr| <= log(2) / 2 = 0.347.  Then exp(r) is
+            % we can make |kr| <= log( 2 ) / 2 = 0.347.  Then exp( r ) is
             % evaluated using the familiar Taylor series.  Reducing the
             % argument substantially speeds up the convergence.
             NSquare = v.ExpRescale;
@@ -1557,11 +1554,11 @@ classdef (Abstract) BaseExtDouble
                 cos_v = cos_v.TimesPowerOf2( +0.5 );
                 return
             end
-            % Strategy.  To compute sin(x), cos(x), we choose integers a, b so that
-            % x = s + a * (pi/2) + b * (pi/16)
+            % Strategy.  To compute sin( x ), cos( x ), we choose integers a, b so that
+            % x = s + a * ( pi/2 ) + b * ( pi/16 )
             % and |s| <= pi/32.  Using the fact that
-            % sin(pi/16) = 0.5 * sqrt(2 - sqrt(2 + sqrt(2) ))
-            % we can compute sin(x) from sin(s), cos(s).  This greatly increases the convergence of the sine Taylor series.
+            % sin( pi/16 ) = 0.5 * sqrt( 2 - sqrt( 2 + sqrt( 2 ) ) )
+            % we can compute sin( x ) from sin( s ), cos( s ).  This greatly increases the convergence of the sine Taylor series.
 
             z = round( v ./ v.piT2 );
             r = v - v.piT2 .* z;
@@ -1577,17 +1574,17 @@ classdef (Abstract) BaseExtDouble
             abs_k = abs( k );
 
             test = ( j >= -2 ) & ( j <= 2 );
-            assert( all( test(:) ) );
+            assert( all( test( : ) ) );
             test = abs_k <= 4;
-            assert( all( test(:) ) );
+            assert( all( test( : ) ) );
 
-            [ sin_t, cos_t ] = t.SinCosTaylor();
+            [ sin_t, cos_t ] = t.SinCosTaylor( );
 
             sin_v = sin_t;
             cos_v = cos_t;
 
-            a = v.CosTable.Index( double(abs_k + 1) );
-            b = v.SinTable.Index( double(abs_k + 1) );
+            a = v.CosTable.Index( double( abs_k + 1 ) );
+            b = v.SinTable.Index( double( abs_k + 1 ) );
 
             a = reshape( a, size( v ) );
             b = reshape( b, size( v ) );
@@ -1598,45 +1595,45 @@ classdef (Abstract) BaseExtDouble
             b_cos_t = b .* cos_t;
 
             Select = k > 0;
-            if any(Select(:) )
-                a_sin_t_s = a_sin_t.Index(Select);
-                a_cos_t_s = a_cos_t.Index(Select);
-                b_sin_t_s = b_sin_t.Index(Select);
-                b_cos_t_s = b_cos_t.Index(Select);
+            if any( Select( : ) )
+                a_sin_t_s = a_sin_t.Index( Select );
+                a_cos_t_s = a_cos_t.Index( Select );
+                b_sin_t_s = b_sin_t.Index( Select );
+                b_cos_t_s = b_cos_t.Index( Select );
                 sin_v = sin_v.Assign( a_sin_t_s + b_cos_t_s, Select );
                 cos_v = cos_v.Assign( a_cos_t_s - b_sin_t_s, Select );
             end
 
             Select = k < 0;
-            if any(Select(:) )
-                a_sin_t_s = a_sin_t.Index(Select);
-                a_cos_t_s = a_cos_t.Index(Select);
-                b_sin_t_s = b_sin_t.Index(Select);
-                b_cos_t_s = b_cos_t.Index(Select);
+            if any( Select( : ) )
+                a_sin_t_s = a_sin_t.Index( Select );
+                a_cos_t_s = a_cos_t.Index( Select );
+                b_sin_t_s = b_sin_t.Index( Select );
+                b_cos_t_s = b_cos_t.Index( Select );
                 sin_v = sin_v.Assign( a_sin_t_s - b_cos_t_s, Select );
                 cos_v = cos_v.Assign( a_cos_t_s + b_sin_t_s, Select );
             end
 
             Select = j == 1;
-            if any(Select(:) )
-                cos_v_s = cos_v.Index(Select);
-                sin_v_s = sin_v.Index(Select);
+            if any( Select( : ) )
+                cos_v_s = cos_v.Index( Select );
+                sin_v_s = sin_v.Index( Select );
                 sin_v = sin_v.Assign( cos_v_s, Select );
                 cos_v = cos_v.Assign( -sin_v_s, Select );
             end
 
             Select = j == -1;
-            if any(Select(:) )
-                cos_v_s = cos_v.Index(Select);
-                sin_v_s = sin_v.Index(Select);
+            if any( Select( : ) )
+                cos_v_s = cos_v.Index( Select );
+                sin_v_s = sin_v.Index( Select );
                 sin_v = sin_v.Assign( -cos_v_s, Select );
                 cos_v = cos_v.Assign( sin_v_s, Select );
             end
 
             Select = abs_j == 2;
-            if any(Select(:) )
-                sin_v_s = sin_v.Index(Select);
-                cos_v_s = cos_v.Index(Select);
+            if any( Select( : ) )
+                sin_v_s = sin_v.Index( Select );
+                cos_v_s = cos_v.Index( Select );
                 sin_v = sin_v.Assign( -sin_v_s, Select );
                 cos_v = cos_v.Assign( -cos_v_s, Select );
             end
@@ -1678,18 +1675,18 @@ classdef (Abstract) BaseExtDouble
             [ sin_z, cos_z ] = sincos( v );
             t = yy;
 
-            if any(Select(:) )
-                tSelect = t.Index(Select);
-                sinZSelect = sin_z.Index(Select);
-                cosZSelect = cos_z.Index(Select);
+            if any( Select( : ) )
+                tSelect = t.Index( Select );
+                sinZSelect = sin_z.Index( Select );
+                cosZSelect = cos_z.Index( Select );
                 t = t.Assign( ( tSelect - sinZSelect ) ./ cosZSelect, Select );
             end
 
             Select = ~Select;
-            if any(Select(:) )
-                xxSelect = xx.Index(Select);
-                sinZSelect = sin_z.Index(Select);
-                cosZSelect = cos_z.Index(Select);
+            if any( Select( : ) )
+                xxSelect = xx.Index( Select );
+                sinZSelect = sin_z.Index( Select );
+                cosZSelect = cos_z.Index( Select );
                 t = t.Assign( ( xxSelect - cosZSelect ) ./ ( -sinZSelect ), Select );
             end
             v = v + t;
@@ -1807,13 +1804,13 @@ classdef (Abstract) BaseExtDouble
         end
 
         function [ C, ia, ic ] = unique( A, varargin )
-            Rows = strcmpi( varargin, 'rows');
+            Rows = strcmpi( varargin, 'rows' );
             if any( Rows )
                 varargin( Rows ) = [];
                 RowFlag = 0;
             else
                 RowFlag = size( A, 1 ) == 1;
-                A = A.Vec();
+                A = A.Vec( );
             end
             Size = size( A );
             A_orig = A;
@@ -1833,7 +1830,7 @@ classdef (Abstract) BaseExtDouble
                     Dim = 1;
                 end
             elseif strcmpi( Dim, 'all' )
-                v = v.Vec();
+                v = v.Vec( );
                 Dim = 1;
             end
             Size = size( v.v1 );
@@ -1848,7 +1845,7 @@ classdef (Abstract) BaseExtDouble
                     Dim = 1;
                 end
             elseif strcmpi( Dim, 'all' )
-                v = v.Vec();
+                v = v.Vec( );
                 Dim = 1;
             end
             Size = size( v.v1 );
@@ -1953,8 +1950,8 @@ classdef (Abstract) BaseExtDouble
             y = a + Step .* Indices;
 
             if n > 1
-                y.v1 = Assign( y.v1, b.v1, length(y.v1) );
-                y.v2 = Assign( y.v2, b.v2, length(y.v2) );
+                y.v1 = Assign( y.v1, b.v1, length( y.v1 ) );
+                y.v2 = Assign( y.v2, b.v2, length( y.v2 ) );
             end
         end
 
@@ -2084,309 +2081,44 @@ classdef (Abstract) BaseExtDouble
     methods ( Access = protected ) % Not sealed, overridden in QuadDouble.
 
         function v = Plus( a, b )
-            if isa( a, 'BaseExtDouble' )
-                if isa( b, 'BaseExtDouble' )
-                    [ x1, x2 ] = BaseExtDouble.EDPlusED( a.v1, a.v2, b.v1, b.v2 );
-                else
-                    [ x1, x2 ] = BaseExtDouble.EDPlusUnderlying( a.v1, a.v2, Promote( a.v1, b ) );
-                end
+            [ a, b ] = BaseExtDouble.JointPromotion( a, b );
+            if a.PromotionOrder( ) == b.PromotionOrder( )
+                [ x1, x2 ] = EDPlusED( a.v1, a.v2, b.v1, b.v2 );
                 v = a.Make( x1, x2 );
-            else
-                if isa( b, 'BaseExtDouble' )
-                    [ x1, x2 ] = BaseExtDouble.EDPlusUnderlying( b.v1, b.v2, Promote( b.v1, a ) );
-                else
-                    % [ x1, x2 ] = BaseExtDouble.DoublePlusUnderlying( double( a ), double( b ) );
-                    error( 'Should never happen.' );
-                end
+            elseif a.PromotionOrder( ) > b.PromotionOrder( )
+                [ x1, x2 ] = EDPlusUnderlying( a.v1, a.v2, Promote( a.v1, b ) );
+                v = a.Make( x1, x2 );
+            else % b.PromotionOrder( ) > a.PromotionOrder( )
+                [ x1, x2 ] = EDPlusUnderlying( b.v1, b.v2, Promote( b.v1, a ) );
                 v = b.Make( x1, x2 );
             end
         end
 
         function v = Times( a, b )
-            if isa( a, 'BaseExtDouble' )
-                if isa( b, 'BaseExtDouble' )
-                    [ x1, x2 ] = BaseExtDouble.EDTimesED( a.v1, a.v2, b.v1, b.v2 );
-                else
-                    [ x1, x2 ] = BaseExtDouble.EDTimesUnderlying( a.v1, a.v2, Promote( a.v1, b ) );
-                end
+            [ a, b ] = BaseExtDouble.JointPromotion( a, b );
+            if a.PromotionOrder( ) == b.PromotionOrder( )
+                [ x1, x2 ] = EDTimesED( a.v1, a.v2, b.v1, b.v2 );
                 v = a.Make( x1, x2 );
-            else
-                if isa( b, 'BaseExtDouble' )
-                    [ x1, x2 ] = BaseExtDouble.EDTimesUnderlying( b.v1, b.v2, Promote( b.v1, a ) );
-                else
-                    % [ x1, x2 ] = BaseExtDouble.DoubleTimesUnderlying( double( a ), double( b ) );
-                    error( 'Should never happen.' );
-                end
+            elseif a.PromotionOrder( ) > b.PromotionOrder( )
+                [ x1, x2 ] = EDTimesUnderlying( a.v1, a.v2, Promote( a.v1, b ) );
+                v = a.Make( x1, x2 );
+            else % b.PromotionOrder( ) > a.PromotionOrder( )
+                [ x1, x2 ] = EDTimesUnderlying( b.v1, b.v2, Promote( b.v1, a ) );
                 v = b.Make( x1, x2 );
             end
         end
 
         function v = RDivide( a, b )
-            if isa( a, 'BaseExtDouble' )
-                if isa( b, 'BaseExtDouble' )
-                    [ x1, x2 ] = BaseExtDouble.EDDividedByED( a.v1, a.v2, b.v1, b.v2 );
-                else
-                    [ x1, x2 ] = BaseExtDouble.EDDividedByUnderlying( a.v1, a.v2, Promote( a.v1, b ) );
-                end
+            [ a, b ] = BaseExtDouble.JointPromotion( a, b );
+            if a.PromotionOrder( ) == b.PromotionOrder( )
+                [ x1, x2 ] = EDDividedByED( a.v1, a.v2, b.v1, b.v2 );
                 v = a.Make( x1, x2 );
-            else
-                if isa( b, 'BaseExtDouble' )
-                    [ x1, x2 ] = BaseExtDouble.EDDividedByED( Promote( b.v1, a ), Promote( b.v1, zeros( size( a ) ) ), b.v1, b.v2 );
-                else
-                    % [ x1, x2 ] = BaseExtDouble.DoubleDividedByUnderlying( double( a ), double( b ) );
-                    error( 'Should never happen.' );
-                end
+            elseif a.PromotionOrder( ) > b.PromotionOrder( )
+                [ x1, x2 ] = EDDividedByUnderlying( a.v1, a.v2, Promote( a.v1, b ) );
+                v = a.Make( x1, x2 );
+            else % b.PromotionOrder( ) > a.PromotionOrder( )
+                [ x1, x2 ] = EDDividedByUnderlying( b.v1, b.v2, Promote( b.v1, a ) );
                 v = b.Make( x1, x2 );
-            end
-        end
-
-    end
-
-    methods ( Static, Access = private )
-
-        function [ s1, s2 ] = Normalize( a1, a2 )
-            s1 = a1 + a2;
-            t = s1 - a1;
-            s2 = a2 - t;
-        end
-
-        function [ s1, s2 ] = EDPlusED( a1, a2, b1, b2 )
-            if BaseExtDouble.SingletonExpansionNotSupported
-                [ a1, a2, b1, b2 ] = BaseExtDouble.ExpandSingleton( a1, a2, b1, b2 );
-            end
-            [ s1, s2 ] = BaseExtDouble.DoublePlusUnderlying( a1, b1 );
-            [ t1, t2 ] = BaseExtDouble.DoublePlusUnderlying( a2, b2 );
-            s2 = s2 + t1;
-            [ s1, s2 ] = BaseExtDouble.Normalize( s1, s2 );
-            s2 = s2 + t2;
-            [ s1, s2 ] = BaseExtDouble.Normalize( s1, s2 );
-        end
-
-        function [ s1, s2 ] = EDPlusUnderlying( a1, a2, b )
-            if BaseExtDouble.SingletonExpansionNotSupported
-                [ a1, a2, b ] = BaseExtDouble.ExpandSingleton( a1, a2, b );
-            end
-            [ s1, s2 ] = BaseExtDouble.DoublePlusUnderlying( a1, b );
-            s2 = s2 + a2;
-            [ s1, s2 ] = BaseExtDouble.Normalize( s1, s2 );
-        end
-
-        function [ s1, s2 ] = DoublePlusUnderlying( a, b )
-            if BaseExtDouble.SingletonExpansionNotSupported
-                [ a, b ] = BaseExtDouble.ExpandSingleton( a, b );
-            end
-            s1 = a + b;
-            bb = s1 - a;
-            t11 = s1 - bb;
-            t2 = b - bb;
-            t1 = a - t11;
-            s2 = t1 + t2;
-        end
-
-        function [ p1, p2 ] = EDTimesED( a1, a2, b1, b2 )
-            if BaseExtDouble.SingletonExpansionNotSupported
-                [ a1, a2, b1, b2 ] = BaseExtDouble.ExpandSingleton( a1, a2, b1, b2 );
-            end
-            [ p1, p2 ] = BaseExtDouble.DoubleTimesUnderlying( a1, b1 );
-            t = a1 .* b2 + a2 .* b1;
-            p2 = p2 + t;
-            [ p1, p2 ] = BaseExtDouble.Normalize( p1, p2 );
-        end
-
-        function [ p1, p2 ] = EDTimesUnderlying( a1, a2, b )
-            if BaseExtDouble.SingletonExpansionNotSupported
-                [ a1, a2, b ] = BaseExtDouble.ExpandSingleton( a1, a2, b );
-            end
-            [ p1, p2 ] = BaseExtDouble.DoubleTimesUnderlying( a1, b );
-            p2 = p2 + a2 .* b;
-            [ p1, p2 ] = BaseExtDouble.Normalize( p1, p2 );
-        end
-
-        function [ p1, p2 ] = DoubleTimesUnderlying( a, b )
-            if BaseExtDouble.SingletonExpansionNotSupported
-                [ a, b ] = BaseExtDouble.ExpandSingleton( a, b );
-            end
-            p1 = a .* b;
-            [ a1, a2 ] = Split( a );
-            [ b1, b2 ] = Split( b );
-            t1 = a1 .* b1 - p1;
-            t2 = t1 + a1 .* b2 + a2 .* b1;
-            p2 = t2 + a2 .* b2;
-        end
-
-        function [ r1, r2 ] = EDDividedByED( a1, a2, b1, b2, AnySolutionWillDo )
-            if BaseExtDouble.SingletonExpansionNotSupported
-                [ a1, a2, b1, b2 ] = BaseExtDouble.ExpandSingleton( a1, a2, b1, b2 );
-            end
-            if nargin < 5
-                AnySolutionWillDo = false;
-            end
-            % Rescale to prevent overflow in intermediate products (cf. QD library)
-            Rescale = abs( a1 ) > 2 ^ 969;
-            if any( Rescale(:) )
-                ScaleDown = 2 ^ -53;
-                a1( Rescale ) = a1( Rescale ) * ScaleDown;
-                a2( Rescale ) = a2( Rescale ) * ScaleDown;
-            end
-            q1 = a1 ./ b1;
-            [ p1, p2 ] = BaseExtDouble.EDTimesUnderlying( b1, b2, q1 );
-            [ r1, r2 ] = BaseExtDouble.EDPlusED( a1, a2, -p1, -p2 );
-            q2 = r1 ./ b1;
-            [ p1, p2 ] = BaseExtDouble.EDTimesUnderlying( b1, b2, q2 );
-            [ r1, ~  ] = BaseExtDouble.EDPlusED( r1, r2, -p1, -p2 );
-            q3 = r1 ./ b1;
-            [ q1, q2 ] = BaseExtDouble.Normalize( q1, q2 );
-            [ r1, r2 ] = BaseExtDouble.EDPlusED( q1, q2, q3, zeros( size( q3 ) ) );
-            if any( Rescale(:) )
-                ScaleUp = 2 ^ 53;
-                r1( Rescale ) = r1( Rescale ) * ScaleUp;
-                r2( Rescale ) = r2( Rescale ) * ScaleUp;
-            end
-            Select = ( b1 == 0 ) & ( b2 == 0 );
-            if any( Select(:) )
-                if ( isscalar( Select ) ) && ( numel( a1 ) > 1 )
-                    Select = repmat( Select, size( a1 ) );
-                elseif ( numel( Select ) > 1 ) && ( isscalar( a1 ) )
-                    a1 = repmat( a1, size( Select ) );
-                end
-                a1Select = a1( Select );
-                a1SelectSelect = a1Select == 0;
-                a1Select = sign( a1Select ) .* Inf;
-                if AnySolutionWillDo
-                    a1Select = Assign( a1Select, 0, a1SelectSelect );
-                end
-                r1 = Assign( r1, a1Select, Select );
-                r2 = Assign( r2, a1Select, Select );
-            end
-            Select = isinf( b1 );
-            if any( Select(:) )
-                if ( isscalar( Select ) ) && ( numel( a1 ) > 1 )
-                    Select = repmat( Select, size( a1 ) );
-                elseif ( numel( Select ) > 1 ) && ( isscalar( a1 ) )
-                    a1 = repmat( a1, size( Select ) );
-                end
-                a1Select = a1( Select );
-                a1SelectSelect = ~isfinite( a1Select );
-                a1Select = 0;
-                a1Select = Assign( a1Select, NaN, a1SelectSelect );
-                r1 = Assign( r1, a1Select, Select );
-                r2 = Assign( r2, a1Select, Select );
-            end
-        end
-
-        function [ r1, r2 ] = EDDividedByUnderlying( a1, a2, b, AnySolutionWillDo )
-            if BaseExtDouble.SingletonExpansionNotSupported
-                [ a1, a2, b ] = BaseExtDouble.ExpandSingleton( a1, a2, b );
-            end
-            if nargin < 4
-                AnySolutionWillDo = false;
-            end
-            % Rescale to prevent overflow in intermediate products (cf. QD library)
-            Rescale = abs( a1 ) > 2 ^ 969;
-            if any( Rescale(:) )
-                ScaleDown = 2 ^ -53;
-                a1( Rescale ) = a1( Rescale ) * ScaleDown;
-                a2( Rescale ) = a2( Rescale ) * ScaleDown;
-            end
-            r1 = a1 ./ b;
-            [ p1, p2 ] = BaseExtDouble.DoubleTimesUnderlying( r1, b );
-            [ s, e ] = BaseExtDouble.DoublePlusUnderlying( a1, -p1 );
-            e = e + a2;
-            e = e - p2;
-            t = s + e;
-            r2 = t ./ b;
-            [ r1, r2 ] = BaseExtDouble.Normalize( r1, r2 );
-            if any( Rescale(:) )
-                ScaleUp = 2 ^ 53;
-                r1( Rescale ) = r1( Rescale ) * ScaleUp;
-                r2( Rescale ) = r2( Rescale ) * ScaleUp;
-            end
-            Select = b == 0;
-            if any( Select(:) )
-                if ( isscalar( Select ) ) && ( numel( a1 ) > 1 )
-                    Select = repmat( Select, size( a1 ) );
-                elseif ( numel( Select ) > 1 ) && ( isscalar( a1 ) )
-                    a1 = repmat( a1, size( Select ) );
-                end
-                a1Select = a1( Select );
-                a1SelectSelect = a1Select == 0;
-                a1Select = sign( a1Select ) .* Inf;
-                if AnySolutionWillDo
-                    a1Select = Assign( a1Select, 0, a1SelectSelect );
-                end
-                r1 = Assign( r1, a1Select, Select );
-                r2 = Assign( r2, a1Select, Select );
-            end
-            Select = isinf( b );
-            if any( Select(:) )
-                if ( isscalar( Select ) ) && ( numel( a1 ) > 1 )
-                    Select = repmat( Select, size( a1 ) );
-                elseif ( numel( Select ) > 1 ) && ( isscalar( a1 ) )
-                    a1 = repmat( a1, size( Select ) );
-                end
-                a1Select = a1( Select );
-                a1SelectSelect = ~isfinite( a1Select );
-                a1Select = 0;
-                a1Select = Assign( a1Select, NaN, a1SelectSelect );
-                r1 = Assign( r1, a1Select, Select );
-                r2 = Assign( r2, a1Select, Select );
-            end
-        end
-
-        function [ r1, r2 ] = DoubleDividedByUnderlying( a, b, AnySolutionWillDo )
-            if BaseExtDouble.SingletonExpansionNotSupported
-                [ a, b ] = BaseExtDouble.ExpandSingleton( a, b );
-            end
-            if nargin < 3
-                AnySolutionWillDo = false;
-            end
-            % Rescale to prevent overflow in intermediate products (cf. QD library)
-            Rescale = abs( a ) > 2 ^ 969;
-            if any( Rescale(:) )
-                ScaleDown = 2 ^ -53;
-                a( Rescale ) = a( Rescale ) * ScaleDown;
-            end
-            r1 = a ./ b;
-            [ p1, p2 ] = BaseExtDouble.DoubleTimesUnderlying( r1, b );
-            [ s, e ] = BaseExtDouble.DoublePlusUnderlying( a, -p1 );
-            e = e - p2;
-            t = s + e;
-            r2 = t ./ b;
-            [ r1, r2 ] = BaseExtDouble.Normalize( r1, r2 );
-            if any( Rescale(:) )
-                ScaleUp = 2 ^ 53;
-                r1( Rescale ) = r1( Rescale ) * ScaleUp;
-                r2( Rescale ) = r2( Rescale ) * ScaleUp;
-            end
-            Select = b == 0;
-            if any( Select(:) )
-                if ( isscalar( Select ) ) && ( numel( a ) > 1 )
-                    Select = repmat( Select, size( a ) );
-                elseif ( numel( Select ) > 1 ) && ( isscalar( a ) )
-                    a = repmat( a, size( Select ) );
-                end
-                a1Select = a( Select );
-                a1SelectSelect = a1Select == 0;
-                a1Select = sign( a1Select ) .* Inf;
-                if AnySolutionWillDo
-                    a1Select = Assign( a1Select, 0, a1SelectSelect );
-                end
-                r1 = Assign( r1, a1Select, Select );
-                r2 = Assign( r2, a1Select, Select );
-            end
-            Select = isinf( b );
-            if any( Select(:) )
-                if ( isscalar( Select ) ) && ( numel( a ) > 1 )
-                    Select = repmat( Select, size( a ) );
-                elseif ( numel( Select ) > 1 ) && ( isscalar( a ) )
-                    a = repmat( a, size( Select ) );
-                end
-                a1Select = a( Select );
-                a1SelectSelect = ~isfinite( a1Select );
-                a1Select = 0;
-                a1Select = Assign( a1Select, NaN, a1SelectSelect );
-                r1 = Assign( r1, a1Select, Select );
-                r2 = Assign( r2, a1Select, Select );
             end
         end
 
@@ -2394,50 +2126,12 @@ classdef (Abstract) BaseExtDouble
 
     methods ( Static, Access = protected )
 
-        function Supported = TestSingletonExpansion()
-            try
-                a = [ 1, 1 ];
-                b = [ 1; 1 ];
-                c = a + b;
-                Supported = all( [ size( b ), size( c ) ] == 2 );
-            catch
-                Supported = false;
-            end
-        end
-
-        function [ varargout ] = ExpandSingleton( varargin )
-            l = cellfun( @( x ) length( size( x ) ), varargin, 'UniformOutput', true );
-            n = length( varargin );
-            ss = ones( n, max( l ) );
-            for i = 1 : n
-                ss( i, 1 : l( i ) ) = size( varargin{ i } );
-            end
-            s = max( ss, [], 1 );
-            isZeroDim = any( ss == 0, 1 );
-            if any( isZeroDim )
-                if any( any( ss( :, isZeroDim ) > 1 ) )
-                    error( 'Arrays have incompatible sizes for this operation.' );
-                end
-                s( isZeroDim ) = 0;
-            end
-            varargout = cell( 1, n );
-            for i = 1 : n
-                repfac = ones( 1, length( s ) );
-                mask = ( ss( i, : ) == 1 ) & ( s ~= 1 );
-                repfac( mask ) = s( mask );
-                varargout{ i } = repmat( varargin{ i }, repfac );
-            end
-        end
-
-        function v = IsEqualWithExpansion( a, b, varargin )
-            v = a == b;
-            v = all( v(:) );
-            if nargin > 2
-                for i = 1 : length( varargin )
-                    if ~v
-                        break
-                    end
-                    v = v && BaseExtDouble.IsEqualWithExpansion( a, varargin{i} );
+        function [ a, b ] = JointPromotion( a, b )
+            if ( a.PromotionOrder( ) ~= b.PromotionOrder( ) ) && ( abs( a.PromotionOrder( ) - b.PromotionOrder( ) ) < 1 )
+                if a.PromotionOrder( ) > b.PromotionOrder( )
+                    b = a.Promote( b );
+                else
+                    a = b.Promote( a );
                 end
             end
         end

@@ -39,10 +39,20 @@ classdef DoubleDouble < BaseExtDouble
 
     properties ( Constant, GetAccess = public )
 
-        zero = DoubleDouble.MakeStatic( 0, 0 );
-        one = DoubleDouble.MakeStatic( 1, 0 );
-        tiny = DoubleDouble.MakeStatic( 4.93038065763132e-32, 0 );
-        pi = DoubleDouble.MakeStatic( 3.141592653589793116e+00, 1.224646799147353207e-16 );
+        empty  = DoubleDouble.MakeStatic( [], [] );
+        zero   = DoubleDouble.MakeStatic( 0, 0 );
+        one    = DoubleDouble.MakeStatic( 1, 0 );
+        tiny   = DoubleDouble.MakeStatic( 4.93038065763132e-32, 0 );
+        pi     = DoubleDouble.MakeStatic( 3.141592653589793116e+00, 1.224646799147353207e-16 );
+        piT2   = DoubleDouble.MakeStatic( 6.283185307179586232e+00,  2.449293598294706414e-16 );
+        piD2   = DoubleDouble.MakeStatic( 1.570796326794896558e+00,  6.123233995736766036e-17 );
+        piD16  = DoubleDouble.MakeStatic( 1.963495408493620697e-01,  7.654042494670957545e-18 );
+        log_2  = DoubleDouble.MakeStatic( 6.931471805599452862e-01,  2.319046813846299558e-17 );
+        log_10 = DoubleDouble.MakeStatic( 2.302585092994045901e+00, -2.170756223382249351e-16 );
+
+        NInverseFactorial = 15;
+        ExpRescale        = 9;
+        LogSteps          = 2;
 
         InverseFactorial = [
             DoubleDouble.MakeStatic( 1.66666666666666657e-01,   9.25185853854297066e-18 );
@@ -61,18 +71,6 @@ classdef DoubleDouble < BaseExtDouble
             DoubleDouble.MakeStatic( 4.77947733238738525e-14,   4.39920548583408126e-31 );
             DoubleDouble.MakeStatic( 2.81145725434552060e-15,   1.65088427308614326e-31 );
             ];
-
-        NInverseFactorial = 15;
-
-        ExpRescale = 9;
-        LogSteps = 2;
-
-        piT2   = DoubleDouble.MakeStatic( 6.283185307179586232e+00,  2.449293598294706414e-16 );
-        piD2   = DoubleDouble.MakeStatic( 1.570796326794896558e+00,  6.123233995736766036e-17 );
-        piD16  = DoubleDouble.MakeStatic( 1.963495408493620697e-01,  7.654042494670957545e-18 );
-
-        log_2  = DoubleDouble.MakeStatic( 6.931471805599452862e-01,  2.319046813846299558e-17 );
-        log_10 = DoubleDouble.MakeStatic( 2.302585092994045901e+00, -2.170756223382249351e-16 );
 
         SinTable = [
             DoubleDouble.MakeStatic( 0,  0 );
@@ -96,8 +94,7 @@ classdef DoubleDouble < BaseExtDouble
 
         function v = DoubleDouble( in, varargin )
             if nargin == 0
-                v.v1 = [];
-                v.v2 = [];
+                v = DoubleDouble.empty;
                 return
             end
             if nargin >= 2
@@ -118,6 +115,10 @@ classdef DoubleDouble < BaseExtDouble
 
         function v = Promote( ~, v )
             v = DoubleDouble( v );
+        end
+
+        function n = PromotionOrder( ~ )
+            n = 1;
         end
 
     end
