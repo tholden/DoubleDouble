@@ -94,7 +94,8 @@ classdef DoubleDouble < BaseExtDouble
 
         function v = DoubleDouble( in, varargin )
             if nargin == 0
-                v = DoubleDouble.empty;
+                v.v1 = [];
+                v.v2 = [];
                 return
             end
             if nargin >= 2

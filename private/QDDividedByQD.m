@@ -1,4 +1,4 @@
-function [ s0, s1, s2, s3 ] = QDDivQD( a0, a1, a2, a3, b0, b1, b2, b3 )
+function [ s0, s1, s2, s3 ] = QDDividedByQD( a0, a1, a2, a3, b0, b1, b2, b3 )
     % Rescale to prevent overflow in intermediate products (cf. QD library)
     Rescale = abs( a0 ) > 2 ^ 969;
     if any( Rescale, 'all' )

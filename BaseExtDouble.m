@@ -1354,7 +1354,8 @@ classdef ( Abstract ) BaseExtDouble
                 v = sign( v.v1 );
             else
                 abs_v = abs( v );
-                [ v.v1, v.v2 ] = v.EDDividedByED( v.v1, v.v2, abs_v.v1, abs_v.v2, true );
+                v = v ./ abs_v;
+                v = Assign( v, 0, abs_v == 0 );
             end
         end
 
@@ -1362,10 +1363,10 @@ classdef ( Abstract ) BaseExtDouble
             x1 = floor( v.v1 );
             x2 = x1 .* 0;
             Select = x1 == v.v1;
-            v_sel = v.Index( Select );
-            x2_sel = floor( v_sel.v2 );
-            x2 = Assign( x2, x2_sel, Select );
-            [ x1, x2 ] = v.Normalize( x1, x2 );
+            vSelect = v.Index( Select );
+            x2Select = floor( vSelect.v2 );
+            x2 = Assign( x2, x2Select, Select );
+            [ x1, x2 ] = Normalize( x1, x2 );
             v = v.Make( x1, x2 );
         end
 
@@ -1373,10 +1374,10 @@ classdef ( Abstract ) BaseExtDouble
             x1 = ceil( v.v1 );
             x2 = x1 .* 0;
             Select = x1 == v.v1;
-            v_sel = v.Index( Select );
-            x2_sel = ceil( v_sel.v2 );
-            x2 = Assign( x2, x2_sel, Select );
-            [ x1, x2 ] = v.Normalize( x1, x2 );
+            vSelect = v.Index( Select );
+            x2Select = ceil( vSelect.v2 );
+            x2 = Assign( x2, x2Select, Select );
+            [ x1, x2 ] = Normalize( x1, x2 );
             v = v.Make( x1, x2 );
         end
 
@@ -1384,10 +1385,10 @@ classdef ( Abstract ) BaseExtDouble
             x1 = fix( v.v1 );
             x2 = x1 .* 0;
             Select = x1 == v.v1;
-            v_sel = v.Index( Select );
-            x2_sel = fix( v_sel.v2 );
-            x2 = Assign( x2, x2_sel, Select );
-            [ x1, x2 ] = v.Normalize( x1, x2 );
+            vSelect = v.Index( Select );
+            x2Select = fix( vSelect.v2 );
+            x2 = Assign( x2, x2Select, Select );
+            [ x1, x2 ] = Normalize( x1, x2 );
             v = v.Make( x1, x2 );
         end
 
@@ -1400,34 +1401,29 @@ classdef ( Abstract ) BaseExtDouble
             x2 = Assign( x2, x2Select, Select );
             Select = ( ~Select ) & ( abs( x1 - v.v1 ) == 0.5 ) & ( v.v2 < 0 );
             x2 = Assign( x2, Index( x2, Select ) - 1, Select );
-            [ x1, x2 ] = v.Normalize( x1, x2 );
+            [ x1, x2 ] = Normalize( x1, x2 );
             v = v.Make( x1, x2 );
         end
 
         function v = realsqrt( v )
             Select = v < 0;
-            v.v1 = Assign( v.v1, NaN, Select );
-            v.v2 = Assign( v.v2, NaN, Select );
+            v = v.Assign( NaN, Select );
             Select = v > 0;
-            x = 1 ./ sqrt( Index( v.v1, Select ) );
-            vx = Index( v.v1, Select ) .* x;
-            [ t1_, t2_ ] = v.UnderlyingTimesUnderlying( vx, vx );
-            t = v.Make( Index( v.v1, Select ), Index( v.v2, Select ) ) - v.Make( t1_, t2_ );
-            [ t1_, t2_ ] = v.EDPlusUnderlying( vx, zeros( size( vx ) ), t.v1 .* ( x * 0.5 ) );
-            t = v.Make( t1_, t2_ );
-            v.v1 = Assign( v.v1, t.v1, Select );
-            v.v2 = Assign( v.v2, t.v2, Select );
+            vSelect = v.Index( Select );
+            x = 1 ./ sqrt( vSelect.v1 );
+            vx = v.Promote( vSelect.v1 .* x );
+            t = vSelect - vx .* vx;
+            t = vx + t.v1 .* ( x * 0.5 );
+            v = v.Assign( t, Select );
         end
 
         function v = sqrt( v )
             Select = v ~= 0;
-            v_sel = v.Index( Select );
-            x = 1 ./ sqrt( v_sel.v1 );
-            vx = v_sel.v1 .* x;
-            [ t1_, t2_ ] = v.UnderlyingTimesUnderlying( vx, vx );
-            t = v_sel - v.Make( t1_, t2_ );
-            [ t1_, t2_ ] = v.EDPlusUnderlying( vx, zeros( size( vx ) ), t.v1 .* ( x * 0.5 ) );
-            t = v.Make( t1_, t2_ );
+            vSelect = v.Index( Select );
+            x = 1 ./ sqrt( vSelect.v1 );
+            vx = v.Promote( vSelect.v1 .* x );
+            t = vSelect - vx .* vx;
+            t = vx + t.v1 .* ( x * 0.5 );
             v = v.Assign( t, Select );
         end
 
@@ -1489,18 +1485,14 @@ classdef ( Abstract ) BaseExtDouble
 
             if expm1Flag
                 Select = m ~= 0;
-                [ t1, t2 ] = v.EDPlusUnderlying( Index( s.v1, Select ), Index( s.v2, Select ), 1.0 );
-                s.v1 = Assign( s.v1, t1, Select );
-                s.v2 = Assign( s.v2, t2, Select );
+                s = s.Assign( s.Index( Select ) + 1.0, Select );
             else
                 s = s + 1.0;
             end
 
             v = v.Make( pow2( s.v1, m ), pow2( s.v2, m ) );
             if expm1Flag
-                [ t1, t2 ] = v.EDPlusUnderlying( Index( v.v1, Select ), Index( v.v2, Select ), -1.0 );
-                v.v1 = Assign( v.v1, t1, Select );
-                v.v2 = Assign( v.v2, t2, Select );
+                v = v.Assign( v.Index( Select ) - 1.0, Select );
             end
         end
 
@@ -2082,13 +2074,13 @@ classdef ( Abstract ) BaseExtDouble
 
         function v = Plus( a, b )
             [ a, b ] = BaseExtDouble.JointPromotion( a, b );
-            if a.PromotionOrder( ) == b.PromotionOrder( )
+            if PromotionOrder( a ) == PromotionOrder( b )
                 [ x1, x2 ] = EDPlusED( a.v1, a.v2, b.v1, b.v2 );
                 v = a.Make( x1, x2 );
-            elseif a.PromotionOrder( ) > b.PromotionOrder( )
+            elseif PromotionOrder( a ) > PromotionOrder( b )
                 [ x1, x2 ] = EDPlusUnderlying( a.v1, a.v2, Promote( a.v1, b ) );
                 v = a.Make( x1, x2 );
-            else % b.PromotionOrder( ) > a.PromotionOrder( )
+            else % PromotionOrder( b ) > PromotionOrder( a )
                 [ x1, x2 ] = EDPlusUnderlying( b.v1, b.v2, Promote( b.v1, a ) );
                 v = b.Make( x1, x2 );
             end
@@ -2096,13 +2088,13 @@ classdef ( Abstract ) BaseExtDouble
 
         function v = Times( a, b )
             [ a, b ] = BaseExtDouble.JointPromotion( a, b );
-            if a.PromotionOrder( ) == b.PromotionOrder( )
+            if PromotionOrder( a ) == PromotionOrder( b )
                 [ x1, x2 ] = EDTimesED( a.v1, a.v2, b.v1, b.v2 );
                 v = a.Make( x1, x2 );
-            elseif a.PromotionOrder( ) > b.PromotionOrder( )
+            elseif PromotionOrder( a ) > PromotionOrder( b )
                 [ x1, x2 ] = EDTimesUnderlying( a.v1, a.v2, Promote( a.v1, b ) );
                 v = a.Make( x1, x2 );
-            else % b.PromotionOrder( ) > a.PromotionOrder( )
+            else % PromotionOrder( b ) > PromotionOrder( a )
                 [ x1, x2 ] = EDTimesUnderlying( b.v1, b.v2, Promote( b.v1, a ) );
                 v = b.Make( x1, x2 );
             end
@@ -2110,13 +2102,13 @@ classdef ( Abstract ) BaseExtDouble
 
         function v = RDivide( a, b )
             [ a, b ] = BaseExtDouble.JointPromotion( a, b );
-            if a.PromotionOrder( ) == b.PromotionOrder( )
+            if PromotionOrder( a ) == PromotionOrder( b )
                 [ x1, x2 ] = EDDividedByED( a.v1, a.v2, b.v1, b.v2 );
                 v = a.Make( x1, x2 );
-            elseif a.PromotionOrder( ) > b.PromotionOrder( )
+            elseif PromotionOrder( a ) > PromotionOrder( b )
                 [ x1, x2 ] = EDDividedByUnderlying( a.v1, a.v2, Promote( a.v1, b ) );
                 v = a.Make( x1, x2 );
-            else % b.PromotionOrder( ) > a.PromotionOrder( )
+            else % PromotionOrder( b ) > PromotionOrder( a )
                 [ x1, x2 ] = EDDividedByUnderlying( b.v1, b.v2, Promote( b.v1, a ) );
                 v = b.Make( x1, x2 );
             end
@@ -2127,8 +2119,8 @@ classdef ( Abstract ) BaseExtDouble
     methods ( Static, Access = protected )
 
         function [ a, b ] = JointPromotion( a, b )
-            if ( a.PromotionOrder( ) ~= b.PromotionOrder( ) ) && ( abs( a.PromotionOrder( ) - b.PromotionOrder( ) ) < 1 )
-                if a.PromotionOrder( ) > b.PromotionOrder( )
+            if ( PromotionOrder( a ) ~= PromotionOrder( b ) ) && ( abs( PromotionOrder( a ) - PromotionOrder( b ) ) < 1 )
+                if PromotionOrder( a ) > PromotionOrder( b )
                     b = a.Promote( b );
                 else
                     a = b.Promote( a );

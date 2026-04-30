@@ -129,7 +129,8 @@ classdef QuadDoubleSlow < BaseExtDouble
 
         function v = QuadDoubleSlow( in, varargin )
             if nargin == 0
-                v = QuadDoubleSlow.empty;
+                v.v1 = DoubleDouble.empty;
+                v.v2 = DoubleDouble.empty;
                 return
             end
             if nargin >= 2

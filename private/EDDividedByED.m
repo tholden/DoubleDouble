@@ -1,7 +1,4 @@
-function [ r1, r2 ] = EDDividedByED( a1, a2, b1, b2, AnySolutionWillDo )
-    if nargin < 5
-        AnySolutionWillDo = false;
-    end
+function [ r1, r2 ] = EDDividedByED( a1, a2, b1, b2 )
     % Rescale to prevent overflow in intermediate products (cf. QD library)
     Rescale = abs( a1 ) > 2 ^ 969;
     if any( Rescale(:) )
@@ -31,11 +28,7 @@ function [ r1, r2 ] = EDDividedByED( a1, a2, b1, b2, AnySolutionWillDo )
             a1 = repmat( a1, size( Select ) );
         end
         a1Select = a1( Select );
-        a1SelectSelect = a1Select == 0;
         a1Select = sign( a1Select ) .* Inf;
-        if AnySolutionWillDo
-            a1Select = Assign( a1Select, 0, a1SelectSelect );
-        end
         r1 = Assign( r1, a1Select, Select );
         r2 = Assign( r2, a1Select, Select );
     end

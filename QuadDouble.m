@@ -142,13 +142,13 @@ classdef QuadDouble < QuadDoubleSlow
 
         function v = Plus( a, b )
             % [ a, b ] = BaseExtDouble.JointPromotion( a, b );
-            % if a.PromotionOrder() == b.PromotionOrder()
+            % if PromotionOrder( a ) == PromotionOrder( b )
             %     [ x1, x2 ] = QDPlusQD( a.v1, a.v2, b.v1, b.v2 );
             %     v = a.Make( x1, x2 );
-            % elseif a.PromotionOrder() > b.PromotionOrder()
+            % elseif PromotionOrder( a ) > PromotionOrder( b )
             %     [ x1, x2 ] = QuadDouble.QDPlusDD( a.v1, a.v2, Promote( a.v1, b ) );
             %     v = a.Make( x1, x2 );
-            % else % b.PromotionOrder() > a.PromotionOrder()
+            % else % PromotionOrder( b ) > PromotionOrder( a )
             %     [ x1, x2 ] = QuadDouble.QDPlusDD( b.v1, b.v2, Promote( b.v1, a ) );
             %     v = b.Make( x1, x2 );
             % end
@@ -163,7 +163,7 @@ classdef QuadDouble < QuadDoubleSlow
         end
 
         function v = RDivide( a, b )
-            [ s0, s1, s2, s3 ] = QDDivQD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
+            [ s0, s1, s2, s3 ] = QDDividedByQD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
             v = QuadDouble.MakeStatic( DoubleDouble.MakeStatic( s0, s1 ), DoubleDouble.MakeStatic( s2, s3 ) );
         end
 
