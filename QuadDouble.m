@@ -56,9 +56,9 @@ classdef QuadDouble < QuadDoubleSlow
             elseif isa( in, 'BaseExtDouble' )
                 C = cell( 1, 4 );
                 [ C{ : } ] = ToSumOfDoubles( in );
-                if length( C ) < 2 || isempty( C{ 2 } ); C{ 2 } = zeros( size( C{ 1 } ) ); end
-                if length( C ) < 3 || isempty( C{ 3 } ); C{ 3 } = zeros( size( C{ 1 } ) ); end
-                if length( C ) < 4 || isempty( C{ 4 } ); C{ 4 } = zeros( size( C{ 1 } ) ); end
+                if isempty( C{ 2 } ); C{ 2 } = zeros( size( C{ 1 } ) ); end
+                if isempty( C{ 3 } ); C{ 3 } = zeros( size( C{ 1 } ) ); end
+                if isempty( C{ 4 } ); C{ 4 } = zeros( size( C{ 1 } ) ); end
                 v.v1 = DoubleDouble.MakeStatic( C{ 1 }, C{ 2 } );
                 v.v2 = DoubleDouble.MakeStatic( C{ 3 }, C{ 4 } );
             else
