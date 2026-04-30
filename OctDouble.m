@@ -51,10 +51,6 @@ classdef OctDouble < BaseExtDouble
         piD2 = OctDouble.MakeStatic( QuadDouble.MakeStatic( DoubleDouble.MakeStatic( 1.57079632679489655800e+00, 6.12323399573676603587e-17 ), DoubleDouble.MakeStatic( -1.49738490485916983294e-33, 5.56227110431682640773e-50 ) ), QuadDouble.MakeStatic( DoubleDouble.MakeStatic( 2.83611598982015787207e-66, 8.72493108067624300601e-84 ), DoubleDouble.MakeStatic( 3.01468636612476992000e-100, 9.55061773439994995741e-117 ) ) );
         piD16 = OctDouble.MakeStatic( QuadDouble.MakeStatic( DoubleDouble.MakeStatic( 1.96349540849362069750e-01, 7.65404249467095754484e-18 ), DoubleDouble.MakeStatic( -1.87173113107396229118e-34, 6.95283888039603300966e-51 ) ), QuadDouble.MakeStatic( DoubleDouble.MakeStatic( 3.54514498727519734009e-67, 1.09061638508453037575e-84 ), DoubleDouble.MakeStatic( 3.76835795765596240000e-101, 1.19382721679999374468e-117 ) ) );
 
-    end
-
-    properties ( Constant, GetAccess = public )
-
         InverseFactorial = [
             OctDouble.MakeStatic( QuadDouble.MakeStatic( DoubleDouble.MakeStatic( 1.66666666666666657415e-01, 9.25185853854297065662e-18 ), DoubleDouble.MakeStatic( 5.13581318503262865639e-34, 2.85094902409834186429e-50 ) ), QuadDouble.MakeStatic( DoubleDouble.MakeStatic( 1.58259462429329970339e-66, 8.78516495269210219928e-83 ), DoubleDouble.MakeStatic( 4.87674620280437298674e-99, 2.70713795980335902122e-115 ) ) );
             OctDouble.MakeStatic( QuadDouble.MakeStatic( DoubleDouble.MakeStatic( 4.16666666666666643537e-02, 2.31296463463574266415e-18 ), DoubleDouble.MakeStatic( 1.28395329625815716410e-34, 7.12737256024585466073e-51 ) ), QuadDouble.MakeStatic( DoubleDouble.MakeStatic( 3.95648656073324925848e-67, 2.19629123817302554982e-83 ), DoubleDouble.MakeStatic( 1.21918655070109324669e-99, 6.76784489950839755304e-116 ) ) );
@@ -359,6 +355,7 @@ classdef OctDouble < BaseExtDouble
         function v = Inf( varargin )
             v = OctDouble.MakeStatic( QuadDouble.Inf( varargin{:} ), QuadDouble.Inf( varargin{:} ) );
         end
+
         function v = randn( varargin )
             v = ToRandn( OctDouble.zeros( varargin{:} ) );
         end
