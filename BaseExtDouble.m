@@ -1,6 +1,6 @@
 classdef (Abstract) BaseExtDouble
 
-    properties ( SetAccess = { ?BaseExtDouble, ?DoubleDouble, ?QuadDoubleSlow, ?QuadDouble, ?OctDouble }, GetAccess = public )
+    properties ( SetAccess = protected, GetAccess = public )
 
         v1
         v2
