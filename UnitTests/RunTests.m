@@ -22,7 +22,7 @@ function Results = RunTests()
     Suite1 = TestSuite.fromClass( ?DoubleDoubleTest );
     Suite2 = TestSuite.fromClass( ?QuadDoubleTest );
     Suite3 = TestSuite.fromClass( ?QuadDoubleSlowTest );
-    Suite4 = TestSuite.fromClass( ?OctDoubleTest );
+    Suite4 = TestSuite.fromClass( ?OctoDoubleTest );
     Suite = [ Suite1, Suite2, Suite3, Suite4 ];
 
     % Create a test runner with verbose output

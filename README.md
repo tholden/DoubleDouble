@@ -11,7 +11,7 @@ The library provides four extended precision classes, each building upon the las
 1. **`DoubleDouble`**: The foundational class. Represents numbers as an unevaluated sum of two 53-bit `double` primitives, providing roughly 106 bits (~32 decimal digits) of precision.
 2. **`QuadDouble`**: The standard quad-double implementation. Provides 212 bits (~64 decimal digits) of precision using explicitly overloaded, optimized numerical kernels.
 3. **`QuadDoubleSlow`**: A mathematically equivalent pure-MATLAB fallback to `QuadDouble`. It achieves 212-bit precision by recursively executing Dekker's split/TwoProd algorithms using `DoubleDouble` objects as its underlying components rather than explicit scalar kernels.
-4. **`OctDouble`**: The highest precision class available in the hierarchy. Provides 424 bits (~128 decimal digits) of precision by recursively leveraging `QuadDouble` objects as its fundamental underlying representation.
+4. **`OctoDouble`**: The highest precision class available in the hierarchy. Provides 424 bits (~128 decimal digits) of precision by recursively leveraging `QuadDouble` objects as its fundamental underlying representation.
 
 ## Features
 
@@ -39,7 +39,7 @@ The suite thoroughly validates standard arithmetic, matrix decompositions, and t
 
 - `DoubleDouble`: Enforces strict accuracy to a `1e-30` absolute tolerance.
 - `QuadDouble` & `QuadDoubleSlow`: Enforces strict accuracy to a `1e-60` absolute tolerance.
-- `OctDouble`: Enforces strict accuracy to a `1e-120` absolute tolerance.
+- `OctoDouble`: Enforces strict accuracy to a `1e-120` absolute tolerance.
 
 ## Development & Coding Standards
 

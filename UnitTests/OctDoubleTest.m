@@ -1,6 +1,6 @@
-classdef OctDoubleTest < matlab.unittest.TestCase
+classdef OctoDoubleTest < matlab.unittest.TestCase
 
-    % OctDoubleTest Test suite for OctDouble class
+    % OctoDoubleTest Test suite for OctoDouble class
 
     properties
 
@@ -20,13 +20,13 @@ classdef OctDoubleTest < matlab.unittest.TestCase
 
         function CreateTestData( TestCase )
             % Create test data for use in tests
-            TestCase.SmallValues = OctDouble( [ 1e-10, 2e-10, 3e-10 ] );
-            TestCase.MediumValues = OctDouble( [ 1, 2, 3 ] );
-            TestCase.LargeValues = OctDouble( [ 1e10, 2e10, 3e10 ] );
-            TestCase.ComplexValues = OctDouble( [ 1 + 1i, 2 + 2i, 3 + 3i ] );
+            TestCase.SmallValues = OctoDouble( [ 1e-10, 2e-10, 3e-10 ] );
+            TestCase.MediumValues = OctoDouble( [ 1, 2, 3 ] );
+            TestCase.LargeValues = OctoDouble( [ 1e10, 2e10, 3e10 ] );
+            TestCase.ComplexValues = OctoDouble( [ 1 + 1i, 2 + 2i, 3 + 3i ] );
 
             % Create matrix test data
-            TestCase.MatrixValues = OctDouble( [ 1, 2, 3; 4, 5, 6; 7, 8, 9 ] );
+            TestCase.MatrixValues = OctoDouble( [ 1, 2, 3; 4, 5, 6; 7, 8, 9 ] );
         end
 
     end
@@ -34,22 +34,22 @@ classdef OctDoubleTest < matlab.unittest.TestCase
     methods ( Test )
 
         function TestCrossValidationVPA( TestCase )
-            % Verify that OctDouble produces identical results to VPA
+            % Verify that OctoDouble produces identical results to VPA
             % at full extended precision.
             Data = [ 1.123, -2.456; 3.789, -4.012 ];
-            
+
             VPAData = vpa( sym(Data, 'f'), 135 );
-            QDS = OctDouble( Data );
-            
+            QDS = OctoDouble( Data );
+
             % Test basic arithmetic operations
             ResVPA = VPAData * VPAData + VPAData - ( VPAData / 2 );
             ResQDS = QDS * QDS + QDS - ( QDS / 2 );
-            
+
             [ v1, v2, v3, v4, v5, v6, v7, v8 ] = ToSumOfDoubles( ResQDS );
             ResQDS_VPA = vpa( v1, 135 ) + vpa( v2, 135 ) + vpa( v3, 135 ) + vpa( v4, 135 ) + vpa( v5, 135 ) + vpa( v6, 135 ) + vpa( v7, 135 ) + vpa( v8, 135 );
-            
+
             TestCase.verifyEqual( double( ResQDS_VPA - ResVPA ), zeros(size(Data)), 'AbsTol', 1e-120 );
-            
+
             % Test linear algebra routines (LU decomposition)
             % Not supported for VPA matrices efficiently with same exact outputs (P, L, U may differ).
             % But we can skip it for cross validation with VPA since VPA lu can behave differently.
@@ -57,42 +57,42 @@ classdef OctDoubleTest < matlab.unittest.TestCase
         end
 
         function TestCrossValidationQuadDouble( TestCase )
-            % Verify that OctDouble closely matches QuadDouble up to QuadDouble precision.
+            % Verify that OctoDouble closely matches QuadDouble up to QuadDouble precision.
             Data = [ 1.123, -2.456; 3.789, -4.012 ];
-            
+
             QD  = QuadDouble( Data );
-            OD = OctDouble( Data );
-            
+            OD = OctoDouble( Data );
+
             % Test basic arithmetic operations
             ResQD  = QD * QD + QD - ( QD / 2 );
             ResOD = OD * OD + OD - ( OD / 2 );
-            
+
             [ v1, v2, v3, v4, ~, ~, ~, ~ ] = ToSumOfDoubles( ResOD );
             [ q1, q2, q3, q4 ] = ToSumOfDoubles( ResQD );
-            
+
             TestCase.verifyEqual( v1, q1, 'AbsTol', 1e-60 );
             TestCase.verifyEqual( v2, q2, 'AbsTol', 1e-60 );
             TestCase.verifyEqual( v3, q3, 'AbsTol', 1e-60 );
             TestCase.verifyEqual( v4, q4, 'AbsTol', 1e-60 );
-            
+
             % Test linear algebra routines (LU decomposition)
             [ L_QD, U_QD, ~ ] = lu( QD );
             [ L_OD, U_OD, ~ ] = lu( OD );
-            
+
             TestCase.verifyEqual( double( L_OD - L_QD ), zeros(size(Data) ), 'AbsTol', 1e-28 );
             TestCase.verifyEqual( double( U_OD - U_QD ), zeros(size(Data) ), 'AbsTol', 1e-28 );
         end
 
         % Constructor tests
         function TestConstructorEmpty( TestCase )
-            A = OctDouble();
+            A = OctoDouble();
             [ V1, ~, ~, ~, ~, ~, ~, V8 ] = ToSumOfDoubles( A );
             TestCase.verifyEmpty( V1 );
             TestCase.verifyEmpty( V8 );
         end
 
         function TestConstructorScalar( TestCase )
-            A = OctDouble( 3.14 );
+            A = OctoDouble( 3.14 );
             [ V1, V2, ~, ~, ~, ~, ~, V8 ] = ToSumOfDoubles( A );
             TestCase.verifyEqual( V1, 3.14 );
             TestCase.verifyTrue( abs( V2 ) < TestCase.AbsTol );
@@ -100,20 +100,20 @@ classdef OctDoubleTest < matlab.unittest.TestCase
         end
 
         function TestConstructorArray( TestCase )
-            A = OctDouble( [ 1, 2, 3 ] );
+            A = OctoDouble( [ 1, 2, 3 ] );
             [ V1, ~, ~, ~, ~, ~, ~, ~ ] = ToSumOfDoubles( A );
             TestCase.verifyEqual( V1, [ 1, 2, 3 ] );
         end
 
         function TestConstructorComplex( TestCase )
-            A = OctDouble( 1 + 2i );
+            A = OctoDouble( 1 + 2i );
             [ V1, ~, ~, ~, ~, ~, ~, ~ ] = ToSumOfDoubles( A );
             TestCase.verifyEqual( V1, 1 + 2i );
         end
 
-        function TestConstructorFromOctDouble( TestCase )
-            A = OctDouble( 3.14 );
-            B = OctDouble( A );
+        function TestConstructorFromOctoDouble( TestCase )
+            A = OctoDouble( 3.14 );
+            B = OctoDouble( A );
             TestCase.verifyEqual( double( A ), double( B ) );
         end
 
@@ -124,19 +124,19 @@ classdef OctDoubleTest < matlab.unittest.TestCase
         end
 
         function TestIsFinite( TestCase )
-            A = OctDouble( [ 1, Inf, NaN ] );
+            A = OctoDouble( [ 1, Inf, NaN ] );
             Expected = [ true, false, false ];
             TestCase.verifyEqual( isfinite( A ), Expected );
         end
 
         function TestIsInf( TestCase )
-            A = OctDouble( [ 1, Inf, NaN ] );
+            A = OctoDouble( [ 1, Inf, NaN ] );
             Expected = [ false, true, false ];
             TestCase.verifyEqual( isinf( A ), Expected );
         end
 
         function TestIsNaN( TestCase )
-            A = OctDouble( [ 1, Inf, NaN ] );
+            A = OctoDouble( [ 1, Inf, NaN ] );
             Expected = [ false, false, true ];
             TestCase.verifyEqual( isnan( A ), Expected );
         end
@@ -158,7 +158,7 @@ classdef OctDoubleTest < matlab.unittest.TestCase
 
         % Conversion tests
         function TestToDouble( TestCase )
-            A = OctDouble( 3.14 );
+            A = OctoDouble( 3.14 );
             TestCase.verifyEqual( double( A ), 3.14 );
         end
 
@@ -178,7 +178,7 @@ classdef OctDoubleTest < matlab.unittest.TestCase
         end
 
         function TestAngle( TestCase )
-            A = OctDouble( 1 + 1i );
+            A = OctoDouble( 1 + 1i );
             Ang = angle( A );
             TestCase.verifyEqual( double( Ang ), pi / 4, 'RelTol', TestCase.RelTol );
         end
@@ -192,7 +192,7 @@ classdef OctDoubleTest < matlab.unittest.TestCase
         end
 
         function TestRepmat( TestCase )
-            A = OctDouble( [ 1, 2 ] );
+            A = OctoDouble( [ 1, 2 ] );
             B = repmat( A, 2, 1 );
             TestCase.verifyEqual( size( B ), [ 2, 2 ] );
             TestCase.verifyEqual( double( B ), [ 1, 2; 1, 2 ] );
@@ -203,7 +203,7 @@ classdef OctDoubleTest < matlab.unittest.TestCase
             D = diag( A );
             TestCase.verifyEqual( double( D ), [ 1; 5; 9 ] );
 
-            V = OctDouble( [ 1, 2, 3 ] );
+            V = OctoDouble( [ 1, 2, 3 ] );
             M = diag( V );
             Expected = eye( 3 ) .* [ 1, 2, 3 ];
             TestCase.verifyEqual( double( M ), Expected );
@@ -223,8 +223,8 @@ classdef OctDoubleTest < matlab.unittest.TestCase
 
         % Arithmetic operator tests
         function TestPlus( TestCase )
-            A = OctDouble( [ 1, 2, 3 ] );
-            B = OctDouble( [ 4, 5, 6 ] );
+            A = OctoDouble( [ 1, 2, 3 ] );
+            B = OctoDouble( [ 4, 5, 6 ] );
             C = A + B;
             TestCase.verifyEqual( double( C ), [ 5, 7, 9 ] );
 
@@ -234,8 +234,8 @@ classdef OctDoubleTest < matlab.unittest.TestCase
         end
 
         function TestMinus( TestCase )
-            A = OctDouble( [ 5, 7, 9 ] );
-            B = OctDouble( [ 1, 2, 3 ] );
+            A = OctoDouble( [ 5, 7, 9 ] );
+            B = OctoDouble( [ 1, 2, 3 ] );
             C = A - B;
             TestCase.verifyEqual( double( C ), [ 4, 5, 6 ] );
 
@@ -245,14 +245,14 @@ classdef OctDoubleTest < matlab.unittest.TestCase
         end
 
         function TestUminus( TestCase )
-            A = OctDouble( [ 1, 2, 3 ] );
+            A = OctoDouble( [ 1, 2, 3 ] );
             C = -A;
             TestCase.verifyEqual( double( C ), [ -1, -2, -3 ] );
         end
 
         function TestTimes( TestCase )
-            A = OctDouble( [ 2, 3, 4 ] );
-            B = OctDouble( [ 5, 6, 7 ] );
+            A = OctoDouble( [ 2, 3, 4 ] );
+            B = OctoDouble( [ 5, 6, 7 ] );
             C = A .* B;
             TestCase.verifyEqual( double( C ), [ 10, 18, 28 ] );
 
@@ -262,8 +262,8 @@ classdef OctDoubleTest < matlab.unittest.TestCase
         end
 
         function TestMtimes( TestCase )
-            A = OctDouble( [ 1, 2; 3, 4 ] );
-            B = OctDouble( [ 5, 6; 7, 8 ] );
+            A = OctoDouble( [ 1, 2; 3, 4 ] );
+            B = OctoDouble( [ 5, 6; 7, 8 ] );
             C = A * B;
             TestCase.verifyEqual( double( C ), [ 19, 22; 43, 50 ] );
 
@@ -273,8 +273,8 @@ classdef OctDoubleTest < matlab.unittest.TestCase
         end
 
         function TestRdivide( TestCase )
-            A = OctDouble( [ 10, 20, 30 ] );
-            B = OctDouble( [ 2, 4, 5 ] );
+            A = OctoDouble( [ 10, 20, 30 ] );
+            B = OctoDouble( [ 2, 4, 5 ] );
             C = A ./ B;
             TestCase.verifyEqual( double( C ), [ 5, 5, 6 ] );
 
@@ -284,22 +284,22 @@ classdef OctDoubleTest < matlab.unittest.TestCase
         end
 
         function TestLdivide( TestCase )
-            A = OctDouble( 2 );
-            B = OctDouble( [ 10, 20, 30 ] );
+            A = OctoDouble( 2 );
+            B = OctoDouble( [ 10, 20, 30 ] );
             C = A .\ B;
             TestCase.verifyEqual( double( C ), [ 5, 10, 15 ] );
         end
 
         function TestMldivide( TestCase )
-            A = OctDouble( [ 3, 1; 1, 2 ] );
-            B = OctDouble( [ 9; 8 ] );
+            A = OctoDouble( [ 3, 1; 1, 2 ] );
+            B = OctoDouble( [ 9; 8 ] );
             X = A \ B;
             Expected = [ 2; 3 ];
             TestCase.verifyEqual( double( X ), Expected, 'RelTol', TestCase.RelTol );
         end
 
         function TestPower( TestCase )
-            A = OctDouble( [ 2, 3, 4 ] );
+            A = OctoDouble( [ 2, 3, 4 ] );
             B = A .^ 2;
             Expected = [ 4, 9, 16 ];
             TestCase.verifyEqual( double( B ), Expected );
@@ -317,8 +317,8 @@ classdef OctDoubleTest < matlab.unittest.TestCase
 
         % Comparison operator tests
         function TestComparisons( TestCase )
-            A = OctDouble( [ 1, 2, 3 ] );
-            B = OctDouble( [ 3, 2, 1 ] );
+            A = OctoDouble( [ 1, 2, 3 ] );
+            B = OctoDouble( [ 3, 2, 1 ] );
 
             TestCase.verifyEqual( A < B, [ true, false, false ] );
             TestCase.verifyEqual( A > B, [ false, false, true ] );
@@ -330,16 +330,16 @@ classdef OctDoubleTest < matlab.unittest.TestCase
 
         % Array construction tests
         function TestColon( TestCase )
-            A = OctDouble( 1 ) : OctDouble( 5 );
+            A = OctoDouble( 1 ) : OctoDouble( 5 );
             TestCase.verifyEqual( double( A ), 1 : 5 );
 
-            B = OctDouble( 1 ) : OctDouble( 0.5 ) : OctDouble( 3 );
+            B = OctoDouble( 1 ) : OctoDouble( 0.5 ) : OctoDouble( 3 );
             TestCase.verifyEqual( double( B ), 1 : 0.5 : 3 );
         end
 
         function TestConcatenation( TestCase )
-            A = OctDouble( [ 1, 2 ] );
-            B = OctDouble( [ 3, 4 ] );
+            A = OctoDouble( [ 1, 2 ] );
+            B = OctoDouble( [ 3, 4 ] );
 
             C = [ A, B ];
             TestCase.verifyEqual( double( C ), [ 1, 2, 3, 4 ] );
@@ -359,43 +359,43 @@ classdef OctDoubleTest < matlab.unittest.TestCase
         end
 
         function TestProd( TestCase )
-            A = OctDouble( [ 2, 3, 4 ] );
+            A = OctoDouble( [ 2, 3, 4 ] );
             P = prod( A );
             TestCase.verifyEqual( double( P ), 24 );
         end
 
         function TestCumsum( TestCase )
-            A = OctDouble( [ 1, 2, 3, 4 ] );
+            A = OctoDouble( [ 1, 2, 3, 4 ] );
             CS = cumsum( A );
             TestCase.verifyEqual( double( CS ), [ 1, 3, 6, 10 ], 'AbsTol', TestCase.AbsTol );
         end
 
         function TestCumprod( TestCase )
-            A = OctDouble( [ 1, 2, 3, 4 ] );
+            A = OctoDouble( [ 1, 2, 3, 4 ] );
             CP = cumprod( A );
             TestCase.verifyEqual( double( CP ), [ 1, 2, 6, 24 ], 'AbsTol', TestCase.AbsTol );
         end
 
         function TestDiff( TestCase )
-            A = OctDouble( [ 1, 3, 6, 10 ] );
+            A = OctoDouble( [ 1, 3, 6, 10 ] );
             D = diff( A );
             TestCase.verifyEqual( double( D ), [ 2, 3, 4 ], 'AbsTol', TestCase.AbsTol );
         end
 
         function TestDot( TestCase )
-            A = OctDouble( [ 1, 2, 3 ] );
-            B = OctDouble( [ 4, 5, 6 ] );
+            A = OctoDouble( [ 1, 2, 3 ] );
+            B = OctoDouble( [ 4, 5, 6 ] );
             D = dot( A, B );
             TestCase.verifyEqual( double( D ), 32 );
         end
 
         function TestNorm( TestCase )
-            A = OctDouble( [ 3, 4 ] );
+            A = OctoDouble( [ 3, 4 ] );
             N = norm( A );
             TestCase.verifyEqual( double( N ), 5 );
 
             % Test with p-norm
-            A = OctDouble( [ 1, 2, 3 ] );
+            A = OctoDouble( [ 1, 2, 3 ] );
             N1 = norm( A, 1 );
             NInf = norm( A, Inf );
             TestCase.verifyEqual( double( N1 ), 6 );
@@ -403,181 +403,181 @@ classdef OctDoubleTest < matlab.unittest.TestCase
         end
 
         function TestAbs( TestCase )
-            A = OctDouble( [ -1, 2, -3 ] );
+            A = OctoDouble( [ -1, 2, -3 ] );
             B = abs( A );
             TestCase.verifyEqual( double( B ), [ 1, 2, 3 ] );
 
             % Test with complex values
-            C = OctDouble( [ 3+4i, 0, 1-1i ] );
+            C = OctoDouble( [ 3+4i, 0, 1-1i ] );
             D = abs( C );
             TestCase.verifyEqual( double( D ), [ 5, 0, sqrt(2) ], 'RelTol', TestCase.RelTol );
         end
 
         function TestSign( TestCase )
-            A = OctDouble( [ -5, 0, 3 ] );
+            A = OctoDouble( [ -5, 0, 3 ] );
             S = sign( A );
             TestCase.verifyEqual( double( S ), [ -1, 0, 1 ] );
         end
 
         % Rounding functions tests
         function TestFloor( TestCase )
-            A = OctDouble( [ 1.7, -1.7 ] );
+            A = OctoDouble( [ 1.7, -1.7 ] );
             F = floor( A );
             TestCase.verifyEqual( double( F ), [ 1, -2 ] );
         end
 
         function TestCeil( TestCase )
-            A = OctDouble( [ 1.3, -1.3 ] );
+            A = OctoDouble( [ 1.3, -1.3 ] );
             C = ceil( A );
             TestCase.verifyEqual( double( C ), [ 2, -1 ] );
         end
 
         function TestFix( TestCase )
-            A = OctDouble( [ 1.7, -1.7 ] );
+            A = OctoDouble( [ 1.7, -1.7 ] );
             F = fix( A );
             TestCase.verifyEqual( double( F ), [ 1, -1 ] );
         end
 
         function TestRound( TestCase )
-            A = OctDouble( [ 1.4, 1.5, 2.5, -1.5 ] );
+            A = OctoDouble( [ 1.4, 1.5, 2.5, -1.5 ] );
             R = round( A );
             TestCase.verifyEqual( double( R ), [ 1, 2, 3, -2 ] );
         end
 
         % Exponential and logarithmic functions tests
         function TestSqrt( TestCase )
-            A = OctDouble( [ 4, 9, 16 ] );
+            A = OctoDouble( [ 4, 9, 16 ] );
             S = sqrt( A );
             TestCase.verifyEqual( double( S ), [ 2, 3, 4 ] );
         end
 
         function TestRealsqrt( TestCase )
-            A = OctDouble( [ 4, 9, 16 ] );
+            A = OctoDouble( [ 4, 9, 16 ] );
             S = realsqrt( A );
             TestCase.verifyEqual( double( S ), [ 2, 3, 4 ] );
         end
         function TestExp( TestCase )
-            A = OctDouble( [ 0, 1, log( 10 ) ] );
+            A = OctoDouble( [ 0, 1, log( 10 ) ] );
             E = exp( A );
             Expected = [ 1, exp( 1 ), 10 ];
             TestCase.verifyEqual( double( E ), Expected, 'RelTol', TestCase.RelTol );
         end
 
         function TestExpm1( TestCase )
-            A = OctDouble( [ 0, 1e-10, 1 ] );
+            A = OctoDouble( [ 0, 1e-10, 1 ] );
             E = expm1( A );
             Expected = [ 0, 1.0000000000500000000e-10, 1.71828182845904523536028747135 ];
             TestCase.verifyEqual( double( E ), Expected, 'RelTol', TestCase.RelTol );
         end
 
         function TestLog( TestCase )
-            A = OctDouble( [ 1, exp( 1 ), 10 ] );
+            A = OctoDouble( [ 1, exp( 1 ), 10 ] );
             L = log( A );
             Expected = [ 0, 1, log( 10 ) ];
             TestCase.verifyEqual( double( L ), Expected, 'RelTol', TestCase.RelTol );
         end
 
         function TestLog10( TestCase )
-            A = OctDouble( [ 1, 10, 100 ] );
+            A = OctoDouble( [ 1, 10, 100 ] );
             L = log10( A );
             TestCase.verifyEqual( double( L ), [ 0, 1, 2 ], 'RelTol', TestCase.RelTol );
         end
 
         function TestLog2( TestCase )
-            A = OctDouble( [ 1, 2, 4, 8 ] );
+            A = OctoDouble( [ 1, 2, 4, 8 ] );
             L = log2( A );
             TestCase.verifyEqual( double( L ), [ 0, 1, 2, 3 ], 'RelTol', TestCase.RelTol );
         end
 
         % Trigonometric functions tests
         function TestSin( TestCase )
-            A = [ 0, OctDouble.pi / 6, OctDouble.pi / 4, OctDouble.pi / 3, OctDouble.pi / 2 ];
+            A = [ 0, OctoDouble.pi / 6, OctoDouble.pi / 4, OctoDouble.pi / 3, OctoDouble.pi / 2 ];
             S = sin( A );
-            Expected = [ 0, 0.5, 1 / sqrt( OctDouble( 2 ) ), sqrt( OctDouble( 3 ) ) / 2, 1 ];
+            Expected = [ 0, 0.5, 1 / sqrt( OctoDouble( 2 ) ), sqrt( OctoDouble( 3 ) ) / 2, 1 ];
             TestCase.verifyEqual( double( S ), double( Expected ), 'RelTol', TestCase.RelTol );
         end
 
         function TestCos( TestCase )
-            A = [ 0, OctDouble.pi / 6, OctDouble.pi / 4, OctDouble.pi / 3, OctDouble.pi / 2 ];
+            A = [ 0, OctoDouble.pi / 6, OctoDouble.pi / 4, OctoDouble.pi / 3, OctoDouble.pi / 2 ];
             C = cos( A );
-            Expected = [ 1, sqrt( OctDouble( 3 ) ) / 2, 1 / sqrt( OctDouble( 2 ) ), 0.5, 0 ];
+            Expected = [ 1, sqrt( OctoDouble( 3 ) ) / 2, 1 / sqrt( OctoDouble( 2 ) ), 0.5, 0 ];
             TestCase.verifyEqual( double( C ), double( Expected ), 'RelTol', TestCase.RelTol );
         end
 
         function TestTan( TestCase )
-            A = [ 0, OctDouble.pi / 6, OctDouble.pi / 4, OctDouble.pi / 3 ];
+            A = [ 0, OctoDouble.pi / 6, OctoDouble.pi / 4, OctoDouble.pi / 3 ];
             T = tan( A );
-            Expected = [ 0, 1 / sqrt( OctDouble( 3 ) ), 1, sqrt( OctDouble( 3 ) ) ];
+            Expected = [ 0, 1 / sqrt( OctoDouble( 3 ) ), 1, sqrt( OctoDouble( 3 ) ) ];
             TestCase.verifyEqual( double( T ), double( Expected ), 'RelTol', TestCase.RelTol );
         end
 
         function TestAsin( TestCase )
-            A = [ 0, 0.5, 1 / sqrt( OctDouble( 2 ) ), sqrt( OctDouble( 3 ) ) / 2, 1 ];
+            A = [ 0, 0.5, 1 / sqrt( OctoDouble( 2 ) ), sqrt( OctoDouble( 3 ) ) / 2, 1 ];
             As = asin( A );
-            Expected = [ 0, OctDouble.pi / 6, OctDouble.pi / 4, OctDouble.pi / 3, OctDouble.pi / 2 ];
+            Expected = [ 0, OctoDouble.pi / 6, OctoDouble.pi / 4, OctoDouble.pi / 3, OctoDouble.pi / 2 ];
             TestCase.verifyEqual( double( As ), double( Expected ), 'RelTol', TestCase.RelTol );
         end
 
         function TestAcos( TestCase )
-            A = [ 1, sqrt( OctDouble( 3 ) ) / 2, 1 / sqrt( OctDouble( 2 ) ), 0.5, 0 ];
+            A = [ 1, sqrt( OctoDouble( 3 ) ) / 2, 1 / sqrt( OctoDouble( 2 ) ), 0.5, 0 ];
             Ac = acos( A );
-            Expected = [ 0, OctDouble.pi / 6, OctDouble.pi / 4, OctDouble.pi / 3, OctDouble.pi / 2 ];
+            Expected = [ 0, OctoDouble.pi / 6, OctoDouble.pi / 4, OctoDouble.pi / 3, OctoDouble.pi / 2 ];
             TestCase.verifyEqual( double( Ac ), double( Expected ), 'RelTol', TestCase.RelTol );
         end
 
         function TestAtan( TestCase )
-            A = [ 0, 1 / sqrt( OctDouble( 3 ) ), 1, sqrt( OctDouble( 3 ) ) ];
+            A = [ 0, 1 / sqrt( OctoDouble( 3 ) ), 1, sqrt( OctoDouble( 3 ) ) ];
             At = atan( A );
-            Expected = [ 0, OctDouble.pi / 6, OctDouble.pi / 4, OctDouble.pi / 3 ];
+            Expected = [ 0, OctoDouble.pi / 6, OctoDouble.pi / 4, OctoDouble.pi / 3 ];
             TestCase.verifyEqual( double( At ), double( Expected ), 'RelTol', TestCase.RelTol );
         end
 
         function TestAtan2( TestCase )
-            Y = OctDouble( [ 0, 1, 1, 1 ] );
-            X = [ 1, sqrt( OctDouble( 3 ) ), 1, 1 / sqrt( OctDouble( 3 ) ) ];
+            Y = OctoDouble( [ 0, 1, 1, 1 ] );
+            X = [ 1, sqrt( OctoDouble( 3 ) ), 1, 1 / sqrt( OctoDouble( 3 ) ) ];
             A = atan2( Y, X );
-            Expected = [ 0, OctDouble.pi / 6, OctDouble.pi / 4, OctDouble.pi / 3 ];
+            Expected = [ 0, OctoDouble.pi / 6, OctoDouble.pi / 4, OctoDouble.pi / 3 ];
             TestCase.verifyEqual( double( A ), double( Expected ), 'RelTol', TestCase.RelTol );
         end
 
         % Hyperbolic functions tests
         function TestSinh( TestCase )
-            A = OctDouble( [ 0, 1, 2 ] );
+            A = OctoDouble( [ 0, 1, 2 ] );
             S = sinh( A );
             Expected = [ 0, sinh( 1 ), sinh( 2 ) ];
             TestCase.verifyEqual( double( S ), Expected, 'RelTol', TestCase.RelTol );
         end
 
         function TestCosh( TestCase )
-            A = OctDouble( [ 0, 1, 2 ] );
+            A = OctoDouble( [ 0, 1, 2 ] );
             C = cosh( A );
             Expected = [ 1, cosh( 1 ), cosh( 2 ) ];
             TestCase.verifyEqual( double( C ), Expected, 'RelTol', TestCase.RelTol );
         end
 
         function TestTanh( TestCase )
-            A = OctDouble( [ 0, 1, 2 ] );
+            A = OctoDouble( [ 0, 1, 2 ] );
             T = tanh( A );
             Expected = [ 0, tanh( 1 ), tanh( 2 ) ];
             TestCase.verifyEqual( double( T ), Expected, 'RelTol', TestCase.RelTol );
         end
 
         function TestAsinh( TestCase )
-            A = OctDouble( [ 0, 1, 2 ] );
+            A = OctoDouble( [ 0, 1, 2 ] );
             As = asinh( A );
             Expected = [ 0, asinh( 1 ), asinh( 2 ) ];
             TestCase.verifyEqual( double( As ), Expected, 'RelTol', TestCase.RelTol );
         end
 
         function TestAcosh( TestCase )
-            A = OctDouble( [ 1, 2, 3 ] );
+            A = OctoDouble( [ 1, 2, 3 ] );
             Ac = acosh( A );
             Expected = [ 0, acosh( 2 ), acosh( 3 ) ];
             TestCase.verifyEqual( double( Ac ), Expected, 'RelTol', TestCase.RelTol );
         end
 
         function TestAtanh( TestCase )
-            A = OctDouble( [ 0, 0.5, 0.75 ] );
+            A = OctoDouble( [ 0, 0.5, 0.75 ] );
             At = atanh( A );
             Expected = [ 0, atanh( 0.5 ), atanh( 0.75 ) ];
             TestCase.verifyEqual( double( At ), Expected, 'RelTol', TestCase.RelTol );
@@ -585,16 +585,16 @@ classdef OctDoubleTest < matlab.unittest.TestCase
 
         % Remainder functions tests
         function TestMod( TestCase )
-            A = OctDouble( [ 7, 7, -7, -7 ] );
-            B = OctDouble( [ 3, -3, 3, -3 ] );
+            A = OctoDouble( [ 7, 7, -7, -7 ] );
+            B = OctoDouble( [ 3, -3, 3, -3 ] );
             M = mod( A, B );
             Expected = mod( double( A ), double( B ) );
             TestCase.verifyEqual( double( M ), Expected );
         end
 
         function TestRem( TestCase )
-            A = OctDouble( [ 7, 7, -7, -7 ] );
-            B = OctDouble( [ 3, -3, 3, -3 ] );
+            A = OctoDouble( [ 7, 7, -7, -7 ] );
+            B = OctoDouble( [ 3, -3, 3, -3 ] );
             R = rem( A, B );
             Expected = [ 1, 1, -1, -1 ];
             TestCase.verifyEqual( double( R ), Expected );
@@ -602,7 +602,7 @@ classdef OctDoubleTest < matlab.unittest.TestCase
 
         % Matrix functions tests
         function TestLU( TestCase )
-            A = OctDouble( [ 2, -1, 0; -1, 2, -1; 0, -1, 2 ] );
+            A = OctoDouble( [ 2, -1, 0; -1, 2, -1; 0, -1, 2 ] );
             [ L, U, P ] = lu( A );
 
             % Verify that P*A = L*U
@@ -612,7 +612,7 @@ classdef OctDoubleTest < matlab.unittest.TestCase
         end
 
         function TestQR( TestCase )
-            A = OctDouble( [ 12, -51, 4; 6, 167, -68; -4, 24, -41 ] );
+            A = OctoDouble( [ 12, -51, 4; 6, 167, -68; -4, 24, -41 ] );
             [ Q, R ] = qr( A );
 
             % Verify that A = Q*R
@@ -626,17 +626,17 @@ classdef OctDoubleTest < matlab.unittest.TestCase
         end
 
         function TestDet( TestCase )
-            A = OctDouble( [ 1, 2; 3, 4 ] );
+            A = OctoDouble( [ 1, 2; 3, 4 ] );
             D = det( A );
             TestCase.verifyEqual( double( D ), -2, 'AbsTol', TestCase.AbsTol );
 
-            B = OctDouble( [ 1, 2, 3; 4, 5, 6; 7, 8, 9 ] );
+            B = OctoDouble( [ 1, 2, 3; 4, 5, 6; 7, 8, 9 ] );
             D = det( B );
             TestCase.verifyEqual( double( D ), 0, 'AbsTol', TestCase.AbsTol );
         end
 
         function TestInv( TestCase )
-            A = OctDouble( [ 4, 7; 2, 6 ] );
+            A = OctoDouble( [ 4, 7; 2, 6 ] );
             AInv = inv( A );
 
             % Verify that A*AInv = I
@@ -646,7 +646,7 @@ classdef OctDoubleTest < matlab.unittest.TestCase
         end
 
         function TestChol( TestCase )
-            A = OctDouble( [ 4, 12, -16; 12, 37, -43; -16, -43, 98 ] );
+            A = OctoDouble( [ 4, 12, -16; 12, 37, -43; -16, -43, 98 ] );
             R = chol( A );
 
             % Verify that R'*R = A
@@ -655,7 +655,7 @@ classdef OctDoubleTest < matlab.unittest.TestCase
         end
 
         function TestLDL( TestCase )
-            A = OctDouble( [ 4, 12, -16; 12, 37, -43; -16, -43, 98 ] );
+            A = OctoDouble( [ 4, 12, -16; 12, 37, -43; -16, -43, 98 ] );
             [ L, D ] = ldl( A, 'vector' );
 
             % Verify that L*diag(D)*L' = A
@@ -664,7 +664,7 @@ classdef OctDoubleTest < matlab.unittest.TestCase
         end
         % Tests for newly added functions
         function TestUnique( TestCase )
-            A = OctDouble( [ 2, 1, 2, 3, 1, 4 ] );
+            A = OctoDouble( [ 2, 1, 2, 3, 1, 4 ] );
             [ C, ia, ic ] = unique( A );
             [ C_, ia_, ic_ ] = unique( double( A ) );
 
@@ -674,7 +674,7 @@ classdef OctDoubleTest < matlab.unittest.TestCase
         end
 
         function TestMean( TestCase )
-            A = OctDouble( [ 1, 2, 3, 4 ] );
+            A = OctoDouble( [ 1, 2, 3, 4 ] );
             M = mean( A );
             TestCase.verifyEqual( double( M ), 2.5 );
 
@@ -687,17 +687,17 @@ classdef OctDoubleTest < matlab.unittest.TestCase
         end
 
         function TestMedian( TestCase )
-            A = OctDouble( [ 1, 3, 5, 7 ] );
+            A = OctoDouble( [ 1, 3, 5, 7 ] );
             M = median( A );
             TestCase.verifyEqual( double( M ), 4 );
 
-            B = OctDouble( [ 1, 3, 5 ] );
+            B = OctoDouble( [ 1, 3, 5 ] );
             M = median( B );
             TestCase.verifyEqual( double( M ), 3 );
         end
 
         function TestStd( TestCase )
-            A = OctDouble( [ 1, 2, 3, 4, 5 ] );
+            A = OctoDouble( [ 1, 2, 3, 4, 5 ] );
             S0 = std( A, 0 );  % Normalize by N - 1
             S1 = std( A, 1 );  % Normalize by N
 
@@ -709,7 +709,7 @@ classdef OctDoubleTest < matlab.unittest.TestCase
         end
 
         function TestVar( TestCase )
-            A = OctDouble( [ 1, 2, 3, 4, 5 ] );
+            A = OctoDouble( [ 1, 2, 3, 4, 5 ] );
             V0 = var( A, 0 );  % Normalize by N - 1
             V1 = var( A, 1 );  % Normalize by N
 
@@ -721,8 +721,8 @@ classdef OctDoubleTest < matlab.unittest.TestCase
         end
 
         function TestMeshgrid( TestCase )
-            X = OctDouble( [ 1, 2, 3 ] );
-            Y = OctDouble( [ 4, 5 ] );
+            X = OctoDouble( [ 1, 2, 3 ] );
+            Y = OctoDouble( [ 4, 5 ] );
             [ XGrid, YGrid ] = meshgrid( X, Y );
 
             ExpectedX = [ 1, 2, 3; 1, 2, 3 ];
@@ -733,8 +733,8 @@ classdef OctDoubleTest < matlab.unittest.TestCase
         end
 
         function TestLinspace( TestCase )
-            A = OctDouble( 1 );
-            B = OctDouble( 5 );
+            A = OctoDouble( 1 );
+            B = OctoDouble( 5 );
             Y = linspace( A, B, 5 );
 
             Expected = [ 1, 2, 3, 4, 5 ];
@@ -743,38 +743,38 @@ classdef OctDoubleTest < matlab.unittest.TestCase
 
         % Test the static methods
         function TestStaticOnes( TestCase )
-            A = OctDouble.ones( 2, 3 );
+            A = OctoDouble.ones( 2, 3 );
             TestCase.verifyEqual( size( A ), [ 2, 3 ] );
             TestCase.verifyEqual( double( A ), ones( 2, 3 ) );
         end
 
         function TestStaticZeros( TestCase )
-            A = OctDouble.zeros( 2, 3 );
+            A = OctoDouble.zeros( 2, 3 );
             TestCase.verifyEqual( size( A ), [ 2, 3 ] );
             TestCase.verifyEqual( double( A ), zeros( 2, 3 ) );
         end
 
         function TestStaticEye( TestCase )
-            A = OctDouble.eye( 3 );
+            A = OctoDouble.eye( 3 );
             TestCase.verifyEqual( size( A ), [ 3, 3 ] );
             TestCase.verifyEqual( double( A ), eye( 3 ) );
         end
 
         function TestStaticRand( TestCase )
-            A = OctDouble.rand( 2, 3 );
+            A = OctoDouble.rand( 2, 3 );
             TestCase.verifyEqual( size( A ), [ 2, 3 ] );
             TestCase.verifyTrue( all( A >= 0 & A <= 1, 'all' ) );
         end
 
         function TestStaticRandn( TestCase )
-            A = OctDouble.randn( 2, 3 );
+            A = OctoDouble.randn( 2, 3 );
             TestCase.verifyEqual( size( A ), [ 2, 3 ] );
         end
 
         % Regression tests for bugs found in code review
         function TestCummaxCumminWithDim( TestCase )
             % Bug #2: cummax/cummin ignored the Dim argument
-            A = OctDouble( [ 1, 3; 4, 2 ] );
+            A = OctoDouble( [ 1, 3; 4, 2 ] );
 
             % cummax along dim 1 (columns)
             CM1 = cummax( A, 1 );
@@ -795,32 +795,32 @@ classdef OctDoubleTest < matlab.unittest.TestCase
 
         function TestColonMixedTypes( TestCase )
             % Bug #3: colon with plain double start and ExtDouble end
-            A = OctDouble( 1 ) : 5;
+            A = OctoDouble( 1 ) : 5;
             TestCase.verifyEqual( double( A ), 1 : 5 );
-            TestCase.verifyTrue( isa( A, 'OctDouble' ) );
+            TestCase.verifyTrue( isa( A, 'OctoDouble' ) );
 
-            B = OctDouble( 1 ) : 0.5 : 3;
+            B = OctoDouble( 1 ) : 0.5 : 3;
             TestCase.verifyEqual( double( B ), 1 : 0.5 : 3 );
-            TestCase.verifyTrue( isa( B, 'OctDouble' ) );
+            TestCase.verifyTrue( isa( B, 'OctoDouble' ) );
         end
 
         function TestConv( TestCase )
             % Bug #4: conv crashed due to u.Dot call
-            U = OctDouble( [ 1, 2, 3 ] );
-            V = OctDouble( [ 1, 1 ] );
+            U = OctoDouble( [ 1, 2, 3 ] );
+            V = OctoDouble( [ 1, 1 ] );
             W = conv( U, V );
             TestCase.verifyEqual( double( W ), conv( [ 1, 2, 3 ], [ 1, 1 ] ) );
         end
 
         function TestMrdivideMatrix( TestCase )
             % Bug #5/6: mrdivide for matrices (A / B)
-            A = OctDouble( [ 3, 1; 1, 2 ] );
-            B = OctDouble( [ 1, 0; 0, 1 ] );
+            A = OctoDouble( [ 3, 1; 1, 2 ] );
+            B = OctoDouble( [ 1, 0; 0, 1 ] );
             X = A / B;
             TestCase.verifyEqual( double( X ), double( A ), 'RelTol', TestCase.RelTol );
 
             % Non-trivial case: A / B where B is not identity
-            C = OctDouble( [ 2, 1; 1, 3 ] );
+            C = OctoDouble( [ 2, 1; 1, 3 ] );
             X2 = A / C;
             % Verify: X2 * C = A
             TestCase.verifyEqual( double( X2 * C ), double( A ), 'RelTol', TestCase.RelTol );
