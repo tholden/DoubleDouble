@@ -46,10 +46,6 @@ classdef QuadDoubleSlow < BaseExtDouble
         tiny = QuadDoubleSlow.MakeStatic( DoubleDouble.MakeStatic(1.21543267145725000000e-63, 0.00000000000000000000e+00), DoubleDouble.MakeStatic(0.00000000000000000000e+00, 0.00000000000000000000e+00 ) );
         pi = QuadDoubleSlow.MakeStatic( DoubleDouble.MakeStatic(3.14159265358979311600e+00, 1.22464679914735320717e-16), DoubleDouble.MakeStatic(-2.99476980971833966589e-33, 1.11245422086336528166e-49 ) );
 
-    end
-
-    properties ( Constant, GetAccess = public )
-
         piT2   = QuadDoubleSlow.MakeStatic( DoubleDouble.MakeStatic(6.28318530717958623200e+00, 2.44929359829470641444e-16), DoubleDouble.MakeStatic(-5.98953961943667933152e-33, 2.22490844172673056346e-49 ) );
         piD2   = QuadDoubleSlow.MakeStatic( DoubleDouble.MakeStatic(1.57079632679489655800e+00, 6.12323399573676603611e-17), DoubleDouble.MakeStatic(-1.49738490485916983288e-33, 5.56227110431682640865e-50 ) );
         piD16  = QuadDoubleSlow.MakeStatic( DoubleDouble.MakeStatic(1.96349540849362069750e-01, 7.65404249467095754484e-18), DoubleDouble.MakeStatic(-1.87173113107396229118e-34, 6.95283888039603300966e-51 ) );
