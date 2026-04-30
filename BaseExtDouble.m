@@ -2221,6 +2221,13 @@ classdef (Abstract) BaseExtDouble
             if nargin < 5
                 AnySolutionWillDo = false;
             end
+            % Rescale to prevent overflow in intermediate products (cf. QD library)
+            Rescale = abs( a1 ) > 2 ^ 969;
+            if any( Rescale(:) )
+                ScaleDown = 2 ^ -53;
+                a1( Rescale ) = a1( Rescale ) * ScaleDown;
+                a2( Rescale ) = a2( Rescale ) * ScaleDown;
+            end
             q1 = a1 ./ b1;
             [ p1, p2 ] = BaseExtDouble.EDTimesUnderlying( b1, b2, q1 );
             [ r1, r2 ] = BaseExtDouble.EDPlusED( a1, a2, -p1, -p2 );
@@ -2230,6 +2237,11 @@ classdef (Abstract) BaseExtDouble
             q3 = r1 ./ b1;
             [ q1, q2 ] = BaseExtDouble.Normalize( q1, q2 );
             [ r1, r2 ] = BaseExtDouble.EDPlusED( q1, q2, q3, zeros( size( q3 ) ) );
+            if any( Rescale(:) )
+                ScaleUp = 2 ^ 53;
+                r1( Rescale ) = r1( Rescale ) * ScaleUp;
+                r2( Rescale ) = r2( Rescale ) * ScaleUp;
+            end
             Select = ( b1 == 0 ) & ( b2 == 0 );
             if any( Select(:) )
                 if ( isscalar( Select ) ) && ( numel( a1 ) > 1 )
@@ -2269,6 +2281,13 @@ classdef (Abstract) BaseExtDouble
             if nargin < 4
                 AnySolutionWillDo = false;
             end
+            % Rescale to prevent overflow in intermediate products (cf. QD library)
+            Rescale = abs( a1 ) > 2 ^ 969;
+            if any( Rescale(:) )
+                ScaleDown = 2 ^ -53;
+                a1( Rescale ) = a1( Rescale ) * ScaleDown;
+                a2( Rescale ) = a2( Rescale ) * ScaleDown;
+            end
             r1 = a1 ./ b;
             [ p1, p2 ] = BaseExtDouble.DoubleTimesUnderlying( r1, b );
             [ s, e ] = BaseExtDouble.DoublePlusUnderlying( a1, -p1 );
@@ -2277,6 +2296,11 @@ classdef (Abstract) BaseExtDouble
             t = s + e;
             r2 = t ./ b;
             [ r1, r2 ] = BaseExtDouble.Normalize( r1, r2 );
+            if any( Rescale(:) )
+                ScaleUp = 2 ^ 53;
+                r1( Rescale ) = r1( Rescale ) * ScaleUp;
+                r2( Rescale ) = r2( Rescale ) * ScaleUp;
+            end
             Select = b == 0;
             if any( Select(:) )
                 if ( isscalar( Select ) ) && ( numel( a1 ) > 1 )
@@ -2316,6 +2340,12 @@ classdef (Abstract) BaseExtDouble
             if nargin < 3
                 AnySolutionWillDo = false;
             end
+            % Rescale to prevent overflow in intermediate products (cf. QD library)
+            Rescale = abs( a ) > 2 ^ 969;
+            if any( Rescale(:) )
+                ScaleDown = 2 ^ -53;
+                a( Rescale ) = a( Rescale ) * ScaleDown;
+            end
             r1 = a ./ b;
             [ p1, p2 ] = BaseExtDouble.DoubleTimesUnderlying( r1, b );
             [ s, e ] = BaseExtDouble.DoublePlusUnderlying( a, -p1 );
@@ -2323,6 +2353,11 @@ classdef (Abstract) BaseExtDouble
             t = s + e;
             r2 = t ./ b;
             [ r1, r2 ] = BaseExtDouble.Normalize( r1, r2 );
+            if any( Rescale(:) )
+                ScaleUp = 2 ^ 53;
+                r1( Rescale ) = r1( Rescale ) * ScaleUp;
+                r2( Rescale ) = r2( Rescale ) * ScaleUp;
+            end
             Select = b == 0;
             if any( Select(:) )
                 if ( isscalar( Select ) ) && ( numel( a ) > 1 )
