@@ -416,8 +416,7 @@ classdef DoubleDoubleTest < matlab.unittest.TestCase
             S = sqrt( A );
             TestCase.verifyEqual( double( S ), [ 2, 3, 4 ] );
         end
-        
-        
+
         function TestRealsqrt( TestCase )
             A = DoubleDouble( [ 4, 9, 16 ] );
             S = realsqrt( A );
@@ -620,8 +619,7 @@ classdef DoubleDoubleTest < matlab.unittest.TestCase
             RtR = R' * R;
             TestCase.verifyEqual( double( RtR ), double( A ), 'RelTol', TestCase.RelTol );
         end
-        
-        
+
         function TestLDL( TestCase )
             A = DoubleDouble( [ 4, 12, -16; 12, 37, -43; -16, -43, 98 ] );
             [ L, D ] = ldl( A, 'vector' );
@@ -630,7 +628,7 @@ classdef DoubleDoubleTest < matlab.unittest.TestCase
             LDLt = L * D * L';
             TestCase.verifyEqual( double( LDLt ), double( A ), 'RelTol', TestCase.RelTol );
         end
-        % Tests for newly added functions
+
         function TestUnique( TestCase )
             A = DoubleDouble( [ 2, 1, 2, 3, 1, 4 ] );
             [ C, ia, ic ] = unique( A );
