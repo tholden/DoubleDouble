@@ -1,6 +1,6 @@
 classdef (Abstract) BaseExtDouble
 
-    properties ( SetAccess = public, GetAccess = public )
+    properties ( SetAccess = { ?BaseExtDouble, ?DoubleDouble, ?QuadDoubleSlow, ?QuadDouble, ?OctDouble }, GetAccess = public )
 
         v1
         v2
@@ -168,9 +168,7 @@ classdef (Abstract) BaseExtDouble
         end
 
         function v = sparse( i, j, v, m, n, nz )
-            if nargin == 0
-                v = i.Make( sparse( [] ), sparse( [] ) );
-            elseif nargin < 3
+            if nargin < 3
                 assert( nargin == 1 );
                 v = i;
                 v.v1 = sparse( v.v1 );
@@ -1782,6 +1780,9 @@ classdef (Abstract) BaseExtDouble
             v = v .* sqrt( d.' );
             if any( d < 0 )
                 p = 1;
+                if nargout < 2
+                    error( 'MATLAB:posdef', 'Matrix must be positive definite.' );
+                end
             else
                 p = 0;
             end
