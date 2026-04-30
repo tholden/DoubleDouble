@@ -143,7 +143,7 @@ classdef QuadDouble < QuadDoubleSlow
         function v = Plus( a, b )
             % [ a, b ] = BaseExtDouble.JointPromotion( a, b );
             % if a.PromotionOrder() == b.PromotionOrder()
-            %     [ x1, x2 ] = QuadDouble.QDPlusQD( a.v1, a.v2, b.v1, b.v2 );
+            %     [ x1, x2 ] = QDPlusQD( a.v1, a.v2, b.v1, b.v2 );
             %     v = a.Make( x1, x2 );
             % elseif a.PromotionOrder() > b.PromotionOrder()
             %     [ x1, x2 ] = QuadDouble.QDPlusDD( a.v1, a.v2, Promote( a.v1, b ) );
@@ -153,147 +153,21 @@ classdef QuadDouble < QuadDoubleSlow
             %     v = b.Make( x1, x2 );
             % end
 
-            [ s0, s1, s2, s3 ] = QuadDouble.QDPlusQD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
+            [ s0, s1, s2, s3 ] = QDPlusQD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
             v = QuadDouble.MakeStatic( DoubleDouble.MakeStatic( s0, s1 ), DoubleDouble.MakeStatic( s2, s3 ) );
         end
 
         function v = Times( a, b )
-            [ s0, s1, s2, s3 ] = QuadDouble.QDTimesQD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
+            [ s0, s1, s2, s3 ] = QDTimesQD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
             v = QuadDouble.MakeStatic( DoubleDouble.MakeStatic( s0, s1 ), DoubleDouble.MakeStatic( s2, s3 ) );
         end
 
         function v = RDivide( a, b )
-            [ s0, s1, s2, s3 ] = QuadDouble.QDDivQD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
+            [ s0, s1, s2, s3 ] = QDDivQD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
             v = QuadDouble.MakeStatic( DoubleDouble.MakeStatic( s0, s1 ), DoubleDouble.MakeStatic( s2, s3 ) );
         end
 
     end
 
-    methods ( Static, Access = protected )
-
-        function [ s0, s1, s2, s3 ] = QDPlusQD( a0, a1, a2, a3, b0, b1, b2, b3 ) % This is the "sloppy" version from QD C++, as the IEEE version requires loops, with a slight accuracy improvement in the final steps.
-            ss0 = a0 + b0;
-            ss1 = a1 + b1;
-            ss2 = a2 + b2;
-            ss3 = a3 + b3;
-            v0 = ss0 - a0;
-            v1 = ss1 - a1;
-            v2 = ss2 - a2;
-            v3 = ss3 - a3;
-            u0 = ss0 - v0;
-            u1 = ss1 - v1;
-            u2 = ss2 - v2;
-            u3 = ss3 - v3;
-            w0 = a0 - u0;
-            w1 = a1 - u1;
-            w2 = a2 - u2;
-            w3 = a3 - u3;
-            uu0 = b0 - v0;
-            uu1 = b1 - v1;
-            uu2 = b2 - v2;
-            uu3 = b3 - v3;
-            t0 = w0 + uu0;
-            t1 = w1 + uu1;
-            t2 = w2 + uu2;
-            t3 = w3 + uu3;
-            [ ss1, t0_2 ] = UnderlyingPlusUnderlying( ss1, t0 );
-            [ ss2, t0_3, t1_2 ] = ThreeSum( ss2, t0_2, t1 );
-            [ ss3, t0_4, t2_2 ] = ThreeSum( ss3, t0_3, t2 );
-            [ t0_5, t1_3 ] = UnderlyingPlusUnderlying( t0_4, t1_2 );
-            t0_5 = t0_5 + ( t1_3 + t2_2 + t3 );
-            [ s0, s1, s2, s3 ] = Renorm5( ss0, ss1, ss2, ss3, t0_5 );
-        end
-
-        function [ s0, s1, s2, s3 ] = QDTimesQD( a0, a1, a2, a3, b0, b1, b2, b3 )
-            % Accurate multiplication (cf. qd_real::accurate_mul in QD library).
-            % Uses 10 UnderlyingTimesUnderlyings and Nine-Two-Sum for O(eps^3) accumulation.
-            % O(eps^1) and O(eps^2) terms
-            [ p0, q0 ] = UnderlyingTimesUnderlying( a0, b0 );
-            [ p1, q1 ] = UnderlyingTimesUnderlying( a0, b1 );
-            [ p2, q2 ] = UnderlyingTimesUnderlying( a1, b0 );
-            [ p3, q3 ] = UnderlyingTimesUnderlying( a0, b2 );
-            [ p4, q4 ] = UnderlyingTimesUnderlying( a1, b1 );
-            [ p5, q5 ] = UnderlyingTimesUnderlying( a2, b0 );
-            % Start accumulation
-            [ p1, p2, q0 ] = ThreeSum( p1, p2, q0 );
-            % Six-Three-Sum of p2, q1, q2, p3, p4, p5
-            [ p2, q1, q2 ] = ThreeSum( p2, q1, q2 );
-            [ p3, p4, p5 ] = ThreeSum( p3, p4, p5 );
-            [ ss0, t0 ] = UnderlyingPlusUnderlying( p2, p3 );
-            [ ss1, t1 ] = UnderlyingPlusUnderlying( q1, p4 );
-            ss2 = q2 + p5;
-            [ ss1, t0_2 ] = UnderlyingPlusUnderlying( ss1, t0 );
-            ss2 = ss2 + ( t0_2 + t1 );
-            % O(eps^3) terms
-            [ p6, q6 ] = UnderlyingTimesUnderlying( a0, b3 );
-            [ p7, q7 ] = UnderlyingTimesUnderlying( a1, b2 );
-            [ p8, q8 ] = UnderlyingTimesUnderlying( a2, b1 );
-            [ p9, q9 ] = UnderlyingTimesUnderlying( a3, b0 );
-            % Nine-Two-Sum of q0, ss1, q3, q4, q5, p6, p7, p8, p9
-            [ q0, q3 ] = UnderlyingPlusUnderlying( q0, q3 );
-            [ q4, q5 ] = UnderlyingPlusUnderlying( q4, q5 );
-            [ p6, p7 ] = UnderlyingPlusUnderlying( p6, p7 );
-            [ p8, p9 ] = UnderlyingPlusUnderlying( p8, p9 );
-            [ t0, t1 ] = UnderlyingPlusUnderlying( q0, q4 );
-            t1 = t1 + ( q3 + q5 );
-            [ r0, r1 ] = UnderlyingPlusUnderlying( p6, p8 );
-            r1 = r1 + ( p7 + p9 );
-            [ q3_2, q4_2 ] = UnderlyingPlusUnderlying( t0, r0 );
-            q4_2 = q4_2 + ( t1 + r1 );
-            [ t0, t1 ] = UnderlyingPlusUnderlying( q3_2, ss1 );
-            t1 = t1 + q4_2;
-            % O(eps^4) terms -- Nine-One-Sum
-            t1 = t1 + a1.*b3 + a2.*b2 + a3.*b1 + q6 + q7 + q8 + q9 + ss2;
-            [ s0, s1, s2, s3 ] = Renorm5( p0, p1, ss0, t0, t1 );
-        end
-
-        function [ s0, s1, s2, s3 ] = QDTimesDouble( a0, a1, a2, a3, b )
-            [ p0, q0 ] = UnderlyingTimesUnderlying( a0, b );
-            [ p1, q1 ] = UnderlyingTimesUnderlying( a1, b );
-            [ p2, q2 ] = UnderlyingTimesUnderlying( a2, b );
-            p3 = a3 .* b;
-            ss0 = p0;
-            [ ss1, s2_1 ] = UnderlyingPlusUnderlying( q0, p1 );
-            [ s2_1, q1, p2 ] = ThreeSum( s2_1, q1, p2 );
-            [ q1, q2, ~ ] = ThreeSum2( q1, q2, p3 );
-            ss3 = q1;
-            s4 = q2 + p2;
-            [ s0, s1, s2, s3 ] = Renorm5( ss0, ss1, s2_1, ss3, s4 );
-        end
-
-        function [ s0, s1, s2, s3 ] = QDDivQD( a0, a1, a2, a3, b0, b1, b2, b3 )
-            % Rescale to prevent overflow in intermediate products (cf. QD library)
-            Rescale = abs( a0 ) > 2 ^ 969;
-            if any( Rescale, 'all' )
-                ScaleDown = 2 ^ -53;
-                a0( Rescale ) = a0( Rescale ) * ScaleDown;
-                a1( Rescale ) = a1( Rescale ) * ScaleDown;
-                a2( Rescale ) = a2( Rescale ) * ScaleDown;
-                a3( Rescale ) = a3( Rescale ) * ScaleDown;
-            end
-            q0 = a0 ./ b0;
-            [ r0, r1, r2, r3 ] = QuadDouble.QDTimesDouble( b0, b1, b2, b3, q0 );
-            [ r0, r1, r2, r3 ] = QuadDouble.QDPlusQD( a0, a1, a2, a3, -r0, -r1, -r2, -r3 );
-            q1 = r0 ./ b0;
-            [ t0, t1, t2, t3 ] = QuadDouble.QDTimesDouble( b0, b1, b2, b3, q1 );
-            [ r0, r1, r2, r3 ] = QuadDouble.QDPlusQD( r0, r1, r2, r3, -t0, -t1, -t2, -t3 );
-            q2 = r0 ./ b0;
-            [ t0, t1, t2, t3 ] = QuadDouble.QDTimesDouble( b0, b1, b2, b3, q2 );
-            [ r0, r1, r2, r3 ] = QuadDouble.QDPlusQD( r0, r1, r2, r3, -t0, -t1, -t2, -t3 );
-            q3 = r0 ./ b0;
-            [ t0, t1, t2, t3 ] = QuadDouble.QDTimesDouble( b0, b1, b2, b3, q3 );
-            [ r0, ~, ~, ~ ] = QuadDouble.QDPlusQD( r0, r1, r2, r3, -t0, -t1, -t2, -t3 );
-            q4 = r0 ./ b0;
-            [ s0, s1, s2, s3 ] = Renorm5( q0, q1, q2, q3, q4 );
-            if any( Rescale, 'all' )
-                ScaleUp = 2 ^ 53;
-                s0( Rescale ) = s0( Rescale ) * ScaleUp;
-                s1( Rescale ) = s1( Rescale ) * ScaleUp;
-                s2( Rescale ) = s2( Rescale ) * ScaleUp;
-                s3( Rescale ) = s3( Rescale ) * ScaleUp;
-            end
-        end
-
-    end
 
 end
