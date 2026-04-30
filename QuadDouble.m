@@ -330,7 +330,7 @@ classdef QuadDouble < QuadDoubleSlow
 
     methods ( Static, Access = protected )
 
-        function [ s0, s1, s2, s3 ] = QDPlusQD( a0, a1, a2, a3, b0, b1, b2, b3 )
+        function [ s0, s1, s2, s3 ] = QDPlusQD( a0, a1, a2, a3, b0, b1, b2, b3 ) % This is the "sloppy" version from QD C++, as the IEEE version requires loops.
             if QuadDouble.SingletonExpansionNotSupported
                 [ a0, b0 ] = QuadDouble.ExpandSingleton( a0, b0 );
                 [ a1, b1 ] = QuadDouble.ExpandSingleton( a1, b1 );
@@ -363,39 +363,31 @@ classdef QuadDouble < QuadDoubleSlow
             t3 = w3 + uu3;
             [ ss1, t0_2 ] = QuadDouble.TwoSum( ss1, t0 );
             [ ss2, t0_3, t1_2 ] = QuadDouble.ThreeSum( ss2, t0_2, t1 );
-            [ ss3, t0_4, ~ ] = QuadDouble.ThreeSum2( ss3, t0_3, t2 );
-            t0_5 = t0_4 + t1_2 + t3;
+            [ ss3, t0_4, t2_2 ] = QuadDouble.ThreeSum( ss3, t0_3, t2 );
+            [ t0_5, t1_3 ] = QuadDouble.TwoSum( t0_4, t1_2 );
+            t0_5 = t0_5 + ( t1_3 + t2_2 + t3 );
             [ s0, s1, s2, s3 ] = QuadDouble.Renorm5( ss0, ss1, ss2, ss3, t0_5 );
         end
 
-        function [ s0, s1, s2, s3 ] = QDPlusDouble( a0, a1, a2, a3, b )
-            if QuadDouble.SingletonExpansionNotSupported
-                [ a0, b ] = QuadDouble.ExpandSingleton( a0, b );
-                [ a1, b ] = QuadDouble.ExpandSingleton( a1, b );
-                [ a2, b ] = QuadDouble.ExpandSingleton( a2, b );
-                [ a3, b ] = QuadDouble.ExpandSingleton( a3, b );
-            end
-            [ c0, e ] = QuadDouble.TwoSum( a0, b );
-            [ c1, e ] = QuadDouble.TwoSum( a1, e );
-            [ c2, e ] = QuadDouble.TwoSum( a2, e );
-            [ c3, e ] = QuadDouble.TwoSum( a3, e );
-            [ s0, s1, s2, s3 ] = QuadDouble.Renorm5( c0, c1, c2, c3, e );
-        end
-
         function [ s0, s1, s2, s3 ] = QDTimesQD( a0, a1, a2, a3, b0, b1, b2, b3 )
+            % Accurate multiplication (cf. qd_real::accurate_mul in QD library).
+            % Uses 10 TwoProds and Nine-Two-Sum for O(eps^3) accumulation.
             if QuadDouble.SingletonExpansionNotSupported
                 [ a0, b0 ] = QuadDouble.ExpandSingleton( a0, b0 );
                 [ a1, b1 ] = QuadDouble.ExpandSingleton( a1, b1 );
                 [ a2, b2 ] = QuadDouble.ExpandSingleton( a2, b2 );
                 [ a3, b3 ] = QuadDouble.ExpandSingleton( a3, b3 );
             end
+            % O(eps^1) and O(eps^2) terms
             [ p0, q0 ] = QuadDouble.TwoProd( a0, b0 );
             [ p1, q1 ] = QuadDouble.TwoProd( a0, b1 );
             [ p2, q2 ] = QuadDouble.TwoProd( a1, b0 );
             [ p3, q3 ] = QuadDouble.TwoProd( a0, b2 );
             [ p4, q4 ] = QuadDouble.TwoProd( a1, b1 );
             [ p5, q5 ] = QuadDouble.TwoProd( a2, b0 );
+            % Start accumulation
             [ p1, p2, q0 ] = QuadDouble.ThreeSum( p1, p2, q0 );
+            % Six-Three-Sum of p2, q1, q2, p3, p4, p5
             [ p2, q1, q2 ] = QuadDouble.ThreeSum( p2, q1, q2 );
             [ p3, p4, p5 ] = QuadDouble.ThreeSum( p3, p4, p5 );
             [ ss0, t0 ] = QuadDouble.TwoSum( p2, p3 );
@@ -403,8 +395,27 @@ classdef QuadDouble < QuadDoubleSlow
             ss2 = q2 + p5;
             [ ss1, t0_2 ] = QuadDouble.TwoSum( ss1, t0 );
             ss2 = ss2 + ( t0_2 + t1 );
-            ss1 = ss1 + a0.*b3 + a1.*b2 + a2.*b1 + a3.*b0 + q0 + q3 + q4 + q5;
-            [ s0, s1, s2, s3 ] = QuadDouble.Renorm5( p0, p1, ss0, ss1, ss2 );
+            % O(eps^3) terms
+            [ p6, q6 ] = QuadDouble.TwoProd( a0, b3 );
+            [ p7, q7 ] = QuadDouble.TwoProd( a1, b2 );
+            [ p8, q8 ] = QuadDouble.TwoProd( a2, b1 );
+            [ p9, q9 ] = QuadDouble.TwoProd( a3, b0 );
+            % Nine-Two-Sum of q0, ss1, q3, q4, q5, p6, p7, p8, p9
+            [ q0, q3 ] = QuadDouble.TwoSum( q0, q3 );
+            [ q4, q5 ] = QuadDouble.TwoSum( q4, q5 );
+            [ p6, p7 ] = QuadDouble.TwoSum( p6, p7 );
+            [ p8, p9 ] = QuadDouble.TwoSum( p8, p9 );
+            [ t0, t1 ] = QuadDouble.TwoSum( q0, q4 );
+            t1 = t1 + ( q3 + q5 );
+            [ r0, r1 ] = QuadDouble.TwoSum( p6, p8 );
+            r1 = r1 + ( p7 + p9 );
+            [ q3_2, q4_2 ] = QuadDouble.TwoSum( t0, r0 );
+            q4_2 = q4_2 + ( t1 + r1 );
+            [ t0, t1 ] = QuadDouble.TwoSum( q3_2, ss1 );
+            t1 = t1 + q4_2;
+            % O(eps^4) terms -- Nine-One-Sum
+            t1 = t1 + a1.*b3 + a2.*b2 + a3.*b1 + q6 + q7 + q8 + q9 + ss2;
+            [ s0, s1, s2, s3 ] = QuadDouble.Renorm5( p0, p1, ss0, t0, t1 );
         end
 
         function [ s0, s1, s2, s3 ] = QDTimesDouble( a0, a1, a2, a3, b )
@@ -450,39 +461,6 @@ classdef QuadDouble < QuadDoubleSlow
             [ t0, t1, t2, t3 ] = QuadDouble.QDTimesDouble( b0, b1, b2, b3, q3 );
             [ r0, ~, ~, ~ ] = QuadDouble.QDPlusQD( r0, r1, r2, r3, -t0, -t1, -t2, -t3 );
             q4 = r0 ./ b0;
-            [ s0, s1, s2, s3 ] = QuadDouble.Renorm5( q0, q1, q2, q3, q4 );
-            if any( Rescale, 'all' )
-                ScaleUp = 2 ^ 53;
-                s0( Rescale ) = s0( Rescale ) * ScaleUp;
-                s1( Rescale ) = s1( Rescale ) * ScaleUp;
-                s2( Rescale ) = s2( Rescale ) * ScaleUp;
-                s3( Rescale ) = s3( Rescale ) * ScaleUp;
-            end
-        end
-
-        function [ s0, s1, s2, s3 ] = QDDivDouble( a0, a1, a2, a3, b )
-            % Rescale to prevent overflow in intermediate products (cf. QD library)
-            Rescale = abs( a0 ) > 2 ^ 969;
-            if any( Rescale, 'all' )
-                ScaleDown = 2 ^ -53;
-                a0( Rescale ) = a0( Rescale ) * ScaleDown;
-                a1( Rescale ) = a1( Rescale ) * ScaleDown;
-                a2( Rescale ) = a2( Rescale ) * ScaleDown;
-                a3( Rescale ) = a3( Rescale ) * ScaleDown;
-            end
-            q0 = a0 ./ b;
-            [ p0, p1 ] = QuadDouble.TwoProd( q0, b );
-            [ r0, r1, r2, r3 ] = QuadDouble.QDPlusQD( a0, a1, a2, a3, -p0, -p1, 0, 0 );
-            q1 = r0 ./ b;
-            [ p0, p1 ] = QuadDouble.TwoProd( q1, b );
-            [ r0, r1, r2, r3 ] = QuadDouble.QDPlusQD( r0, r1, r2, r3, -p0, -p1, 0, 0 );
-            q2 = r0 ./ b;
-            [ p0, p1 ] = QuadDouble.TwoProd( q2, b );
-            [ r0, r1, r2, r3 ] = QuadDouble.QDPlusQD( r0, r1, r2, r3, -p0, -p1, 0, 0 );
-            q3 = r0 ./ b;
-            [ p0, p1 ] = QuadDouble.TwoProd( q3, b );
-            [ r0, ~, ~, ~ ] = QuadDouble.QDPlusQD( r0, r1, r2, r3, -p0, -p1, 0, 0 );
-            q4 = r0 ./ b;
             [ s0, s1, s2, s3 ] = QuadDouble.Renorm5( q0, q1, q2, q3, q4 );
             if any( Rescale, 'all' )
                 ScaleUp = 2 ^ 53;
