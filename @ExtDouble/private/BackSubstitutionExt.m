@@ -6,14 +6,14 @@ function v = BackSubstitutionExt( v, U ) % For upper triangular U, x = BackSubst
     if vm < n
         v = [ v; zeros( n - vm, vn, 'like', v ) ];
     elseif vm > n
-        v = v( 1 : n, : );
+        v = v.Index( 1 : n, ':' );
     end
 
-    v( mn, : ) = v( mn, : ) ./ U( mn, mn );
+    v = v.Assign( v.Index( mn, ':' ) ./ U.Index( mn, mn ), mn, ':' );
     for k = ( mn - 1 ) : -1 : 1
         j = ( k + 1 ) : n;
-        t = sum( v( j, : ) .* U( k, j ).', 1 );
-        v( k, : ) = ( v( k, : ) - t ) ./ U( k, k );
+        t = sum( v.Index( j, ':' ) .* U.Index( k, j ).', 1 );
+        v = v.Assign( ( v.Index( k, ':' ) - t ) ./ U.Index( k, k ), k, ':' );
     end
 
 end

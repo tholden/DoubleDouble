@@ -17,8 +17,8 @@ function w = convExt( u, v )
         j = max( 1, k + 1 - N ) : min( k, M );
         i = k - j + 1;
 
-        wk = dot( u( j ), v( i ) );
-        w( k ) = wk;
+        wk = dot( u.Index( j ), v.Index( i ) );
+        w = w.Assign( wk, k );
 
     end
 

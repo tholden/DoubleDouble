@@ -5,16 +5,16 @@ function [ Q, R ] = qrExt( A ) % Type-agnostic QR decomposition (Modified Gram-S
     R = zeros( n, n, 'like', A );
 
     for j = 1 : n
-        v = A( :, j );
+        v = A.Index( ':', j );
         for i = 1 : ( j - 1 )
-            R( i, j ) = sum( conj( Q( :, i ) ) .* v );
-            v = v - R( i, j ) * Q( :, i );
+            R = R.Assign( sum( conj( Q.Index( ':', i ) ) .* v ), i, j );
+            v = v - R.Index( i, j ) * Q.Index( ':', i );
         end
-        R( j, j ) = norm( v );
-        if R( j, j ) > 0
-            Q( :, j ) = v ./ R( j, j );
+        R = R.Assign( norm( v ), j, j );
+        if R.Index( j, j ) > 0
+            Q = Q.Assign( v ./ R.Index( j, j ), ':', j );
         else
-            Q( :, j ) = v;
+            Q = Q.Assign( v, ':', j );
         end
     end
 

@@ -6,25 +6,25 @@ function [ v, U, p ] = luExt( v, type )
     for k = 1 : min( m, n )
 
         % Find index of largest element below diagonal in k-th column
-        [ ~, midx ] = max( abs( v( k:m, k ) ) );
+        [ ~, midx ] = max( abs( v.Index( k:m, k ) ) );
         midx = midx + k - 1;
 
         % Skip elimination if column is zero
-        if v( midx, k ) ~= 0
+        if v.Index( midx, k ) ~= 0
 
             % Swap pivot row
             if midx ~= k
-                v( [ k midx ], : ) = v( [ midx k ], : );
+                v = v.Assign( v.Index( [ midx k ], ':' ), [ k midx ], ':' );
                 p( [ k midx ] ) = p( [ midx k ] );
             end
 
             % Compute multipliers
             i = ( k + 1 ) : m;
-            v( i, k ) = v( i, k ) ./ v( k, k );
+            v = v.Assign( v.Index( i, k ) ./ v.Index( k, k ), i, k );
 
             % Update the remainder of the matrix
             j = ( k + 1 ) : n;
-            v( i, j ) = v( i, j ) - v( i, k ) .* v( k, j );
+            v = v.Assign( v.Index( i, j ) - v.Index( i, k ) .* v.Index( k, j ), i, j );
         end
     end
 
@@ -33,9 +33,9 @@ function [ v, U, p ] = luExt( v, type )
         L = tril( v, -1 ) + eye( m, n, 'like', v );
         U = triu( v );
         if n > m
-            L = L( :, 1:m );
+            L = L.Index( ':', 1:m );
         elseif n < m
-            U = U( 1:n, : );
+            U = U.Index( 1:n, ':' );
         end
         v = L;
 
@@ -47,7 +47,7 @@ function [ v, U, p ] = luExt( v, type )
             end
         else
             invp( p ) = 1 : m;
-            v = v( invp, : );
+            v = v.Index( invp, ':' );
         end
     end
 

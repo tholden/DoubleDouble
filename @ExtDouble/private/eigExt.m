@@ -8,8 +8,8 @@ function [ v, d ] = eigExt( x )
 
     for c = 1 : C
 
-        vi = v( :, c );
-        dii = d( c, 1 );
+        vi = v.Index( ':', c );
+        dii = d.Index( c, 1 );
         err = Inf;
 
         while true
@@ -34,8 +34,8 @@ function [ v, d ] = eigExt( x )
             end
         end
 
-        d( c, 1 ) = dii;
-        v( :, c ) = vi;
+        d = d.Assign( dii, c, 1 );
+        v = v.Assign( vi, ':', c );
 
     end
 
