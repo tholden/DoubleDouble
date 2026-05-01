@@ -377,24 +377,24 @@ classdef ( Abstract ) ExtDouble < BaseExtDouble
             if Ra ~= Ca
                 [ q, a ] = qr( a );
                 v = q' * v;
-                v = BackSubstitutionExt( v, a );
+                v = BackSubstitution( v, a );
                 return
             end
             if IsEqualWithExpansion( triu( a, 1 ), 0 )
                 % Lower triangular
-                v = ForwardEliminationExt( v, a );
+                v = ForwardElimination( v, a );
                 return
             elseif IsEqualWithExpansion( tril( a, -1 ), 0 )
                 % Upper triangular
-                v = BackSubstitutionExt( v, a );
+                v = BackSubstitution( v, a );
                 return
             elseif IsEqualWithExpansion( a, a' )
                 [ L, d ] = ldl( a, 'vector_d' );
                 if all( all( isfinite( L ) ) ) && all( isfinite( d ) )
                     % Positive definite
-                    v = ForwardEliminationExt( v, L );
+                    v = ForwardElimination( v, L );
                     v = v ./ d;
-                    v = BackSubstitutionExt( v, L' );
+                    v = BackSubstitution( v, L' );
                     return
                 end
             end
@@ -404,10 +404,10 @@ classdef ( Abstract ) ExtDouble < BaseExtDouble
             % Permutation and forward elimination
             v.v1 = Index( v.v1, p, ':' );
             v.v2 = Index( v.v2, p, ':' );
-            v = ForwardEliminationExt( v, L );
+            v = ForwardElimination( v, L );
 
             % Back substitution
-            v = BackSubstitutionExt( v, U );
+            v = BackSubstitution( v, U );
         end
 
         function v = mrdivide( v, a )
@@ -1711,15 +1711,76 @@ classdef ( Abstract ) ExtDouble < BaseExtDouble
         end
 
         function [ v, U, p ] = lu( v, type )
-            if nargin < 2
-                [ v, U, p ] = luExt( v );
-            else
-                [ v, U, p ] = luExt( v, type );
+            [ m, n ] = size( v );
+            p = 1 : m;
+
+            for k = 1 : min( m, n )
+
+                % Find index of largest element below diagonal in k-th column
+                [ ~, midx ] = max( abs( v.Index( k:m, k ) ) );
+                midx = midx + k - 1;
+
+                % Skip elimination if column is zero
+                if v.Index( midx, k ) ~= 0
+
+                    % Swap pivot row
+                    if midx ~= k
+                        v = v.Assign( v.Index( [ midx k ], ':' ), [ k midx ], ':' );
+                        p( [ k midx ] ) = p( [ midx k ] );
+                    end
+
+                    % Compute multipliers
+                    i = ( k + 1 ) : m;
+                    v = v.Assign( v.Index( i, k ) ./ v.Index( k, k ), i, k );
+
+                    % Update the remainder of the matrix
+                    j = ( k + 1 ) : n;
+                    v = v.Assign( v.Index( i, j ) - v.Index( i, k ) .* v.Index( k, j ), i, j );
+                end
+            end
+
+            if nargout > 1
+                % Separate result
+                L = tril( v, -1 ) + eye( m, n, 'like', v );
+                U = triu( v );
+                if n > m
+                    L = L.Index( ':', 1:m );
+                elseif n < m
+                    U = U.Index( 1:n, ':' );
+                end
+                v = L;
+
+                if nargout > 2
+                    if nargin < 2 || ~strcmp( type, 'vector' )
+                        pp = eye( m );
+                        pp = pp( p, : );
+                        p = pp;
+                    end
+                else
+                    invp( p ) = 1 : m;
+                    v = v.Index( invp, ':' );
+                end
             end
         end
 
-        function [ q, v ] = qr( v )
-            [ q, v ] = qrExt( v );
+        function [ Q, R ] = qr( A )
+            [ m, n ] = size( A );
+            Q = zeros( m, n, 'like', A );
+            R = zeros( n, n, 'like', A );
+
+            for j = 1 : n
+                v = A.Index( ':', j );
+                for i = 1 : ( j - 1 )
+                    R = R.Assign( sum( conj( Q.Index( ':', i ) ) .* v ), i, j );
+                    v = v - R.Index( i, j ) * Q.Index( ':', i );
+                end
+                R = R.Assign( norm( v ), j, j );
+                if R.Index( j, j ) > 0
+                    Q = Q.Assign( v ./ R.Index( j, j ), ':', j );
+                else
+                    Q = Q.Assign( v, ':', j );
+                end
+            end
         end
 
         function v = det( v )
@@ -1759,19 +1820,112 @@ classdef ( Abstract ) ExtDouble < BaseExtDouble
             end
         end
 
-        function [ L, d ] = ldl( v, type )
+        function [ L, D ] = ldl( A, type )
             if nargin < 2
                 type = [];
             end
-            [ L, d ] = ldlExt( v, type );
+            [ m, n ] = size( A );
+            assert( m == n, 'Matrix must be square.' );
+            L = eye( n, 'like', A );
+            D = zeros( 1, n, 'like', A );
+
+            D = D.Assign( A.Index( 1, 1 ), 1 );
+            if n > 1
+                L = L.Assign( A.Index( 2 : n, 1 ) ./ D.Index( 1 ), 2 : n, 1 );
+            end
+
+            for j = 2 : n
+                idxs = 1 : ( j - 1 );
+                t = sum( L.Index( j, idxs ) .* D.Index( idxs ) .* conj( L.Index( j, idxs ) ) );
+                D = D.Assign( A.Index( j, j ) - t, j );
+
+                if j < n
+                    jdxs = ( j + 1 ) : n;
+                    tt = sum( L.Index( jdxs, idxs ) .* ( D.Index( idxs ) .* conj( L.Index( j, idxs ) ) ), 2 );
+                    L = L.Assign( ( A.Index( jdxs, j ) - tt ) ./ D.Index( j ), jdxs, j );
+                end
+            end
+
+            if nargin < 2 || ~strcmp( type, 'vector_d' )
+                D = diag( D );
+            else
+                D = D.';
+            end
         end
 
         function [ v, d ] = eig( x )
-            [ v, d ] = eigExt( x );
+            [ v, d ] = eig( x.v1 );
+            v = x.Promote( v );
+            d = x.Promote( diag( d ) );
+            C = length( d );
+            I = eye( C, 'like', x );
+
+            for c = 1 : C
+
+                vi = v.Index( ':', c );
+                dii = d.Index( c, 1 );
+                err = Inf;
+
+                while true
+                    nvi = ( x - dii * I ) \ vi;
+                    nvi = nvi ./ norm( nvi );
+                    if any( ~isfinite( nvi ) )
+                        break
+                    end
+                    vi = nvi;
+                    odii = dii;
+                    xTvi = x * vi;
+                    dii = ( vi' * xTvi ) ./ ( vi' * vi );
+                    oerr = err;
+                    errv = abs( xTvi - dii * vi );
+                    err = sum( errv .* errv );
+                    if err > oerr
+                        dii = odii;
+                        break
+                    end
+                    if ( err == 0 ) || ( err == oerr )
+                        break
+                    end
+                end
+
+                d = d.Assign( dii, c, 1 );
+                v = v.Assign( vi, ':', c );
+
+            end
+
+            if nargout < 2
+                v = d;
+            else
+                d = diag( d );
+            end
         end
 
         function w = conv( u, v )
-            w = convExt( u, v );
+            RowVector = size( u, 1 ) == 1 && size( v, 1 ) == 1;
+
+            u = u.Vec();
+            v = v.Vec();
+
+            M = size( u, 1 );
+            N = size( v, 1 );
+
+            K = M + N - 1;
+
+            w = zeros( K, 1, 'like', u );
+
+            for k = 1 : K
+
+                j = max( 1, k + 1 - N ) : min( k, M );
+                i = k - j + 1;
+
+                wk = dot( u.Index( j ), v.Index( i ) );
+                w = w.Assign( wk, k );
+
+            end
+
+            if RowVector
+                w = w.';
+            end
         end
 
         function [ C, ia, ic ] = unique( A, varargin )
@@ -2045,6 +2199,83 @@ classdef ( Abstract ) ExtDouble < BaseExtDouble
 
         function v = Minus( a, b )
             v = Plus( a, -b );
+        end
+
+    end
+
+    methods ( Sealed, Access = private )
+
+        function v = ForwardElimination( v, L ) % For lower triangular L, x = ForwardElimination( b, L ) solves L*x = b.
+            [ m, n ] = size( L );
+            mn = min( m, n );
+            [ vm, vn ] = size( v );
+            if vm < n
+                v = [ v; zeros( n - vm, vn, 'like', v ) ];
+            elseif vm > n
+                v = v.Index( 1 : n, ':' );
+            end
+
+            v = v.Assign( v.Index( 1, ':' ) ./ L.Index( 1, 1 ), 1, ':' );
+            for k = 2 : mn
+                j = 1 : ( k - 1 );
+                t = sum( v.Index( j, ':' ) .* L.Index( k, j ).', 1 );
+                v = v.Assign( ( v.Index( k, ':' ) - t ) ./ L.Index( k, k ), k, ':' );
+            end
+        end
+
+        function v = BackSubstitution( v, U ) % For upper triangular U, x = BackSubstitution( b, U ) solves U*x = b.
+            [ m, n ] = size( U );
+            mn = min( m, n );
+            [ vm, vn ] = size( v );
+            if vm < n
+                v = [ v; zeros( n - vm, vn, 'like', v ) ];
+            elseif vm > n
+                v = v.Index( 1 : n, ':' );
+            end
+
+            v = v.Assign( v.Index( mn, ':' ) ./ U.Index( mn, mn ), mn, ':' );
+            for k = ( mn - 1 ) : -1 : 1
+                j = ( k + 1 ) : n;
+                t = sum( v.Index( j, ':' ) .* U.Index( k, j ).', 1 );
+                v = v.Assign( ( v.Index( k, ':' ) - t ) ./ U.Index( k, k ), k, ':' );
+            end
+        end
+
+        function [ varargout ] = ExpandSingleton( varargin )
+            l = cellfun( @( x ) length( size( x ) ), varargin, 'UniformOutput', true );
+            n = length( varargin );
+            ss = ones( n, max( l ) );
+            for i = 1 : n
+                ss( i, 1 : l( i ) ) = size( varargin{ i } );
+            end
+            s = max( ss, [], 1 );
+            isZeroDim = any( ss == 0, 1 );
+            if any( isZeroDim )
+                if any( any( ss( :, isZeroDim ) > 1 ) )
+                    error( 'Arrays have incompatible sizes for this operation.' );
+                end
+                s( isZeroDim ) = 0;
+            end
+            varargout = cell( 1, n );
+            for i = 1 : n
+                repfac = ones( 1, length( s ) );
+                mask = ( ss( i, : ) == 1 ) & ( s ~= 1 );
+                repfac( mask ) = s( mask );
+                varargout{ i } = repmat( varargin{ i }, repfac );
+            end
+        end
+
+        function v = IsEqualWithExpansion( a, b, varargin )
+            v = a == b;
+            v = all( v(:) );
+            if nargin > 2
+                for i = 1 : length( varargin )
+                    if ~v
+                        break
+                    end
+                    v = v && IsEqualWithExpansion( a, varargin{ i } );
+                end
+            end
         end
 
     end
