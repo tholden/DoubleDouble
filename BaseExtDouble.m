@@ -1366,7 +1366,7 @@ classdef ( Abstract ) BaseExtDouble
             vSelect = v.Index( Select );
             x2Select = floor( vSelect.v2 );
             x2 = Assign( x2, x2Select, Select );
-            [ x1, x2 ] = Normalize( x1, x2 );
+            [ x1, x2 ] = EDNormalize( x1, x2 );
             v = v.Make( x1, x2 );
         end
 
@@ -1377,7 +1377,7 @@ classdef ( Abstract ) BaseExtDouble
             vSelect = v.Index( Select );
             x2Select = ceil( vSelect.v2 );
             x2 = Assign( x2, x2Select, Select );
-            [ x1, x2 ] = Normalize( x1, x2 );
+            [ x1, x2 ] = EDNormalize( x1, x2 );
             v = v.Make( x1, x2 );
         end
 
@@ -1388,7 +1388,7 @@ classdef ( Abstract ) BaseExtDouble
             vSelect = v.Index( Select );
             x2Select = fix( vSelect.v2 );
             x2 = Assign( x2, x2Select, Select );
-            [ x1, x2 ] = Normalize( x1, x2 );
+            [ x1, x2 ] = EDNormalize( x1, x2 );
             v = v.Make( x1, x2 );
         end
 
@@ -1401,7 +1401,7 @@ classdef ( Abstract ) BaseExtDouble
             x2 = Assign( x2, x2Select, Select );
             Select = ( ~Select ) & ( abs( x1 - v.v1 ) == 0.5 ) & ( v.v2 < 0 );
             x2 = Assign( x2, Index( x2, Select ) - 1, Select );
-            [ x1, x2 ] = Normalize( x1, x2 );
+            [ x1, x2 ] = EDNormalize( x1, x2 );
             v = v.Make( x1, x2 );
         end
 

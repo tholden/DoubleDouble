@@ -13,7 +13,7 @@ function [ r1, r2 ] = EDDividedByED( a1, a2, b1, b2 )
     [ p1, p2 ] = EDTimesUnderlying( b1, b2, q2 );
     [ r1, ~  ] = EDPlusED( r1, r2, -p1, -p2 );
     q3 = r1 ./ b1;
-    [ q1, q2 ] = Normalize( q1, q2 );
+    [ q1, q2 ] = EDNormalize( q1, q2 );
     [ r1, r2 ] = EDPlusED( q1, q2, q3, zeros( size( q3 ) ) );
     if any( Rescale(:) )
         ScaleUp = 2 ^ 53;

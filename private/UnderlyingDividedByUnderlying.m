@@ -14,7 +14,7 @@ function [ r1, r2 ] = UnderlyingDividedByUnderlying( a, b )
     e = e - p2;
     t = s + e;
     r2 = t ./ b;
-    [ r1, r2 ] = BaseExtDouble.Normalize( r1, r2 );
+    [ r1, r2 ] = BaseExtDouble.EDNormalize( r1, r2 );
     if any( Rescale(:) )
         ScaleUp = 2 ^ 53;
         r1( Rescale ) = r1( Rescale ) * ScaleUp;
