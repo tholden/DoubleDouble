@@ -115,7 +115,7 @@ classdef QuadDouble < QuadDoubleSlow
 
     end
 
-    methods ( Static, Access = { ?QuadDoubleSlow, ?QuadDouble, ?OctoDouble } )
+    methods ( Static, Access = ?BaseExtDouble )
 
         function v = MakeStatic( a1, a2 )
             v = QuadDouble;
@@ -174,7 +174,7 @@ classdef QuadDouble < QuadDoubleSlow
 
     methods ( Static, Access = private )
 
-        function v = PromoteStatic( a )
+        function v = PromoteStatic( a ) % TODO Remove
             v = QuadDouble( a );
         end
 

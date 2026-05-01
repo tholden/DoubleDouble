@@ -404,7 +404,7 @@ classdef OctoDouble < BaseExtDouble
 
     end
 
-    methods ( Static, Access = ?OctoDouble )
+    methods ( Static, Access = ?BaseExtDouble )
 
         function v = MakeStatic( a1, a2 )
             v = OctoDouble;
