@@ -1,6 +1,6 @@
 classdef ( Abstract ) BaseDoubleDouble
 
-    properties ( SetAccess = protected, GetAccess = public )
+    properties ( SetAccess = { ?BaseDoubleDouble, ?BaseExtDoubleProperties, ?ExtDouble }, GetAccess = public )
 
         v1
         v2
@@ -10,7 +10,6 @@ classdef ( Abstract ) BaseDoubleDouble
     methods ( Abstract )
 
         v = Promote( a, v )
-
         n = PromotionOrder( v )
 
     end

@@ -1,23 +1,26 @@
-classdef ( Abstract ) ExtDouble < BaseDoubleDouble
+classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
 
-    properties ( Abstract, Constant )
+    properties ( Abstract, SetAccess = { ?BaseDoubleDouble, ?BaseExtDoubleProperties, ?ExtDouble }, GetAccess = public )
 
-        empty
-        zero
-        one
-        tiny
-        pi
-        InverseFactorial
-        NInverseFactorial
-        piT2
-        piD2
-        piD16
-        log_2
-        log_10
-        SinTable
-        CosTable
-        ExpRescale
-        LogSteps
+        v1
+        v2
+
+    end
+
+    methods ( Abstract )
+
+        v = Promote( a, v )
+        n = PromotionOrder( v )
+
+    end
+
+    methods ( Abstract, Access = protected )
+
+        v = Make( z, a1, a2 )
+        v = Plus( a, b )
+        v = Times( a, b )
+        v = RDivide( a, b )
+        v = Normalize( v )
 
     end
 
