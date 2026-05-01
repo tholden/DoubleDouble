@@ -171,7 +171,7 @@ classdef QuadDouble < QuadDoubleSlow
         end
 
         function v = Normalize( v )
-            [ s0, s1, s2, s3 ] = Renorm4( v.v1.v1, v.v1.v2, v.v2.v1, v.v2.v2 );
+            [ s0, s1, s2, s3 ] = QDNormalize( v.v1.v1, v.v1.v2, v.v2.v1, v.v2.v2 );
             v = QuadDouble.MakeStatic( DoubleDouble.MakeStatic( s0, s1 ), DoubleDouble.MakeStatic( s2, s3 ) );
         end
 

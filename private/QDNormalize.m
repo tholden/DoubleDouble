@@ -1,4 +1,4 @@
-function [ c0, c1, c2, c3 ] = Renorm4( c0, c1, c2, c3 )
+function [ c0, c1, c2, c3 ] = QDNormalize( c0, c1, c2, c3 )
     [ c3, c4 ] = EDNormalize( c2, c3 );
     [ c2, c3 ] = EDNormalize( c1, c3 );
     [ c1, c2 ] = EDNormalize( c0, c2 );
