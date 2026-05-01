@@ -58,7 +58,7 @@ classdef QuadDouble < QuadDoubleSlow
             elseif isa( in, 'DoubleDouble' )
                 v.v1 = in;
                 v.v2 = DoubleDouble.zeros( size( in ) );
-            elseif isa( in, 'BaseExtDouble' )
+            elseif isa( in, 'ExtDouble' )
                 C = cell( 1, 4 );
                 [ C{ : } ] = ToSumOfDoubles( in );
                 v.v1 = DoubleDouble.MakeStatic( C{ 1 }, C{ 2 } );
@@ -115,22 +115,6 @@ classdef QuadDouble < QuadDoubleSlow
 
     end
 
-    methods ( Static, Access = ?BaseExtDouble )
-
-        function v = MakeStatic( a1, a2 )
-            v = QuadDouble;
-            if ~isa( a1, 'DoubleDouble' )
-                a1 = DoubleDouble( a1 );
-            end
-            if ~isa( a2, 'DoubleDouble' )
-                a2 = DoubleDouble( a2 );
-            end
-            v.v1 = a1;
-            v.v2 = a2;
-        end
-
-    end
-
     methods ( Access = protected )
 
         function v = Make( ~, a1, a2 )
@@ -181,6 +165,22 @@ classdef QuadDouble < QuadDoubleSlow
 
         function v = PromoteStatic( a ) % TODO Remove
             v = QuadDouble( a );
+        end
+
+    end
+
+    methods ( Static, Access = ?ExtDouble )
+
+        function v = MakeStatic( a1, a2 )
+            v = QuadDouble;
+            if ~isa( a1, 'DoubleDouble' )
+                a1 = DoubleDouble( a1 );
+            end
+            if ~isa( a2, 'DoubleDouble' )
+                a2 = DoubleDouble( a2 );
+            end
+            v.v1 = a1;
+            v.v2 = a2;
         end
 
     end

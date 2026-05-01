@@ -1,7 +1,4 @@
 function [ r1, r2 ] = UnderlyingDividedByUnderlying( a, b )
-    if BaseExtDouble.SingletonExpansionNotSupported
-        [ a, b ] = BaseExtDouble.ExpandSingleton( a, b );
-    end
     % Rescale to prevent overflow in intermediate products (cf. QD library)
     Rescale = abs( a ) > 2 ^ 969;
     if any( Rescale(:) )
@@ -9,12 +6,12 @@ function [ r1, r2 ] = UnderlyingDividedByUnderlying( a, b )
         a( Rescale ) = a( Rescale ) * ScaleDown;
     end
     r1 = a ./ b;
-    [ p1, p2 ] = BaseExtDouble.DoubleTimesUnderlying( r1, b );
-    [ s, e ] = BaseExtDouble.DoublePlusUnderlying( a, -p1 );
+    [ p1, p2 ] = UnderlyingTimesUnderlying( r1, b );
+    [ s, e ] = UnderlyingPlusUnderlying( a, -p1 );
     e = e - p2;
     t = s + e;
     r2 = t ./ b;
-    [ r1, r2 ] = BaseExtDouble.EDNormalize( r1, r2 );
+    [ r1, r2 ] = EDNormalize( r1, r2 );
     if any( Rescale(:) )
         ScaleUp = 2 ^ 53;
         r1( Rescale ) = r1( Rescale ) * ScaleUp;

@@ -37,7 +37,7 @@
 
 % WARNING: This code was primarily written by AI, based on OctoDouble.m, using DoubleDouble components. Having not gone through it line by line, I cannot 100% guarantee its correctness.
 
-classdef QuadDoubleSlow < BaseExtDouble
+classdef QuadDoubleSlow < ExtDouble
 
     properties ( Constant, GetAccess = public )
 
@@ -144,7 +144,7 @@ classdef QuadDoubleSlow < BaseExtDouble
             elseif isa( in, 'DoubleDouble' )
                 v.v1 = in;
                 v.v2 = DoubleDouble.zeros( size( in ) );
-            elseif isa( in, 'BaseExtDouble' )
+            elseif isa( in, 'ExtDouble' )
                 C = cell( 1, 4 );
                 [ C{ : } ] = ToSumOfDoubles( in );
                 v.v1 = DoubleDouble.MakeStatic( C{ 1 }, C{ 2 } );
@@ -209,7 +209,7 @@ classdef QuadDoubleSlow < BaseExtDouble
 
     end
 
-    methods ( Static, Access = ?BaseExtDouble )
+    methods ( Static, Access = ?ExtDouble )
 
         function v = MakeStatic( a1, a2 )
             v = QuadDoubleSlow;
