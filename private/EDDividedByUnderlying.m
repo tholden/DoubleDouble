@@ -1,7 +1,4 @@
-function [ r1, r2 ] = EDDividedByUnderlying( a1, a2, b, AnySolutionWillDo )
-    if nargin < 4
-        AnySolutionWillDo = false;
-    end
+function [ r1, r2 ] = EDDividedByUnderlying( a1, a2, b )
     % Rescale to prevent overflow in intermediate products (cf. QD library)
     Rescale = abs( a1 ) > 2 ^ 969;
     if any( Rescale(:) )
@@ -30,13 +27,9 @@ function [ r1, r2 ] = EDDividedByUnderlying( a1, a2, b, AnySolutionWillDo )
             a1 = repmat( a1, size( Select ) );
         end
         a1Select = a1( Select );
-        a1SelectSelect = a1Select == 0;
         a1Select = sign( a1Select ) .* Inf;
-        if AnySolutionWillDo
-            a1Select = Assign( a1Select, 0, a1SelectSelect );
-        end
-        r1 = Assign( r1, a1Select, Select );
-        r2 = Assign( r2, a1Select, Select );
+        r1( Select ) = a1Select;
+        r2( Select ) = a1Select;
     end
     Select = isinf( b );
     if any( Select(:) )
@@ -48,8 +41,8 @@ function [ r1, r2 ] = EDDividedByUnderlying( a1, a2, b, AnySolutionWillDo )
         a1Select = a1( Select );
         a1SelectSelect = ~isfinite( a1Select );
         a1Select = 0;
-        a1Select = Assign( a1Select, NaN, a1SelectSelect );
-        r1 = Assign( r1, a1Select, Select );
-        r2 = Assign( r2, a1Select, Select );
+        a1Select( a1SelectSelect ) = NaN;
+        r1( Select ) = a1Select;
+        r2( Select ) = a1Select;
     end
 end

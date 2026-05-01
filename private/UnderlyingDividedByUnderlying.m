@@ -29,8 +29,8 @@ function [ r1, r2 ] = UnderlyingDividedByUnderlying( a, b )
         end
         a1Select = a( Select );
         a1Select = sign( a1Select ) .* Inf;
-        r1 = Assign( r1, a1Select, Select );
-        r2 = Assign( r2, a1Select, Select );
+        r1( Select ) = a1Select;
+        r2( Select ) = a1Select;
     end
     Select = isinf( b );
     if any( Select(:) )
@@ -42,8 +42,8 @@ function [ r1, r2 ] = UnderlyingDividedByUnderlying( a, b )
         a1Select = a( Select );
         a1SelectSelect = ~isfinite( a1Select );
         a1Select = 0;
-        a1Select = Assign( a1Select, NaN, a1SelectSelect );
-        r1 = Assign( r1, a1Select, Select );
-        r2 = Assign( r2, a1Select, Select );
+        a1Select( a1SelectSelect ) = NaN;
+        r1( Select ) = a1Select;
+        r2( Select ) = a1Select;
     end
 end
