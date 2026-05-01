@@ -1,4 +1,4 @@
-classdef ( Abstract ) BaseExtDouble
+classdef ( Abstract ) BaseDoubleDouble
 
     properties ( SetAccess = protected, GetAccess = public )
 
@@ -24,7 +24,7 @@ classdef ( Abstract ) BaseExtDouble
     methods ( Access = protected ) % Not sealed, overridden in QuadDouble.
 
         function v = Plus( a, b )
-            [ a, b ] = BaseExtDouble.JointPromotion( a, b );
+            [ a, b ] = BaseDoubleDouble.JointPromotion( a, b );
             if PromotionOrder( a ) == PromotionOrder( b )
                 [ x1, x2 ] = EDPlusED( a.v1, a.v2, b.v1, b.v2 );
                 v = a.Make( x1, x2 );
@@ -38,7 +38,7 @@ classdef ( Abstract ) BaseExtDouble
         end
 
         function v = Times( a, b )
-            [ a, b ] = BaseExtDouble.JointPromotion( a, b );
+            [ a, b ] = BaseDoubleDouble.JointPromotion( a, b );
             if PromotionOrder( a ) == PromotionOrder( b )
                 [ x1, x2 ] = EDTimesED( a.v1, a.v2, b.v1, b.v2 );
                 v = a.Make( x1, x2 );
@@ -52,7 +52,7 @@ classdef ( Abstract ) BaseExtDouble
         end
 
         function v = RDivide( a, b )
-            [ a, b ] = BaseExtDouble.JointPromotion( a, b );
+            [ a, b ] = BaseDoubleDouble.JointPromotion( a, b );
             if PromotionOrder( a ) == PromotionOrder( b )
                 [ x1, x2 ] = EDDividedByED( a.v1, a.v2, b.v1, b.v2 );
                 v = a.Make( x1, x2 );

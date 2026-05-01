@@ -1,4 +1,4 @@
-classdef ( Abstract ) ExtDouble < BaseExtDouble
+classdef ( Abstract ) ExtDouble < BaseDoubleDouble
 
     properties ( Abstract, Constant )
 

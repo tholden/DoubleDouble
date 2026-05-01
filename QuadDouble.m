@@ -83,7 +83,7 @@ classdef QuadDouble < QuadDoubleSlow
         end
 
         function v = Plus( a, b )
-            % [ a, b ] = BaseExtDouble.JointPromotion( a, b );
+            % [ a, b ] = BaseDoubleDouble.JointPromotion( a, b );
             % if PromotionOrder( a ) == PromotionOrder( b )
             %     [ x1, x2 ] = QDPlusQD( a.v1, a.v2, b.v1, b.v2 );
             %     v = a.Make( x1, x2 );
