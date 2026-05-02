@@ -25,7 +25,7 @@ classdef QuadDoubleConstant < ED.BaseDoubleDouble & ED.ExtDouble
         end
 
         function v = Promote( ~, v )
-            v = QuadDouble( v );
+            v = QuadDoubleSlow( v );
         end
 
         function n = PromotionOrder( ~ )
