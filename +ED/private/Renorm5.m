@@ -8,8 +8,8 @@ function [ c0, c1, c2, c3 ] = Renorm5( c0, c1, c2, c3, c4 )
     s0 = c0;
     s1 = c2;
 
-    s2 = zeros( size( s0 ) );
-    s3 = zeros( size( s0 ) );
+    s2 = zeros( size( s0 ), 'like', s0 );
+    s3 = zeros( size( s0 ), 'like', s0 );
 
     Select = s1 ~= 0;
     if any( Select, 'all' )

@@ -14,7 +14,7 @@ function [ r1, r2 ] = DDDividedByDD( a1, a2, b1, b2 )
     [ r1, ~  ] = DDPlusDD( r1, r2, -p1, -p2 );
     q3 = r1 ./ b1;
     [ q1, q2 ] = DDNormalize( q1, q2 );
-    [ r1, r2 ] = DDPlusDD( q1, q2, q3, zeros( size( q3 ) ) );
+    [ r1, r2 ] = DDPlusUnderlying( q1, q2, q3 );
     if any( Rescale(:) )
         ScaleUp = 2 ^ 53;
         r1( Rescale ) = r1( Rescale ) * ScaleUp;
