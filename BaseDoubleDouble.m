@@ -25,13 +25,13 @@ classdef ( Abstract ) BaseDoubleDouble
         function v = Plus( a, b )
             [ a, b ] = BaseDoubleDouble.JointPromotion( a, b );
             if PromotionOrder( a ) == PromotionOrder( b )
-                [ x1, x2 ] = EDPlusED( a.v1, a.v2, b.v1, b.v2 );
+                [ x1, x2 ] = DDPlusDD( a.v1, a.v2, b.v1, b.v2 );
                 v = a.Make( x1, x2 );
             elseif PromotionOrder( a ) > PromotionOrder( b )
-                [ x1, x2 ] = EDPlusUnderlying( a.v1, a.v2, Promote( a.v1, b ) );
+                [ x1, x2 ] = DDPlusUnderlying( a.v1, a.v2, Promote( a.v1, b ) );
                 v = a.Make( x1, x2 );
             else % PromotionOrder( b ) > PromotionOrder( a )
-                [ x1, x2 ] = EDPlusUnderlying( b.v1, b.v2, Promote( b.v1, a ) );
+                [ x1, x2 ] = DDPlusUnderlying( b.v1, b.v2, Promote( b.v1, a ) );
                 v = b.Make( x1, x2 );
             end
         end
@@ -39,13 +39,13 @@ classdef ( Abstract ) BaseDoubleDouble
         function v = Times( a, b )
             [ a, b ] = BaseDoubleDouble.JointPromotion( a, b );
             if PromotionOrder( a ) == PromotionOrder( b )
-                [ x1, x2 ] = EDTimesED( a.v1, a.v2, b.v1, b.v2 );
+                [ x1, x2 ] = DDTimesDD( a.v1, a.v2, b.v1, b.v2 );
                 v = a.Make( x1, x2 );
             elseif PromotionOrder( a ) > PromotionOrder( b )
-                [ x1, x2 ] = EDTimesUnderlying( a.v1, a.v2, Promote( a.v1, b ) );
+                [ x1, x2 ] = DDTimesUnderlying( a.v1, a.v2, Promote( a.v1, b ) );
                 v = a.Make( x1, x2 );
             else % PromotionOrder( b ) > PromotionOrder( a )
-                [ x1, x2 ] = EDTimesUnderlying( b.v1, b.v2, Promote( b.v1, a ) );
+                [ x1, x2 ] = DDTimesUnderlying( b.v1, b.v2, Promote( b.v1, a ) );
                 v = b.Make( x1, x2 );
             end
         end
@@ -53,13 +53,13 @@ classdef ( Abstract ) BaseDoubleDouble
         function v = RDivide( a, b )
             [ a, b ] = BaseDoubleDouble.JointPromotion( a, b );
             if PromotionOrder( a ) == PromotionOrder( b )
-                [ x1, x2 ] = EDDividedByED( a.v1, a.v2, b.v1, b.v2 );
+                [ x1, x2 ] = DDDividedByDD( a.v1, a.v2, b.v1, b.v2 );
                 v = a.Make( x1, x2 );
             elseif PromotionOrder( a ) > PromotionOrder( b )
-                [ x1, x2 ] = EDDividedByUnderlying( a.v1, a.v2, Promote( a.v1, b ) );
+                [ x1, x2 ] = DDDividedByUnderlying( a.v1, a.v2, Promote( a.v1, b ) );
                 v = a.Make( x1, x2 );
             else % PromotionOrder( b ) > PromotionOrder( a )
-                [ x1, x2 ] = EDDividedByUnderlying( b.v1, b.v2, Promote( b.v1, a ) );
+                [ x1, x2 ] = DDDividedByUnderlying( b.v1, b.v2, Promote( b.v1, a ) );
                 v = b.Make( x1, x2 );
             end
         end
@@ -67,7 +67,7 @@ classdef ( Abstract ) BaseDoubleDouble
         function v = Normalize( v )
             v.v1 = Normalize( v.v1 );
             v.v2 = Normalize( v.v2 );
-            [ v.v1, v.v2 ] = EDNormalize( v.v1, v.v2 );
+            [ v.v1, v.v2 ] = DDNormalize( v.v1, v.v2 );
         end
 
     end
