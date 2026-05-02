@@ -1,6 +1,6 @@
 classdef ( Abstract ) BaseDoubleDouble
 
-    properties ( SetAccess = { ?BaseDoubleDouble, ?BaseExtDoubleProperties, ?ExtDouble }, GetAccess = public )
+    properties ( SetAccess = { ?BaseDoubleDouble, ?BaseExtDoubleProperties }, GetAccess = public )
 
         v1
         v2

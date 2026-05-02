@@ -25,7 +25,7 @@ classdef QuadDoubleConstant < BaseDoubleDouble & ExtDouble
         end
 
         function v = Promote( ~, v )
-            v = QuadDoubleConstant( v );
+            v = QuadDouble( v );
         end
 
         function n = PromotionOrder( ~ )
@@ -40,21 +40,9 @@ classdef QuadDoubleConstant < BaseDoubleDouble & ExtDouble
             v = QuadDoubleConstant.MakeStatic( a1, a2 );
         end
 
-        function v = Plus( v, ~ )
-        end
-
-        function v = Times( v, ~ )
-        end
-
-        function v = RDivide( v, ~ )
-        end
-
-        function v = Normalize( v )
-        end
-
     end
 
-    methods ( Static, Access = { ?BaseDoubleDouble, ?BaseExtDoubleProperties, ?ExtDouble } )
+    methods ( Static, Access = { ?BaseDoubleDouble, ?BaseExtDoubleProperties } )
 
         function v = MakeStatic( a1, a2 )
             v = QuadDoubleConstant;

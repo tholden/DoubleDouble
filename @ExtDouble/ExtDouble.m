@@ -1,6 +1,6 @@
 classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
 
-    properties ( Abstract, SetAccess = { ?BaseDoubleDouble, ?BaseExtDoubleProperties, ?ExtDouble }, GetAccess = public )
+    properties ( Abstract, SetAccess = { ?BaseDoubleDouble, ?BaseExtDoubleProperties }, GetAccess = public )
 
         v1
         v2

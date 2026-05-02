@@ -84,7 +84,7 @@ classdef QuadDouble < BaseQuadDouble & ExtDouble & QuadDoublePropertiesMixin
 
     end
 
-    methods ( Static, Access = { ?BaseDoubleDouble, ?BaseExtDoubleProperties, ?ExtDouble } )
+    methods ( Static, Access = { ?BaseDoubleDouble, ?BaseExtDoubleProperties } )
 
         function v = MakeStatic( a1, a2 )
             v = QuadDouble;

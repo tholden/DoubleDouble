@@ -365,7 +365,7 @@ classdef OctoDouble < BaseDoubleDouble & ExtDouble
 
     end
 
-    methods ( Static, Access = { ?BaseDoubleDouble, ?BaseExtDoubleProperties, ?ExtDouble } )
+    methods ( Static, Access = { ?BaseDoubleDouble, ?BaseExtDoubleProperties } )
 
         function v = MakeStatic( a1, a2 )
             v = OctoDouble;

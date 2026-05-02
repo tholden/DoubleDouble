@@ -131,7 +131,7 @@ classdef DoubleDouble < BaseDoubleDouble & ExtDouble
 
     end
 
-    methods ( Static, Access = { ?BaseDoubleDouble, ?BaseExtDoubleProperties, ?ExtDouble } )
+    methods ( Static, Access = { ?BaseDoubleDouble, ?BaseExtDoubleProperties, ?ExtDouble, ?QuadDoubleConstant, ?QuadDoublePropertiesMixin, ?QuadDoubleSlow, ?QuadDouble, ?OctoDouble } )
 
         function v = MakeStatic( a1, a2 )
             v = DoubleDouble;
