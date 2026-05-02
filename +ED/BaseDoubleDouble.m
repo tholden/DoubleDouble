@@ -1,6 +1,6 @@
 classdef ( Abstract ) BaseDoubleDouble
 
-    properties ( SetAccess = { ?BaseDoubleDouble, ?BaseExtDoubleProperties }, GetAccess = public )
+    properties ( SetAccess = { ?ED.BaseDoubleDouble, ?ED.BaseExtDoubleProperties }, GetAccess = public )
 
         v1
         v2
@@ -23,7 +23,7 @@ classdef ( Abstract ) BaseDoubleDouble
     methods ( Access = protected ) % Not sealed, overridden in QuadDouble.
 
         function v = Plus( a, b )
-            [ a, b ] = BaseDoubleDouble.JointPromotion( a, b );
+            [ a, b ] = ED.BaseDoubleDouble.JointPromotion( a, b );
             if PromotionOrder( a ) == PromotionOrder( b )
                 [ x1, x2 ] = DDPlusDD( a.v1, a.v2, b.v1, b.v2 );
                 v = a.Make( x1, x2 );
@@ -37,7 +37,7 @@ classdef ( Abstract ) BaseDoubleDouble
         end
 
         function v = Times( a, b )
-            [ a, b ] = BaseDoubleDouble.JointPromotion( a, b );
+            [ a, b ] = ED.BaseDoubleDouble.JointPromotion( a, b );
             if PromotionOrder( a ) == PromotionOrder( b )
                 [ x1, x2 ] = DDTimesDD( a.v1, a.v2, b.v1, b.v2 );
                 v = a.Make( x1, x2 );
@@ -51,7 +51,7 @@ classdef ( Abstract ) BaseDoubleDouble
         end
 
         function v = RDivide( a, b )
-            [ a, b ] = BaseDoubleDouble.JointPromotion( a, b );
+            [ a, b ] = ED.BaseDoubleDouble.JointPromotion( a, b );
             if PromotionOrder( a ) == PromotionOrder( b )
                 [ x1, x2 ] = DDDividedByDD( a.v1, a.v2, b.v1, b.v2 );
                 v = a.Make( x1, x2 );

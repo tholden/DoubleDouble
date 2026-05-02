@@ -1,4 +1,4 @@
-classdef DoubleDouble < BaseDoubleDouble & ExtDouble
+classdef DoubleDouble < ED.BaseDoubleDouble & ED.ExtDouble
 
     properties ( Constant, GetAccess = public )
 
@@ -47,7 +47,7 @@ classdef DoubleDouble < BaseDoubleDouble & ExtDouble
             if isa( in, 'DoubleDouble' )
                 v.v1 = in.v1;
                 v.v2 = in.v2;
-            elseif isa( in, 'ExtDouble' )
+            elseif isa( in, 'ED.ExtDouble' )
                 [ v.v1, v.v2 ] = ToSumOfDoubles( in );
             else
                 v.v1 = double( in );
@@ -109,7 +109,7 @@ classdef DoubleDouble < BaseDoubleDouble & ExtDouble
 
     end
 
-    methods ( Static, Access = { ?BaseDoubleDouble, ?BaseExtDoubleProperties } )
+    methods ( Static, Access = { ?ED.BaseDoubleDouble, ?ED.BaseExtDoubleProperties } )
 
         function v = MakeStatic( a1, a2 )
             v = DoubleDouble;

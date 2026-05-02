@@ -794,7 +794,7 @@ classdef OctoDoubleTest < matlab.unittest.TestCase
         end
 
         function TestColonMixedTypes( TestCase )
-            % Bug #3: colon with plain double start and ExtDouble end
+            % Bug #3: colon with plain double start and ED.ExtDouble end
             A = OctoDouble( 1 ) : 5;
             TestCase.verifyEqual( double( A ), 1 : 5 );
             TestCase.verifyTrue( isa( A, 'OctoDouble' ) );

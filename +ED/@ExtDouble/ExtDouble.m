@@ -1,6 +1,6 @@
-classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
+classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
 
-    properties ( Abstract, SetAccess = { ?BaseDoubleDouble, ?BaseExtDoubleProperties }, GetAccess = public )
+    properties ( Abstract, SetAccess = { ?ED.BaseDoubleDouble, ?ED.BaseExtDoubleProperties }, GetAccess = public )
 
         v1
         v2
@@ -34,10 +34,10 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
                 if length( varargin ) > 1
                     v = cat( dim, cat( dim, a, b ), varargin{ 2 : end } );
                 else
-                    if ~isa( a, 'ExtDouble' )
+                    if ~isa( a, 'ED.ExtDouble' )
                         a = b.Promote( a );
                     end
-                    if ~isa( b, 'ExtDouble' )
+                    if ~isa( b, 'ED.ExtDouble' )
                         b = a.Promote( b );
                     end
                     x1 = cat( dim, a.v1, b.v1 );
@@ -74,20 +74,20 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
         end
 
         function v = Index( v, varargin )
-            assert( isa( v, 'ExtDouble' ) );
+            assert( isa( v, 'ED.ExtDouble' ) );
             v.v1 = Index( v.v1, varargin{:} );
             v.v2 = Index( v.v2, varargin{:} );
         end
 
         function v = Assign( v, Value, varargin )
-            if ~isa( v, 'ExtDouble' )
-                assert( isa( Value, 'ExtDouble' ) );
+            if ~isa( v, 'ED.ExtDouble' )
+                assert( isa( Value, 'ED.ExtDouble' ) );
                 if isempty( v )
                     v = zeros( cellfun( @max, varargin, 'UniformOutput', true ), 'like', Value );
                 else
                     v = Value.Promote( v );
                 end
-            elseif ~isa( Value, 'ExtDouble' )
+            elseif ~isa( Value, 'ED.ExtDouble' )
                 Value = v.Promote( Value );
             end
             v.v1 = Assign( v.v1, Value.v1, varargin{:} );
@@ -307,7 +307,7 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
         end
 
         function v = plus( a, b )
-            if isa( a, 'ExtDouble' )
+            if isa( a, 'ED.ExtDouble' )
                 v = a.Plus( b );
             else
                 v = b.Plus( a );
@@ -315,7 +315,7 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
         end
 
         function v = minus( a, b )
-            if isa( a, 'ExtDouble' )
+            if isa( a, 'ED.ExtDouble' )
                 v = a.Minus( b );
             else
                 v = -( b.Minus( a ) );
@@ -331,7 +331,7 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
         end
 
         function v = times( a, b )
-            if isa( a, 'ExtDouble' )
+            if isa( a, 'ED.ExtDouble' )
                 v = a.Times( b );
             else
                 v = b.Times( a );
@@ -339,17 +339,17 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
         end
 
         function v = mtimes( a, b )
-            if ~isa( a, 'ExtDouble' )
+            if ~isa( a, 'ED.ExtDouble' )
                 a = b.Promote( a );
             end
-            if ~isa( b, 'ExtDouble' )
+            if ~isa( b, 'ED.ExtDouble' )
                 b = a.Promote( b );
             end
             v = a.MTimes( b );
         end
 
         function v = rdivide( a, b )
-            if isa( a, 'ExtDouble' )
+            if isa( a, 'ED.ExtDouble' )
                 v = a.RDivide( b );
             else
                 a = b.Promote( a );
@@ -358,7 +358,7 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
         end
 
         function v = ldivide( a, b )
-            if isa( b, 'ExtDouble' )
+            if isa( b, 'ED.ExtDouble' )
                 v = b.RDivide( a );
             else
                 b = a.Promote( b );
@@ -373,7 +373,7 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
                 v = a.LDivide( v );
                 return
             end
-            if ~isa( v, 'ExtDouble' )
+            if ~isa( v, 'ED.ExtDouble' )
                 v = a.Promote( v );
             end
             assert( Ra == Rv );
@@ -414,10 +414,10 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
         end
 
         function v = mrdivide( v, a )
-            if ~isa( a, 'ExtDouble' )
+            if ~isa( a, 'ED.ExtDouble' )
                 a = v.Promote( a );
             end
-            if ~isa( v, 'ExtDouble' )
+            if ~isa( v, 'ED.ExtDouble' )
                 v = a.Promote( v );
             end
             at = a';
@@ -426,10 +426,10 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
         end
 
         function v = power( a, b )
-            if ~isa( a, 'ExtDouble' )
+            if ~isa( a, 'ED.ExtDouble' )
                 a = b.Promote( a );
             end
-            if isa( b, 'ExtDouble' )
+            if isa( b, 'ED.ExtDouble' )
                 b2 = b.TimesPowerOf2( 2 );
             else
                 b2 = 2 * b;
@@ -486,20 +486,20 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
                     assert( length( unique( d.v1 ) ) == length( d.v1 ) );
                     v = v * diag( d .^ b ) / v;
                 else
-                    v = ExtDouble;
+                    v = ED.ExtDouble;
                 end
             end
         end
 
         function v = lt( a, b )
-            if isa( a, 'ExtDouble' )
+            if isa( a, 'ED.ExtDouble' )
                 a1 = a.v1;
                 a2 = a.v2;
             else
                 a1 = a;
                 a2 = 0;
             end
-            if isa( b, 'ExtDouble' )
+            if isa( b, 'ED.ExtDouble' )
                 b1 = b.v1;
                 b2 = b.v2;
             else
@@ -510,14 +510,14 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
         end
 
         function v = gt( a, b )
-            if isa( a, 'ExtDouble' )
+            if isa( a, 'ED.ExtDouble' )
                 a1 = a.v1;
                 a2 = a.v2;
             else
                 a1 = a;
                 a2 = 0;
             end
-            if isa( b, 'ExtDouble' )
+            if isa( b, 'ED.ExtDouble' )
                 b1 = b.v1;
                 b2 = b.v2;
             else
@@ -528,14 +528,14 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
         end
 
         function v = le( a, b )
-            if isa( a, 'ExtDouble' )
+            if isa( a, 'ED.ExtDouble' )
                 a1 = a.v1;
                 a2 = a.v2;
             else
                 a1 = a;
                 a2 = 0;
             end
-            if isa( b, 'ExtDouble' )
+            if isa( b, 'ED.ExtDouble' )
                 b1 = b.v1;
                 b2 = b.v2;
             else
@@ -546,14 +546,14 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
         end
 
         function v = ge( a, b )
-            if isa( a, 'ExtDouble' )
+            if isa( a, 'ED.ExtDouble' )
                 a1 = a.v1;
                 a2 = a.v2;
             else
                 a1 = a;
                 a2 = 0;
             end
-            if isa( b, 'ExtDouble' )
+            if isa( b, 'ED.ExtDouble' )
                 b1 = b.v1;
                 b2 = b.v2;
             else
@@ -564,14 +564,14 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
         end
 
         function v = ne( a, b )
-            if isa( a, 'ExtDouble' )
+            if isa( a, 'ED.ExtDouble' )
                 a1 = a.v1;
                 a2 = a.v2;
             else
                 a1 = a;
                 a2 = 0;
             end
-            if isa( b, 'ExtDouble' )
+            if isa( b, 'ED.ExtDouble' )
                 b1 = b.v1;
                 b2 = b.v2;
             else
@@ -582,14 +582,14 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
         end
 
         function v = eq( a, b )
-            if isa( a, 'ExtDouble' )
+            if isa( a, 'ED.ExtDouble' )
                 a1 = a.v1;
                 a2 = a.v2;
             else
                 a1 = a;
                 a2 = 0;
             end
-            if isa( b, 'ExtDouble' )
+            if isa( b, 'ED.ExtDouble' )
                 b1 = b.v1;
                 b2 = b.v2;
             else
@@ -604,13 +604,13 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
                 b = d;
                 d = 1;
             end
-            if ~isa( a, 'ExtDouble' )
+            if ~isa( a, 'ED.ExtDouble' )
                 a = b.Promote( a );
             end
-            if ~isa( b, 'ExtDouble' )
+            if ~isa( b, 'ED.ExtDouble' )
                 b = a.Promote( b );
             end
-            if ~isa( d, 'ExtDouble' )
+            if ~isa( d, 'ED.ExtDouble' )
                 d = a.Promote( d );
             end
             c = double( floor( ( b - a ) ./ d ) );
@@ -654,10 +654,10 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
                     v = builtin( 'subsasgn', v, s, b );
                 end
             else
-                if ~isa( v, 'ExtDouble' )
+                if ~isa( v, 'ED.ExtDouble' )
                     v = b.Promote( v );
                 end
-                if ~isa( b, 'ExtDouble' )
+                if ~isa( b, 'ED.ExtDouble' )
                     b = v.Promote( b );
                 end
                 v.v1 = Assign( v.v1, b.v1, s.subs{:} );
@@ -693,7 +693,7 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
             if nargin < 3 || isempty( cm )
                 cm = 'auto';
             end
-            if isa( v, 'ExtDouble' )
+            if isa( v, 'ED.ExtDouble' )
                 if strcmpi( cm( 1 ), 'r' )
                     a = real( v );
                     b = imag( v );
@@ -744,7 +744,7 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
             if nargin < 2
                 Dim = [];
             end
-            if isa( v, 'ExtDouble' )
+            if isa( v, 'ED.ExtDouble' )
                 if nargin < 2 || isempty( Dim )
                     Dim = find( size( v.v1 ) > 1, 1 );
                     if isempty( Dim )
@@ -795,7 +795,7 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
             if nargin < 2
                 Dim = [];
             end
-            if isa( v, 'ExtDouble' )
+            if isa( v, 'ED.ExtDouble' )
                 if nargin < 2 || isempty( Dim )
                     Dim = find( size( v.v1 ) > 1, 1 );
                     if isempty( Dim )
@@ -855,7 +855,7 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
                     i = [];
                     return
                 end
-                if isa( a, 'ExtDouble' )
+                if isa( a, 'ED.ExtDouble' )
                     if nargin < 3 || isempty( Dim )
                         Dim = find( size( a.v1 ) > 1, 1 );
                         if isempty( Dim )
@@ -893,10 +893,10 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
                     end
                 end
             else
-                if ~isa( a, 'ExtDouble' )
+                if ~isa( a, 'ED.ExtDouble' )
                     a = b.Promote( a );
                 end
-                if ~isa( b, 'ExtDouble' )
+                if ~isa( b, 'ED.ExtDouble' )
                     b = a.Promote( b );
                 end
                 [ a, b ] = ExpandSingleton( a, b );
@@ -915,7 +915,7 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
                 end
             end
             if isempty( b )
-                if isa( a, 'ExtDouble' )
+                if isa( a, 'ED.ExtDouble' )
                     if nargin < 3 || isempty( Dim )
                         Dim = find( size( a.v1 ) > 1, 1 );
                         if isempty( Dim )
@@ -953,10 +953,10 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
                     end
                 end
             else
-                if ~isa( a, 'ExtDouble' )
+                if ~isa( a, 'ED.ExtDouble' )
                     a = b.Promote( a );
                 end
-                if ~isa( b, 'ExtDouble' )
+                if ~isa( b, 'ED.ExtDouble' )
                     b = a.Promote( b );
                 end
                 [ a, b ] = ExpandSingleton( a, b );
@@ -971,7 +971,7 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
             if nargin < 2
                 Dim = [];
             end
-            if isa( v, 'ExtDouble' )
+            if isa( v, 'ED.ExtDouble' )
                 if nargin < 2 || isempty( Dim )
                     Dim = find( size( v.v1 ) > 1, 1 );
                     if isempty( Dim )
@@ -1032,7 +1032,7 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
             if nargin < 2
                 Dim = [];
             end
-            if isa( v, 'ExtDouble' )
+            if isa( v, 'ED.ExtDouble' )
                 if nargin < 2 || isempty( Dim )
                     Dim = find( size( v.v1 ) > 1, 1 );
                     if isempty( Dim )
@@ -1097,7 +1097,7 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
             if nargin < 2
                 Dim = [];
             end
-            if isa( v, 'ExtDouble' )
+            if isa( v, 'ED.ExtDouble' )
                 if nargin < 2 || isempty( Dim )
                     Dim = find( size( v.v1 ) > 1, 1 );
                     if isempty( Dim )
@@ -1158,7 +1158,7 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
             if nargin < 2
                 Dim = [];
             end
-            if isa( v, 'ExtDouble' )
+            if isa( v, 'ED.ExtDouble' )
                 if nargin < 2 || isempty( Dim )
                     Dim = find( size( v.v1 ) > 1, 1 );
                     if isempty( Dim )
@@ -1219,7 +1219,7 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
             if nargin < 2
                 Dim = [];
             end
-            if isa( v, 'ExtDouble' )
+            if isa( v, 'ED.ExtDouble' )
                 if nargin < 2 || isempty( Dim )
                     Dim = find( size( v.v1 ) > 1, 1 );
                     if isempty( Dim )
@@ -2055,11 +2055,11 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
                 n = 100;
             end
 
-            if ~isa( a, 'ExtDouble' )
+            if ~isa( a, 'ED.ExtDouble' )
                 a = b.Promote( a );
             end
 
-            if ~isa( b, 'ExtDouble' )
+            if ~isa( b, 'ED.ExtDouble' )
                 b = a.Promote( b );
             end
 
@@ -2092,7 +2092,7 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
             if nargin == 1
                 v = pow2( 2, v );
             else
-                if isa( v, 'ExtDouble' )
+                if isa( v, 'ED.ExtDouble' )
                     v.v1 = pow2( v.v1, double( b ) );
                     v.v2 = pow2( v.v2, double( b ) );
                 else
@@ -2102,7 +2102,7 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
         end
 
         function v = TimesPowerOf2( v, b )
-            if isa( v, 'ExtDouble' )
+            if isa( v, 'ED.ExtDouble' )
                 v.v1 = TimesPowerOf2( v.v1, b );
                 v.v2 = TimesPowerOf2( v.v2, b );
             else
@@ -2129,7 +2129,7 @@ classdef ( Abstract ) ExtDouble < BaseExtDoubleProperties
                 return
             end
             v = zeros( R, C, 'like', a );
-            if isa( b, 'ExtDouble' )
+            if isa( b, 'ED.ExtDouble' )
                 for c = 1 : C
                     t = sum( a .* b.Make( Index( b.v1, ':', c ).', Index( b.v2, ':', c ).' ), 2 );
                     v.v1 = Assign( v.v1, t.v1, ':', c );

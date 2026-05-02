@@ -1,4 +1,4 @@
-classdef QuadDouble < BaseQuadDouble & ExtDouble & QuadDoublePropertiesMixin
+classdef QuadDouble < ED.BaseQuadDouble & ED.ExtDouble & ED.QuadDoublePropertiesMixin
 
     methods
 
@@ -13,13 +13,13 @@ classdef QuadDouble < BaseQuadDouble & ExtDouble & QuadDoublePropertiesMixin
                     in = QuadDouble.Plus( in, varargin{ i } );
                 end
             end
-            if isa( in, 'QuadDouble' ) || isa( in, 'QuadDoubleSlow' ) || isa( in, 'QuadDoubleConstant' )
+            if isa( in, 'QuadDouble' ) || isa( in, 'QuadDoubleSlow' ) || isa( in, 'ED.QuadDoubleConstant' )
                 v.v1 = in.v1;
                 v.v2 = in.v2;
             elseif isa( in, 'DoubleDouble' )
                 v.v1 = in;
                 v.v2 = DoubleDouble.zeros( size( in ) );
-            elseif isa( in, 'ExtDouble' )
+            elseif isa( in, 'ED.ExtDouble' )
                 C = cell( 1, 4 );
                 [ C{ : } ] = ToSumOfDoubles( in );
                 v.v1 = DoubleDouble.MakeStatic( C{ 1 }, C{ 2 } );
@@ -84,7 +84,7 @@ classdef QuadDouble < BaseQuadDouble & ExtDouble & QuadDoublePropertiesMixin
 
     end
 
-    methods ( Static, Access = { ?BaseDoubleDouble, ?BaseExtDoubleProperties } )
+    methods ( Static, Access = { ?ED.BaseDoubleDouble, ?ED.BaseExtDoubleProperties } )
 
         function v = MakeStatic( a1, a2 )
             v = QuadDouble;
