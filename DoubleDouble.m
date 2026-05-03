@@ -12,8 +12,6 @@ classdef DoubleDouble < ED.BaseDoubleDouble & ED.ExtDouble
         piD16  = DoubleDouble.MakeStatic( 1.963495408493620697e-01,  7.654042494670957545e-18 );
         log_2  = DoubleDouble.MakeStatic( 6.931471805599452862e-01,  2.319046813846299558e-17 );
         log_10 = DoubleDouble.MakeStatic( 2.302585092994045901e+00, -2.170756223382249351e-16 );
-
-        NInverseFactorial = 15;
         ExpRescale        = 9;
         LogSteps          = 2;
 

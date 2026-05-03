@@ -11,7 +11,6 @@ classdef OctoDouble < ED.BaseDoubleDouble & ED.ExtDouble
         piT2   = OctoDouble.MakeStatic( QuadDouble.MakeStatic( DoubleDouble.MakeStatic( 6.28318530717958623200e+00, 2.44929359829470641435e-16 ), DoubleDouble.MakeStatic( -5.98953961943667933177e-33, 2.22490844172673056309e-49 ) ), QuadDouble.MakeStatic( DoubleDouble.MakeStatic( 1.13444639592806314883e-65, 3.48997243227049720241e-83 ), DoubleDouble.MakeStatic( 1.20587454644990796800e-99, 3.82024709375997998296e-116 ) ) );
         piD2   = OctoDouble.MakeStatic( QuadDouble.MakeStatic( DoubleDouble.MakeStatic( 1.57079632679489655800e+00, 6.12323399573676603587e-17 ), DoubleDouble.MakeStatic( -1.49738490485916983294e-33, 5.56227110431682640773e-50 ) ), QuadDouble.MakeStatic( DoubleDouble.MakeStatic( 2.83611598982015787207e-66, 8.72493108067624300601e-84 ), DoubleDouble.MakeStatic( 3.01468636612476992000e-100, 9.55061773439994995741e-117 ) ) );
         piD16  = OctoDouble.MakeStatic( QuadDouble.MakeStatic( DoubleDouble.MakeStatic( 1.96349540849362069750e-01, 7.65404249467095754484e-18 ), DoubleDouble.MakeStatic( -1.87173113107396229118e-34, 6.95283888039603300966e-51 ) ), QuadDouble.MakeStatic( DoubleDouble.MakeStatic( 3.54514498727519734009e-67, 1.09061638508453037575e-84 ), DoubleDouble.MakeStatic( 3.76835795765596240000e-101, 1.19382721679999374468e-117 ) ) );
-        NInverseFactorial = 99;
         ExpRescale        = 16;
         LogSteps          = 4;
         InverseFactorial = OctoDouble.MakeStatic( ...

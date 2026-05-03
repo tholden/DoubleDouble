@@ -8,7 +8,6 @@ classdef ( Abstract ) BaseExtDoubleProperties
         tiny
         pi
         InverseFactorial
-        NInverseFactorial
         piT2
         piD2
         piD16

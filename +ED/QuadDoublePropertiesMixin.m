@@ -12,8 +12,6 @@ classdef ( Abstract ) QuadDoublePropertiesMixin < ED.BaseExtDoubleProperties
         piD16  = ED.QuadDoubleConstant.MakeStatic( DoubleDouble.MakeStatic( 1.96349540849362069750e-01, 7.65404249467095754484e-18 ), DoubleDouble.MakeStatic( -1.87173113107396229118e-34, 6.95283888039603300966e-51 ) );
         log_2  = ED.QuadDoubleConstant.MakeStatic( DoubleDouble.MakeStatic( 6.93147180559945286227e-01, 2.31904681384629955842e-17 ), DoubleDouble.MakeStatic( 5.70770843841621206578e-34, -3.58243221060181142336e-50 ) );
         log_10 = ED.QuadDoubleConstant.MakeStatic( DoubleDouble.MakeStatic( 2.30258509299404590109e+00, -2.17075622338224935076e-16 ), DoubleDouble.MakeStatic( -9.98426245446577657012e-33, -4.02335745445020637879e-49 ) );
-
-        NInverseFactorial = 48;
         ExpRescale        = 12;
         LogSteps          = 3;
 
