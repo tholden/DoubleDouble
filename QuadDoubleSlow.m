@@ -51,23 +51,23 @@ classdef QuadDoubleSlow < ED.BaseDoubleDouble & ED.ExtDouble & ED.QuadDoubleProp
     methods ( Static )
 
         function v = ones( varargin )
-            v = QuadDoubleSlow.MakeStatic( DoubleDouble( ones( varargin{:}, 'double' ) ), DoubleDouble( zeros( varargin{:}, 'double' ) ) );
+            v = QuadDoubleSlow.MakeStatic( DoubleDouble( ones( varargin{:}, 'double' ) ), 0 );
         end
 
         function v = zeros( varargin )
-            v = QuadDoubleSlow.MakeStatic( DoubleDouble( zeros( varargin{:}, 'double' ) ), DoubleDouble( zeros( varargin{:}, 'double' ) ) );
+            v = QuadDoubleSlow.MakeStatic( DoubleDouble( zeros( varargin{:}, 'double' ) ), 0 );
         end
 
         function v = eye( varargin )
-            v = QuadDoubleSlow.MakeStatic( DoubleDouble( eye( varargin{:}, 'double' ) ), DoubleDouble( zeros( varargin{:}, 'double' ) ) );
+            v = QuadDoubleSlow.MakeStatic( DoubleDouble( eye( varargin{:}, 'double' ) ), 0 );
         end
 
         function v = NaN( varargin )
-            v = QuadDoubleSlow.MakeStatic( DoubleDouble.NaN( varargin{:} ), DoubleDouble.NaN( varargin{:} ) );
+            v = QuadDoubleSlow.MakeStatic( DoubleDouble.NaN( varargin{:} ), 0 );
         end
 
         function v = Inf( varargin )
-            v = QuadDoubleSlow.MakeStatic( DoubleDouble.Inf( varargin{:} ), DoubleDouble.Inf( varargin{:} ) );
+            v = QuadDoubleSlow.MakeStatic( DoubleDouble.Inf( varargin{:} ), 0 );
         end
 
         function v = randn( varargin )
@@ -79,7 +79,7 @@ classdef QuadDoubleSlow < ED.BaseDoubleDouble & ED.ExtDouble & ED.QuadDoubleProp
         end
 
         function v = randi( imax, varargin )
-            v = QuadDoubleSlow.MakeStatic( DoubleDouble( randi( imax, varargin{:}, 'double' ) ), DoubleDouble( zeros( varargin{:}, 'double' ) ) );
+            v = QuadDoubleSlow.MakeStatic( DoubleDouble( randi( imax, varargin{:}, 'double' ) ), 0 );
         end
 
     end
@@ -89,12 +89,7 @@ classdef QuadDoubleSlow < ED.BaseDoubleDouble & ED.ExtDouble & ED.QuadDoubleProp
         function v = MakeStatic( a1, a2 )
             v = QuadDoubleSlow;
             v.v1 = DoubleDouble( a1 );
-            if ~isempty( a2 ) && all( a2 == 0, 'all' )
-                v.v2 = 0;
-            else
-                v.v2 = DoubleDouble( a2 );
-            end
-
+            v.v2 = DoubleDouble( a2 );
         end
 
     end

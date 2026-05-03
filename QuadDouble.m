@@ -43,23 +43,23 @@ classdef QuadDouble < ED.BaseQuadDouble & ED.ExtDouble & ED.QuadDoubleProperties
     methods ( Static )
 
         function v = ones( varargin )
-            v = QuadDouble.MakeStatic( DoubleDouble.ones( varargin{:} ), DoubleDouble.zeros( varargin{:} ) );
+            v = QuadDouble.MakeStatic( DoubleDouble.ones( varargin{:} ), 0 );
         end
 
         function v = zeros( varargin )
-            v = QuadDouble.MakeStatic( DoubleDouble.zeros( varargin{:} ), DoubleDouble.zeros( varargin{:} ) );
+            v = QuadDouble.MakeStatic( DoubleDouble.zeros( varargin{:} ), 0 );
         end
 
         function v = eye( varargin )
-            v = QuadDouble.MakeStatic( DoubleDouble.eye( varargin{:} ), DoubleDouble.zeros( varargin{:} ) );
+            v = QuadDouble.MakeStatic( DoubleDouble.eye( varargin{:} ), 0 );
         end
 
         function v = NaN( varargin )
-            v = QuadDouble.MakeStatic( DoubleDouble.NaN( varargin{:} ), DoubleDouble.NaN( varargin{:} ) );
+            v = QuadDouble.MakeStatic( DoubleDouble.NaN( varargin{:} ), 0 );
         end
 
         function v = Inf( varargin )
-            v = QuadDouble.MakeStatic( DoubleDouble.Inf( varargin{:} ), DoubleDouble.Inf( varargin{:} ) );
+            v = QuadDouble.MakeStatic( DoubleDouble.Inf( varargin{:} ), 0 );
         end
 
         function v = rand( varargin )
@@ -71,7 +71,7 @@ classdef QuadDouble < ED.BaseQuadDouble & ED.ExtDouble & ED.QuadDoubleProperties
         end
 
         function v = randi( imax, varargin )
-            v = QuadDouble.MakeStatic( DoubleDouble( randi( imax, varargin{:}, 'double' ) ), DoubleDouble.zeros( varargin{:} ) );
+            v = QuadDouble.MakeStatic( DoubleDouble( randi( imax, varargin{:}, 'double' ) ), 0 );
         end
 
     end
@@ -89,11 +89,7 @@ classdef QuadDouble < ED.BaseQuadDouble & ED.ExtDouble & ED.QuadDoubleProperties
         function v = MakeStatic( a1, a2 )
             v = QuadDouble;
             v.v1 = DoubleDouble( a1 );
-            if ~isempty( a2 ) && all( a2 == 0, 'all' )
-                v.v2 = 0;
-            else
-                v.v2 = DoubleDouble( a2 );
-            end
+            v.v2 = DoubleDouble( a2 );
         end
 
     end
