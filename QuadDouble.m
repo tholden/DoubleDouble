@@ -18,15 +18,15 @@ classdef QuadDouble < ED.BaseQuadDouble & ED.ExtDouble & ED.QuadDoubleProperties
                 v.v2 = in.v2;
             elseif isa( in, 'DoubleDouble' )
                 v.v1 = in;
-                v.v2 = DoubleDouble.zeros( size( in ) );
+                v.v2 = 0;
             elseif isa( in, 'ED.ExtDouble' )
                 C = cell( 1, 4 );
                 [ C{ : } ] = ToSumOfDoubles( in );
                 v.v1 = DoubleDouble.MakeStatic( C{ 1 }, C{ 2 } );
                 v.v2 = DoubleDouble.MakeStatic( C{ 3 }, C{ 4 } );
             else
-                v.v1 = DoubleDouble( in );
-                v.v2 = DoubleDouble.zeros( size( in ) );
+                v.v1 = DoubleDouble( double( in ) );
+                v.v2 = 0;
             end
         end
 
@@ -35,7 +35,7 @@ classdef QuadDouble < ED.BaseQuadDouble & ED.ExtDouble & ED.QuadDoubleProperties
         end
 
         function n = PromotionOrder( ~ )
-            n = 2.8;
+            n = 2.2;
         end
 
     end
@@ -88,14 +88,12 @@ classdef QuadDouble < ED.BaseQuadDouble & ED.ExtDouble & ED.QuadDoubleProperties
 
         function v = MakeStatic( a1, a2 )
             v = QuadDouble;
-            if ~isa( a1, 'DoubleDouble' )
-                a1 = DoubleDouble( a1 );
+            v.v1 = DoubleDouble( a1 );
+            if ~isempty( a2 ) && all( a2 == 0, 'all' )
+                v.v2 = 0;
+            else
+                v.v2 = DoubleDouble( a2 );
             end
-            if ~isa( a2, 'DoubleDouble' )
-                a2 = DoubleDouble( a2 );
-            end
-            v.v1 = a1;
-            v.v2 = a2;
         end
 
     end

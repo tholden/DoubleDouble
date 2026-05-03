@@ -21,9 +21,8 @@ classdef OctoDouble < ED.BaseDoubleDouble & ED.ExtDouble
 
         function v = OctoDouble( in, varargin )
             if nargin == 0
-                DoubleDoubleEmpty = DoubleDouble.MakeStatic( [], [] );
-                v.v1 = QuadDouble.MakeStatic( DoubleDoubleEmpty, DoubleDoubleEmpty );
-                v.v2 = QuadDouble.MakeStatic( DoubleDoubleEmpty, DoubleDoubleEmpty );
+                v.v1 = QuadDouble.empty;
+                v.v2 = QuadDouble.empty;
                 return
             end
             if nargin >= 2
@@ -34,45 +33,19 @@ classdef OctoDouble < ED.BaseDoubleDouble & ED.ExtDouble
             if isa( in, 'OctoDouble' )
                 v.v1 = in.v1;
                 v.v2 = in.v2;
-            elseif isa( in, 'QuadDouble' )
-                v.v1 = in;
-                v.v2 = QuadDouble.zeros( size( in ) );
-            elseif isa( in, 'DoubleDouble' )
-                v.v1 = in;
-                v.v2 = DoubleDouble.zeros( size( in ) );
+            elseif isa( in, 'QuadDouble' ) || isa( in, 'QuadDoubleSlow' ) || isa( in, 'ED.QuadDoubleConstant' ) || isa( in, 'DoubleDouble' )
+                v.v1 = QuadDouble( in );
+                v.v2 = 0;
             elseif isa( in, 'ED.ExtDouble' )
                 C = cell( 1, 4 );
                 [ C{ : } ] = ToSumOfDoubles( in );
                 v.v1 = DoubleDouble.MakeStatic( C{ 1 }, C{ 2 } );
                 v.v2 = DoubleDouble.MakeStatic( C{ 3 }, C{ 4 } );
             else
-                v.v1 = DoubleDouble( in );
-                v.v2 = DoubleDouble.zeros( size( in ) );
+                v.v1 = QuadDouble( DoubleDouble( double( in ) ) );
+                v.v2 = 0;
             end
 
-            if nargin == 0
-                v.v1 = QuadDouble( [] );
-                v.v2 = QuadDouble( [] );
-                return
-            end
-            if nargin >= 2
-                for i = 1 : length( varargin )
-                    in = OctoDouble.Plus( in, varargin{ i } );
-                end
-            end
-            if isa( in, 'OctoDouble' )
-                v.v1 = in.v1;
-                v.v2 = in.v2;
-            elseif isa( in, 'QuadDouble' )
-                v.v1 = in;
-                v.v2 = QuadDouble( zeros( size( in ) ) );
-            elseif isa( in, 'DoubleDouble' )
-                v.v1 = QuadDouble( in );
-                v.v2 = QuadDouble( zeros( size( in ) ) );
-            else
-                v.v1 = QuadDouble( in );
-                v.v2 = QuadDouble( zeros( size( in ) ) );
-            end
         end
 
         function v = Promote( ~, a )
@@ -133,14 +106,12 @@ classdef OctoDouble < ED.BaseDoubleDouble & ED.ExtDouble
 
         function v = MakeStatic( a1, a2 )
             v = OctoDouble;
-            if ~isa( a1, 'QuadDouble' )
-                a1 = QuadDouble( a1 );
+            v.v1 = QuadDouble( a1 );
+            if ~isempty( a2 ) && all( a2 == 0, 'all' )
+                v.v2 = 0;
+            else
+                v.v2 = QuadDouble( a2 );
             end
-            if ~isa( a2, 'QuadDouble' )
-                a2 = QuadDouble( a2 );
-            end
-            v.v1 = a1;
-            v.v2 = a2;
         end
 
     end
