@@ -1,11 +1,11 @@
-function Results = RunTests()
+function Results = RunTests( )
     % RunTests Run all DoubleDouble and QuadDouble tests
     %
     % This function runs the comprehensive test suite for the DoubleDouble class
     % and reports the results.
     %
     % Usage:
-    %   Results = RunTests()
+    %   Results = RunTests( )
     %
     % Returns:
     %   Results - TestResult object containing test outcomes

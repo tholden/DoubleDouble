@@ -1,5 +1,5 @@
 function v = Vec( v )
 
-    v = v(:);
+    v = v( : );
 
 end

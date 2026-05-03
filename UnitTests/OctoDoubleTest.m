@@ -38,7 +38,7 @@ classdef OctoDoubleTest < matlab.unittest.TestCase
             % at full extended precision.
             Data = [ 1.123, -2.456; 3.789, -4.012 ];
 
-            VPAData = vpa( sym(Data, 'f'), 135 );
+            VPAData = vpa( sym( Data, 'f' ), 135 );
             QDS = OctoDouble( Data );
 
             % Test basic arithmetic operations
@@ -48,10 +48,10 @@ classdef OctoDoubleTest < matlab.unittest.TestCase
             [ v1, v2, v3, v4, v5, v6, v7, v8 ] = ToSumOfDoubles( ResQDS );
             ResQDS_VPA = vpa( v1, 135 ) + vpa( v2, 135 ) + vpa( v3, 135 ) + vpa( v4, 135 ) + vpa( v5, 135 ) + vpa( v6, 135 ) + vpa( v7, 135 ) + vpa( v8, 135 );
 
-            TestCase.verifyEqual( double( ResQDS_VPA - ResVPA ), zeros(size(Data)), 'AbsTol', 1e-120 );
+            TestCase.verifyEqual( double( ResQDS_VPA - ResVPA ), zeros( size( Data ) ), 'AbsTol', 1e-120 );
 
-            % Test linear algebra routines (LU decomposition)
-            % Not supported for VPA matrices efficiently with same exact outputs (P, L, U may differ).
+            % Test linear algebra routines ( LU decomposition )
+            % Not supported for VPA matrices efficiently with same exact outputs ( P, L, U may differ ).
             % But we can skip it for cross validation with VPA since VPA lu can behave differently.
             % Or just skip LU in TestCrossValidation since it is tested in TestLU.
         end
@@ -75,17 +75,17 @@ classdef OctoDoubleTest < matlab.unittest.TestCase
             TestCase.verifyEqual( v3, q3, 'AbsTol', 1e-60 );
             TestCase.verifyEqual( v4, q4, 'AbsTol', 1e-60 );
 
-            % Test linear algebra routines (LU decomposition)
+            % Test linear algebra routines ( LU decomposition )
             [ L_QD, U_QD, ~ ] = lu( QD );
             [ L_OD, U_OD, ~ ] = lu( OD );
 
-            TestCase.verifyEqual( double( L_OD - L_QD ), zeros(size(Data) ), 'AbsTol', 1e-28 );
-            TestCase.verifyEqual( double( U_OD - U_QD ), zeros(size(Data) ), 'AbsTol', 1e-28 );
+            TestCase.verifyEqual( double( L_OD - L_QD ), zeros( size( Data ) ), 'AbsTol', 1e-28 );
+            TestCase.verifyEqual( double( U_OD - U_QD ), zeros( size( Data ) ), 'AbsTol', 1e-28 );
         end
 
         % Constructor tests
         function TestConstructorEmpty( TestCase )
-            A = OctoDouble();
+            A = OctoDouble( );
             [ V1, ~, ~, ~, ~, ~, ~, V8 ] = ToSumOfDoubles( A );
             TestCase.verifyEmpty( V1 );
             TestCase.verifyEmpty( V8 );
@@ -410,7 +410,7 @@ classdef OctoDoubleTest < matlab.unittest.TestCase
             % Test with complex values
             C = OctoDouble( [ 3+4i, 0, 1-1i ] );
             D = abs( C );
-            TestCase.verifyEqual( double( D ), [ 5, 0, sqrt(2) ], 'RelTol', TestCase.RelTol );
+            TestCase.verifyEqual( double( D ), [ 5, 0, sqrt( 2 ) ], 'RelTol', TestCase.RelTol );
         end
 
         function TestSign( TestCase )
@@ -658,7 +658,7 @@ classdef OctoDoubleTest < matlab.unittest.TestCase
             A = OctoDouble( [ 4, 12, -16; 12, 37, -43; -16, -43, 98 ] );
             [ L, D ] = ldl( A, 'vector' );
 
-            % Verify that L*diag(D)*L' = A
+            % Verify that L*diag( D )*L' = A
             LDLt = L * D * L';
             TestCase.verifyEqual( double( LDLt ), double( A ), 'RelTol', TestCase.RelTol );
         end
@@ -776,19 +776,19 @@ classdef OctoDoubleTest < matlab.unittest.TestCase
             % Bug #2: cummax/cummin ignored the Dim argument
             A = OctoDouble( [ 1, 3; 4, 2 ] );
 
-            % cummax along dim 1 (columns)
+            % cummax along dim 1 ( columns )
             CM1 = cummax( A, 1 );
             TestCase.verifyEqual( double( CM1 ), [ 1, 3; 4, 3 ] );
 
-            % cummax along dim 2 (rows)
+            % cummax along dim 2 ( rows )
             CM2 = cummax( A, 2 );
             TestCase.verifyEqual( double( CM2 ), [ 1, 3; 4, 4 ] );
 
-            % cummin along dim 1 (columns)
+            % cummin along dim 1 ( columns )
             Cm1 = cummin( A, 1 );
             TestCase.verifyEqual( double( Cm1 ), [ 1, 3; 1, 2 ] );
 
-            % cummin along dim 2 (rows)
+            % cummin along dim 2 ( rows )
             Cm2 = cummin( A, 2 );
             TestCase.verifyEqual( double( Cm2 ), [ 1, 1; 4, 2 ] );
         end
@@ -813,7 +813,7 @@ classdef OctoDoubleTest < matlab.unittest.TestCase
         end
 
         function TestMrdivideMatrix( TestCase )
-            % Bug #5/6: mrdivide for matrices (A / B)
+            % Bug #5/6: mrdivide for matrices ( A / B )
             A = OctoDouble( [ 3, 1; 1, 2 ] );
             B = OctoDouble( [ 1, 0; 0, 1 ] );
             X = A / B;

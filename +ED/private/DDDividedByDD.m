@@ -1,7 +1,7 @@
 function [ r1, r2 ] = DDDividedByDD( a1, a2, b1, b2 )
-    % Rescale to prevent overflow in intermediate products (cf. QD library)
+    % Rescale to prevent overflow in intermediate products ( cf. QD library )
     Rescale = abs( a1 ) > 2 ^ 969;
-    if any( Rescale(:) )
+    if any( Rescale( : ) )
         ScaleDown = 2 ^ -53;
         a1( Rescale ) = a1( Rescale ) * ScaleDown;
         a2( Rescale ) = a2( Rescale ) * ScaleDown;
@@ -15,13 +15,13 @@ function [ r1, r2 ] = DDDividedByDD( a1, a2, b1, b2 )
     q3 = r1 ./ b1;
     [ q1, q2 ] = DDNormalize( q1, q2 );
     [ r1, r2 ] = DDPlusUnderlying( q1, q2, q3 );
-    if any( Rescale(:) )
+    if any( Rescale( : ) )
         ScaleUp = 2 ^ 53;
         r1( Rescale ) = r1( Rescale ) * ScaleUp;
         r2( Rescale ) = r2( Rescale ) * ScaleUp;
     end
     Select = ( b1 == 0 ) & ( b2 == 0 );
-    if any( Select(:) )
+    if any( Select( : ) )
         if ( isscalar( Select ) ) && ( numel( a1 ) > 1 )
             Select = repmat( Select, size( a1 ) );
         elseif ( numel( Select ) > 1 ) && ( isscalar( a1 ) )
@@ -33,7 +33,7 @@ function [ r1, r2 ] = DDDividedByDD( a1, a2, b1, b2 )
         r2( Select ) = a1Select;
     end
     Select = isinf( b1 );
-    if any( Select(:) )
+    if any( Select( : ) )
         if ( isscalar( Select ) ) && ( numel( a1 ) > 1 )
             Select = repmat( Select, size( a1 ) );
         elseif ( numel( Select ) > 1 ) && ( isscalar( a1 ) )

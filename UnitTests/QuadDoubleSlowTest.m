@@ -37,51 +37,51 @@ classdef QuadDoubleSlowTest < matlab.unittest.TestCase
             % Verify that QuadDoubleSlow produces identical results to QuadDouble
             % at full extended precision.
             Data = [ 1.123, -2.456; 3.789, -4.012 ];
-            
+
             QD  = QuadDouble( Data );
             QDS = QuadDoubleSlow( Data );
-            
+
             % Test basic arithmetic operations
             ResQD  = QD * QD + QD - ( QD / 2 );
             ResQDS = QDS * QDS + QDS - ( QDS / 2 );
-            
-            % Verify internal SumOfDoubles bounds (difference must be strictly 0)
+
+            % Verify internal SumOfDoubles bounds ( difference must be strictly 0 )
             [ v1, v2, v3, v4 ] = ToSumOfDoubles( ResQDS );
             [ q1, q2, q3, q4 ] = ToSumOfDoubles( ResQD );
-            
+
             TestCase.verifyEqual( v1, q1, 'AbsTol', TestCase.AbsTol );
             TestCase.verifyEqual( v2, q2, 'AbsTol', TestCase.AbsTol );
             TestCase.verifyEqual( v3, q3, 'AbsTol', TestCase.AbsTol );
             TestCase.verifyEqual( v4, q4, 'AbsTol', TestCase.AbsTol );
-            
-            % Test linear algebra routines (LU decomposition)
+
+            % Test linear algebra routines ( LU decomposition )
             [ L_QD, U_QD, ~ ] = lu( QD );
             [ L_QDS, U_QDS, ~ ] = lu( QDS );
-            
-            TestCase.verifyEqual( double( L_QDS - L_QD ), zeros(size(Data) ), 'AbsTol', 1e-28 );
-            TestCase.verifyEqual( double( U_QDS - U_QD ), zeros(size(Data) ), 'AbsTol', 1e-28 );
+
+            TestCase.verifyEqual( double( L_QDS - L_QD ), zeros( size( Data ) ), 'AbsTol', 1e-28 );
+            TestCase.verifyEqual( double( U_QDS - U_QD ), zeros( size( Data ) ), 'AbsTol', 1e-28 );
         end
 
         function TestCrossValidationVPA( TestCase )
             % Verify that QuadDoubleSlow is accurate compared to VPA
             Data = [ 1.123, -2.456; 3.789, -4.012 ];
-            
-            VPAData = vpa( sym(Data, 'f'), 135 );
+
+            VPAData = vpa( sym( Data, 'f' ), 135 );
             QDS = QuadDoubleSlow( Data );
-            
+
             % Test basic arithmetic operations
             ResVPA = VPAData * VPAData + VPAData - ( VPAData / 2 );
             ResQDS = QDS * QDS + QDS - ( QDS / 2 );
-            
+
             [ v1, v2, v3, v4 ] = ToSumOfDoubles( ResQDS );
             ResQDS_VPA = vpa( v1, 135 ) + vpa( v2, 135 ) + vpa( v3, 135 ) + vpa( v4, 135 );
-            
-            TestCase.verifyEqual( double( ResQDS_VPA - ResVPA ), zeros(size(Data)), 'AbsTol', 1e-60 );
+
+            TestCase.verifyEqual( double( ResQDS_VPA - ResVPA ), zeros( size( Data ) ), 'AbsTol', 1e-60 );
         end
 
         % Constructor tests
         function TestConstructorEmpty( TestCase )
-            A = QuadDoubleSlow();
+            A = QuadDoubleSlow( );
             [ V1, V2, V3, V4 ] = ToSumOfDoubles( A );
             TestCase.verifyEmpty( V1 );
             TestCase.verifyEmpty( V2 );
@@ -409,7 +409,7 @@ classdef QuadDoubleSlowTest < matlab.unittest.TestCase
             % Test with complex values
             C = QuadDoubleSlow( [ 3+4i, 0, 1-1i ] );
             D = abs( C );
-            TestCase.verifyEqual( double( D ), [ 5, 0, sqrt(2) ], 'RelTol', TestCase.RelTol );
+            TestCase.verifyEqual( double( D ), [ 5, 0, sqrt( 2 ) ], 'RelTol', TestCase.RelTol );
         end
 
         function TestSign( TestCase )
@@ -657,7 +657,7 @@ classdef QuadDoubleSlowTest < matlab.unittest.TestCase
             A = QuadDoubleSlow( [ 4, 12, -16; 12, 37, -43; -16, -43, 98 ] );
             [ L, D ] = ldl( A, 'vector' );
 
-            % Verify that L*diag(D)*L' = A
+            % Verify that L*diag( D )*L' = A
             LDLt = L * D * L';
             TestCase.verifyEqual( double( LDLt ), double( A ), 'RelTol', TestCase.RelTol );
         end
@@ -775,19 +775,19 @@ classdef QuadDoubleSlowTest < matlab.unittest.TestCase
             % Bug #2: cummax/cummin ignored the Dim argument
             A = QuadDoubleSlow( [ 1, 3; 4, 2 ] );
 
-            % cummax along dim 1 (columns)
+            % cummax along dim 1 ( columns )
             CM1 = cummax( A, 1 );
             TestCase.verifyEqual( double( CM1 ), [ 1, 3; 4, 3 ] );
 
-            % cummax along dim 2 (rows)
+            % cummax along dim 2 ( rows )
             CM2 = cummax( A, 2 );
             TestCase.verifyEqual( double( CM2 ), [ 1, 3; 4, 4 ] );
 
-            % cummin along dim 1 (columns)
+            % cummin along dim 1 ( columns )
             Cm1 = cummin( A, 1 );
             TestCase.verifyEqual( double( Cm1 ), [ 1, 3; 1, 2 ] );
 
-            % cummin along dim 2 (rows)
+            % cummin along dim 2 ( rows )
             Cm2 = cummin( A, 2 );
             TestCase.verifyEqual( double( Cm2 ), [ 1, 1; 4, 2 ] );
         end
@@ -812,7 +812,7 @@ classdef QuadDoubleSlowTest < matlab.unittest.TestCase
         end
 
         function TestMrdivideMatrix( TestCase )
-            % Bug #5/6: mrdivide for matrices (A / B)
+            % Bug #5/6: mrdivide for matrices ( A / B )
             A = QuadDoubleSlow( [ 3, 1; 1, 2 ] );
             B = QuadDoubleSlow( [ 1, 0; 0, 1 ] );
             X = A / B;
