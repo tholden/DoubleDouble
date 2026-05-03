@@ -31,7 +31,7 @@ classdef OctoDouble < ED.BaseDoubleDouble & ED.ExtDouble
     methods
 
         function v = OctoDouble( in, varargin )
-            if nargin == 0
+            if nargin == 0 || isempty( in )
                 v.v1 = QuadDouble.empty;
                 v.v2 = QuadDouble.empty;
                 return
@@ -118,7 +118,13 @@ classdef OctoDouble < ED.BaseDoubleDouble & ED.ExtDouble
         function v = MakeStatic( a1, a2 )
             v = OctoDouble;
             v.v1 = QuadDouble( a1 );
-            v.v2 = QuadDouble( a2 );
+            if isempty( a1 )
+                v.v2 = v.v1;
+            elseif all( a2 == 0, 'all' )
+                v.v2 = 0;
+            else
+                v.v2 = QuadDouble( a2 );
+            end
         end
 
     end
