@@ -108,8 +108,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             varargout = cell( 1, nargout );
             [ varargout{:} ] = ToSumOfDoubles( v.v1 );
             FirstEmpty = find( cellfun( @isempty, varargout, 'UniformOutput', true ), 1, 'first' );
-            if ~isempty( FirstEmpty )
-                v = FillV2( v );
+            if ~isempty( FirstEmpty ) && ~isempty( v.v2 )
                 [ varargout{ FirstEmpty : nargout } ] = ToSumOfDoubles( v.v2 );
             end
         end
@@ -1086,16 +1085,15 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 end
                 [ a, b ] = ED.ExtDouble.ExpandSingleton( a, b );
                 if isempty( a.v2 ) && isempty( b.v2 )
-                    i = ( a.v1 > b.v1 );
+                    i = a.v1 > b.v1;
                     s = b;
                     s.v1 = Assign( s.v1, Index( a.v1, i ), i );
                     s.v2 = [];
                 else
-                    a = FillV2( a ); b = FillV2( b );
+                    a = FillV2( a );
+                    b = FillV2( b );
                     i = ( a.v1 > b.v1 ) | ( ( a.v1 == b.v1 ) & ( a.v2 > b.v2 ) );
-                    s = b;
-                    s.v1 = Assign( s.v1, Index( a.v1, i ), i );
-                    s.v2 = Assign( s.v2, Index( a.v2, i ), i );
+                    s = Assign( b, Index( a, i ), i );
                 end
             end
         end
@@ -1158,16 +1156,14 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 end
                 [ a, b ] = ED.ExtDouble.ExpandSingleton( a, b );
                 if isempty( a.v2 ) && isempty( b.v2 )
-                    i = ( a.v1 < b.v1 );
+                    i = a.v1 < b.v1;
                     s = b;
                     s.v1 = Assign( s.v1, Index( a.v1, i ), i );
                     s.v2 = [];
                 else
                     a = FillV2( a ); b = FillV2( b );
                     i = ( a.v1 < b.v1 ) | ( ( a.v1 == b.v1 ) & ( a.v2 < b.v2 ) );
-                    s = b;
-                    s.v1 = Assign( s.v1, Index( a.v1, i ), i );
-                    s.v2 = Assign( s.v2, Index( a.v2, i ), i );
+                    s = Assign( b, Index( a, i ), i );
                 end
             end
         end
@@ -1569,65 +1565,73 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
         end
 
         function v = floor( v )
+            x1 = floor( v.v1 );
             if isempty( v.v2 )
-                v = v.Make( floor( v.v1 ), [] );
+                x2 = [];
             else
-                x1 = floor( v.v1 );
-                x2 = x1 .* 0;
-                Select = x1 == v.v1;
-                vSelect = v.Index( Select );
-                x2Select = floor( vSelect.v2 );
-                x2 = Assign( x2, x2Select, Select );
-                v = v.Make( x1, x2 );
-                v = Normalize( v );
+                Select = find( x1 == v.v1 );
+                if isempty( Select )
+                    x2 = [];
+                else
+                    x2 = zeros( size( x1 ), 'like', x1 );
+                    x2 = Assign( x2, floor( Index( v.v2, Select ) ), Select );
+                end
             end
+            v = v.Make( x1, x2 );
+            v = Normalize( v );
         end
 
         function v = ceil( v )
+            x1 = ceil( v.v1 );
             if isempty( v.v2 )
-                v = v.Make( ceil( v.v1 ), [] );
+                x2 = [];
             else
-                x1 = ceil( v.v1 );
-                x2 = x1 .* 0;
-                Select = x1 == v.v1;
-                vSelect = v.Index( Select );
-                x2Select = ceil( vSelect.v2 );
-                x2 = Assign( x2, x2Select, Select );
-                v = v.Make( x1, x2 );
-                v = Normalize( v );
+                Select = find( x1 == v.v1 );
+                if isempty( Select )
+                    x2 = [];
+                else
+                    x2 = zeros( size( x1 ), 'like', x1 );
+                    x2 = Assign( x2, ceil( Index( v.v2, Select ) ), Select );
+                end
             end
+            v = v.Make( x1, x2 );
+            v = Normalize( v );
         end
 
         function v = fix( v )
+            x1 = fix( v.v1 );
             if isempty( v.v2 )
-                v = v.Make( fix( v.v1 ), [] );
+                x2 = [];
             else
-                x1 = fix( v.v1 );
-                x2 = x1 .* 0;
-                Select = x1 == v.v1;
-                vSelect = v.Index( Select );
-                x2Select = fix( vSelect.v2 );
-                x2 = Assign( x2, x2Select, Select );
-                v = v.Make( x1, x2 );
-                v = Normalize( v );
+                Select = find( x1 == v.v1 );
+                if isempty( Select )
+                    x2 = [];
+                else
+                    x2 = zeros( size( x1 ), 'like', x1 );
+                    x2 = Assign( x2, fix( Index( v.v2, Select ) ), Select );
+                end
             end
+            v = v.Make( x1, x2 );
+            v = Normalize( v );
         end
 
         function v = round( v )
+            x1 = round( v.v1 );
             if isempty( v.v2 )
-                v = v.Make( round( v.v1 ), [] );
+                x2 = [];
             else
-                x1 = round( v.v1 );
-                x2 = x1 .* 0;
-                Select = x1 == v.v1;
-                vSelect = v.Index( Select );
-                x2Select = round( vSelect.v2 );
-                x2 = Assign( x2, x2Select, Select );
-                Select = ( ~Select ) & ( abs( x1 - v.v1 ) == 0.5 ) & ( v.v2 < 0 );
-                x2 = Assign( x2, Index( x2, Select ) - 1, Select );
-                v = v.Make( x1, x2 );
-                v = Normalize( v );
+                Select = find( x1 == v.v1 );
+                if isempty( Select )
+                    x2 = [];
+                else
+                    x2 = zeros( size( x1 ), 'like', x1 );
+                    x2 = Assign( x2, round( Index( v.v2, Select ) ), Select );
+                    Select = find( ( abs( x1 - v.v1 ) == 0.5 ) & ( v.v2 < 0 ) );
+                    x2 = Assign( x2, Index( x2, Select ) - 1, Select );
+                end
             end
+            v = v.Make( x1, x2 );
+            v = Normalize( v );
         end
 
         function v = realsqrt( v )
@@ -1715,8 +1719,13 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 s = s + 1.0;
             end
 
-            s = FillV2( s );
-            v = v.Make( pow2( s.v1, m ), pow2( s.v2, m ) );
+            x1 = pow2( s.v1, m );
+            if isempty( s.v2 )
+                x2 = [];
+            else
+                x2 = pow2( s.v2, m );
+            end
+            v = v.Make( x1, x2 );
             if expm1Flag
                 v = v.Assign( v.Index( Select ) - 1.0, Select );
             end
@@ -2185,15 +2194,15 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 A = A.Vec( );
             end
             Size = size( A );
-            A_orig = A;
+            AOriginal = A;
             if isempty( A.v2 )
                 [ C, ia, ic ] = unique( A.v1, 'rows', varargin{:} );
-                C = A_orig.Make( C, [] );
+                C = AOriginal.Make( C, [] );
             else
                 A = [ A.v1, A.v2 ];
                 [ C, ia, ic ] = unique( A, 'rows', varargin{:} );
                 n = Size( 2 );
-                C = A_orig.Make( Index( C, ':', 1:n ), Index( C, ':', ( n + 1 ) : ( 2 * n ) ) );
+                C = AOriginal.Make( Index( C, ':', 1:n ), Index( C, ':', ( n + 1 ) : ( 2 * n ) ) );
             end
             if RowFlag
                 C = C.';
@@ -2240,14 +2249,14 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             v = sort( v, 1 );
 
             if mod( n, 2 ) == 1
-                Middle = ( n + 1 ) / 2;
+                Middle = ( n + 1 ) * 0.5;
                 v = v.Index( Middle, ':' );
             else
-                Middle1 = n / 2;
+                Middle1 = n * 0.5;
                 Middle2 = Middle1 + 1;
                 m1 = v.Index( Middle1, ':' );
                 m2 = v.Index( Middle2, ':' );
-                v = ( m1 + m2 ) / 2;
+                v = ( m1 + m2 ) * 0.5;
             end
             v = ipermute( reshape( v, [ ones( 1, numel( Dim ) ), Size( NotDim ) ] ), [ Dim, NotDim ] );
         end
@@ -2339,28 +2348,28 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
         end
 
         function v = pow2( v, b )
-            if isempty( b )
-                v = v.Make( [], [] );
-            else
-                if isa( v, 'ED.ExtDouble' )
-                    v.v1 = pow2( v.v1, double( b ) );
-                    if ~isempty( v.v2 )
-                        v.v2 = pow2( v.v2, double( b ) );
-                    end
-                else
-                    v = pow2( v, double( b ) );
+            if nargin == 1
+                b = v;
+                v = 1;
+            end
+            if isa( v, 'ED.ExtDouble' )
+                v.v1 = pow2( v.v1, double( b ) );
+                if ~isempty( v.v2 )
+                    v.v2 = pow2( v.v2, double( b ) );
                 end
+            else
+                v = b.Promote( pow2( v, double( b ) ) );
             end
         end
 
         function v = TimesPowerOf2( v, b )
             if isa( v, 'ED.ExtDouble' )
-                v.v1 = TimesPowerOf2( v.v1, b );
+                v.v1 = TimesPowerOf2( v.v1, double( b ) );
                 if ~isempty( v.v2 )
-                    v.v2 = TimesPowerOf2( v.v2, b );
+                    v.v2 = TimesPowerOf2( v.v2, double( b ) );
                 end
             else
-                v = TimesPowerOf2( v, double( b ) );
+                v = b.Promote( TimesPowerOf2( v, double( b ) ) );
             end
         end
 

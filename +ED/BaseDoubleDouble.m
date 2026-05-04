@@ -83,6 +83,9 @@ classdef ( Abstract ) BaseDoubleDouble
             v.v1 = Normalize( v.v1 );
             v.v2 = Normalize( v.v2 );
             [ v.v1, v.v2 ] = DDNormalize( v.v1, v.v2 );
+            if all( v.v2 == 0, 'all' )
+                v.v2 = [];
+            end
         end
 
     end
