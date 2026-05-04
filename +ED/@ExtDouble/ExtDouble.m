@@ -106,10 +106,16 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
 
         function varargout = ToSumOfDoubles( v )
             varargout = cell( 1, nargout );
-            [ varargout{:} ] = ToSumOfDoubles( v.v1 );
-            FirstEmpty = find( cellfun( @isempty, varargout, 'UniformOutput', true ), 1, 'first' );
-            if ~isempty( FirstEmpty ) && ~isempty( v.v2 )
-                [ varargout{ FirstEmpty : nargout } ] = ToSumOfDoubles( v.v2 );
+            if ~isempty( v.v1 )
+                [ varargout{:} ] = ToSumOfDoubles( v.v1 );
+                FirstEmpty = find( cellfun( @isempty, varargout, 'UniformOutput', true ), 1, 'first' );
+                if ~isempty( FirstEmpty )
+                    if isempty( v.v2 )
+                        varargout( FirstEmpty : nargout ) = repmat( { 0 }, 1, nargout - FirstEmpty + 1 );
+                    else
+                        [ varargout{ FirstEmpty : nargout } ] = ToSumOfDoubles( v.v2 );
+                    end
+                end
             end
         end
 
