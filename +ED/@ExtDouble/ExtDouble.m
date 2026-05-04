@@ -583,13 +583,15 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 b1 = b;
                 b2 = [];
             end
-            if isempty( a2 ) && isempty( b2 )
+            a2IsZero = all( a2 == 0, 'all' );
+            b2IsZero = all( b2 == 0, 'all' );
+            if a2IsZero && b2IsZero
                 v = a1 < b1;
             else
-                if isempty( a2 )
+                if a2IsZero
                     a2 = 0;
                 end
-                if isempty( b2 )
+                if b2IsZero
                     b2 = 0;
                 end
                 v = ( a1 < b1 ) | ( ( a1 == b1 ) & ( a2 < b2 ) );
@@ -611,13 +613,15 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 b1 = b;
                 b2 = [];
             end
-            if isempty( a2 ) && isempty( b2 )
+            a2IsZero = all( a2 == 0, 'all' );
+            b2IsZero = all( b2 == 0, 'all' );
+            if a2IsZero && b2IsZero
                 v = a1 > b1;
             else
-                if isempty( a2 )
+                if a2IsZero
                     a2 = 0;
                 end
-                if isempty( b2 )
+                if b2IsZero
                     b2 = 0;
                 end
                 v = ( a1 > b1 ) | ( ( a1 == b1 ) & ( a2 > b2 ) );
@@ -639,13 +643,15 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 b1 = b;
                 b2 = [];
             end
-            if isempty( a2 ) && isempty( b2 )
+            a2IsZero = all( a2 == 0, 'all' );
+            b2IsZero = all( b2 == 0, 'all' );
+            if a2IsZero && b2IsZero
                 v = a1 <= b1;
             else
-                if isempty( a2 )
+                if a2IsZero
                     a2 = 0;
                 end
-                if isempty( b2 )
+                if b2IsZero
                     b2 = 0;
                 end
                 v = ( a1 < b1 ) | ( ( a1 == b1 ) & ( a2 <= b2 ) );
@@ -667,13 +673,15 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 b1 = b;
                 b2 = [];
             end
-            if isempty( a2 ) && isempty( b2 )
+            a2IsZero = all( a2 == 0, 'all' );
+            b2IsZero = all( b2 == 0, 'all' );
+            if a2IsZero && b2IsZero
                 v = a1 >= b1;
             else
-                if isempty( a2 )
+                if a2IsZero
                     a2 = 0;
                 end
-                if isempty( b2 )
+                if b2IsZero
                     b2 = 0;
                 end
                 v = ( a1 > b1 ) | ( ( a1 == b1 ) & ( a2 >= b2 ) );
@@ -695,13 +703,15 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 b1 = b;
                 b2 = [];
             end
-            if isempty( a2 ) && isempty( b2 )
+            a2IsZero = all( a2 == 0, 'all' );
+            b2IsZero = all( b2 == 0, 'all' );
+            if a2IsZero && b2IsZero
                 v = a1 ~= b1;
             else
-                if isempty( a2 )
+                if a2IsZero
                     a2 = 0;
                 end
-                if isempty( b2 )
+                if b2IsZero
                     b2 = 0;
                 end
                 v = ( a1 ~= b1 ) | ( a2 ~= b2 );
@@ -723,13 +733,15 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 b1 = b;
                 b2 = [];
             end
-            if isempty( a2 ) && isempty( b2 )
+            a2IsZero = all( a2 == 0, 'all' );
+            b2IsZero = all( b2 == 0, 'all' );
+            if a2IsZero && b2IsZero
                 v = a1 == b1;
             else
-                if isempty( a2 )
+                if a2IsZero
                     a2 = 0;
                 end
-                if isempty( b2 )
+                if b2IsZero
                     b2 = 0;
                 end
                 v = ( a1 == b1 ) & ( ~isfinite( a1 ) | ( a2 == b2 ) );
