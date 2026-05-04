@@ -26,13 +26,13 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
 
     methods ( Sealed )
 
-        function v = cat( dim, a, varargin )
+        function v = cat( Dim, a, varargin )
             if isempty( varargin )
                 v = a;
             else
                 b = varargin{ 1 };
                 if length( varargin ) > 1
-                    v = cat( dim, cat( dim, a, b ), varargin{ 2 : end } );
+                    v = cat( Dim, cat( Dim, a, b ), varargin{ 2 : end } );
                 else
                     if ~isa( a, 'ED.ExtDouble' )
                         a = b.Promote( a );
@@ -40,9 +40,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                     if ~isa( b, 'ED.ExtDouble' )
                         b = a.Promote( b );
                     end
-                    x1 = cat( dim, a.v1, b.v1 );
-                    x2 = cat( dim, a.v2, b.v2 );
-                    v = a.Make( x1, x2 );
+                    v = a.Make( cat( Dim, a.v1, b.v1 ), cat( Dim, a.v2, b.v2 ) );
                 end
             end
         end
@@ -74,7 +72,6 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
         end
 
         function v = Index( v, varargin )
-            assert( isa( v, 'ED.ExtDouble' ) );
             v.v1 = Index( v.v1, varargin{:} );
             v.v2 = Index( v.v2, varargin{:} );
         end
@@ -383,15 +380,15 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 v = BackSubstitution( v, a );
                 return
             end
-            if IsEqualWithExpansion( triu( a, 1 ), 0 )
+            if ED.ExtDouble.IsEqualWithExpansion( triu( a, 1 ), 0 )
                 % Lower triangular
                 v = ForwardElimination( v, a );
                 return
-            elseif IsEqualWithExpansion( tril( a, -1 ), 0 )
+            elseif ED.ExtDouble.IsEqualWithExpansion( tril( a, -1 ), 0 )
                 % Upper triangular
                 v = BackSubstitution( v, a );
                 return
-            elseif IsEqualWithExpansion( a, a' )
+            elseif ED.ExtDouble.IsEqualWithExpansion( a, a' )
                 [ L, d ] = ldl( a, 'vector_d' );
                 if all( all( isfinite( L ) ) ) && all( isfinite( d ) )
                     % Positive definite
@@ -693,7 +690,32 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             if nargin < 3 || isempty( cm )
                 cm = 'auto';
             end
-            if isa( v, 'ED.ExtDouble' )
+            Size = size( v.v1 );
+            if any( Size == 0 )
+                Indices = [];
+                return
+            end
+            Blocks = arrayfun( @( x ) ones( x, 1 ), Size, 'UniformOutput', false );
+            Blocks{ Dim } = Size( Dim );
+            xv1 = mat2cell( v.v1, Blocks{:} );
+            xv2 = mat2cell( v.v2, Blocks{:} );
+            Indices = cell( size( xv1 ) );
+
+            if isreal( v )
+                if ( length( cm ) > 1 ) && strcmpi( cm( 1 : 2 ), 'ab' )
+                    a = abs( v );
+                    xa1 = mat2cell( a.v1, Blocks{:} );
+                    xa2 = mat2cell( a.v2, Blocks{:} );
+                else
+                    xa1 = xv1;
+                    xa2 = xv2;
+                end
+                for i = 1 : numel( xv1 )
+                    [ ~, Indices{ i } ] = sortrows( [ xa1{ i }( : ), xa2{ i }( : ) ], varargin{:} );
+                    xv1{ i } = Index( xv1{ i }, Indices{ i } );
+                    xv2{ i } = Index( xv2{ i }, Indices{ i } );
+                end
+            else
                 if strcmpi( cm( 1 ), 'r' )
                     a = real( v );
                     b = imag( v );
@@ -709,35 +731,18 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                         b = angle( v );
                     end
                 end
-                Size = size( v.v1 );
-                if any( Size == 0 )
-                    Indices = [];
-                    return
-                end
-                Blocks = arrayfun( @( x ) ones( x, 1 ), Size, 'UniformOutput', false );
-                Blocks{ Dim } = Size( Dim );
-                xv1 = mat2cell( v.v1, Blocks{:} );
-                xv2 = mat2cell( v.v2, Blocks{:} );
                 xa1 = mat2cell( a.v1, Blocks{:} );
                 xa2 = mat2cell( a.v2, Blocks{:} );
                 xb1 = mat2cell( b.v1, Blocks{:} );
                 xb2 = mat2cell( b.v2, Blocks{:} );
-                Indices = cell( size( xv1 ) );
                 for i = 1 : numel( xv1 )
                     [ ~, Indices{ i } ] = sortrows( [ xa1{ i }( : ), xa2{ i }( : ), xb1{ i }( : ), xb2{ i }( : ) ], varargin{:} );
                     xv1{ i } = Index( xv1{ i }, Indices{ i } );
                     xv2{ i } = Index( xv2{ i }, Indices{ i } );
                 end
-                Indices = cell2mat( Indices );
-                v       = v.Make( cell2mat( xv1 ), cell2mat( xv2 ) );
-            else
-                if nargout > 1
-                    [ v, Indices ] = sort( v, Dim, 'ComparisonMethod', cm, varargin{:} );
-                else
-                    v = sort( v, Dim, 'ComparisonMethod', cm, varargin{:} );
-                end
-                v = v.Promote( v );
             end
+            Indices = cell2mat( Indices );
+            v       = v.Make( cell2mat( xv1 ), cell2mat( xv2 ) );
         end
 
         function v = sum( v, Dim )
@@ -1450,7 +1455,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             s = r + p.TimesPowerOf2( 0.5 );
             p = p .* r;
             t = p .* v.InverseFactorial.Index( 1 );
-            for i = 2 : v.NInverseFactorial
+            for i = 2 : size( v.InverseFactorial, 1 )
                 s = s + t;
                 p = p .* r;
                 t = p .* v.InverseFactorial.Index( i );
@@ -1490,7 +1495,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
         end
 
         function x = log( v )
-            x = v.Make( log( v.v1 ), zeros( size( v.v1 ) ) );
+            x = v.Make( log( v.v1 ), [] );
             for i = 1 : v.LogSteps
                 x = x + v .* exp( -x ) - 1.0;
             end
@@ -1798,13 +1803,13 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             elseif DetP < 0
                 v = -prod( diag( u ) );
             else
-                v = v.Make( NaN, NaN ); % scalar NaN, can't use 'like' here
+                v = v.Make( NaN, [] );
             end
         end
 
         function v = inv( v )
             n = size( v, 1 );
-            v = v \ v.Make( eye( n ), zeros( n ) );
+            v = v \ v.Make( eye( n ), [] );
         end
 
         function [ v, p ] = chol( v, type )
@@ -1906,8 +1911,8 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
         function w = conv( u, v )
             RowVector = size( u, 1 ) == 1 && size( v, 1 ) == 1;
 
-            u = u.Vec();
-            v = v.Vec();
+            u = u.Vec( );
+            v = v.Vec( );
 
             M = size( u, 1 );
             N = size( v, 1 );
@@ -2148,7 +2153,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             Threshold = 0.5 .* abs( Index( v.v1, ':' ) ) .* v.tiny.v1;
             x = - v .* v;
             r = v;
-            for i = 1 : 2 : v.NInverseFactorial
+            for i = 1 : 2 : size( v.InverseFactorial, 1 )
                 r = r .* x;
                 t = r .* v.InverseFactorial.Index( i );
                 v = v + t;
@@ -2244,12 +2249,20 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             end
         end
 
+    end
+
+    methods ( Static, Access = private )
+
         function [ varargout ] = ExpandSingleton( varargin )
             l = cellfun( @( x ) length( size( x ) ), varargin, 'UniformOutput', true );
             n = length( varargin );
             ss = ones( n, max( l ) );
             for i = 1 : n
                 ss( i, 1 : l( i ) ) = size( varargin{ i } );
+            end
+            if all( ss == ss( 1, : ), 'all' )
+                varargout = varargin;
+                return
             end
             s = max( ss, [], 1 );
             isZeroDim = any( ss == 0, 1 );
@@ -2259,24 +2272,28 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 end
                 s( isZeroDim ) = 0;
             end
+            if all( s <= 1 )
+                varargout = varargin;
+                return
+            end
             varargout = cell( 1, n );
             for i = 1 : n
-                repfac = ones( 1, length( s ) );
-                mask = ( ss( i, : ) == 1 ) & ( s ~= 1 );
-                repfac( mask ) = s( mask );
-                varargout{ i } = repmat( varargin{ i }, repfac );
+                RepFactor = ones( 1, max( length( s ), 2 ) );
+                mask = find( ( ss( i, : ) == 1 ) & ( s ~= 1 ) );
+                RepFactor( mask ) = s( mask );
+                varargout{ i } = repmat( varargin{ i }, RepFactor );
             end
         end
 
         function v = IsEqualWithExpansion( a, b, varargin )
             v = a == b;
-            v = all( v(:) );
+            v = all( v( : ) );
             if nargin > 2
                 for i = 1 : length( varargin )
                     if ~v
                         break
                     end
-                    v = v && IsEqualWithExpansion( a, varargin{ i } );
+                    v = v && ED.ExtDouble.IsEqualWithExpansion( a, varargin{ i } );
                 end
             end
         end
