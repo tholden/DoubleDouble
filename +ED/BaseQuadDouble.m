@@ -27,8 +27,8 @@ classdef ( Abstract ) BaseQuadDouble < ED.BaseDoubleDouble
                     [ x1, x2, x3, x4 ] = DDPlusUnderlyingAsQD( b.v1, b.v2, a );
                 else
                     [ x1, x2 ] = UnderlyingPlusUnderlying( a, b );
-                    x3 = [];
-                    x4 = [];
+                    x3 = 0;
+                    x4 = 0;
                 end
             end
             v = c.Make( c.v1.Make( x1, x2 ), c.v1.Make( x3, x4 ) );
@@ -97,7 +97,11 @@ classdef ( Abstract ) BaseQuadDouble < ED.BaseDoubleDouble
         function v = Normalize( v )
             if all( v.v2 == 0, 'all' )
                 v.v1 = Normalize( v.v1 );
-                v.v2 = [];
+                if isempty( v.v1 )
+                    v.v2 = [];
+                else
+                    v.v2 = 0;
+                end
                 return
             end
             if all( v.v1.v2 == 0, 'all' )
@@ -112,13 +116,25 @@ classdef ( Abstract ) BaseQuadDouble < ED.BaseDoubleDouble
             v.v2.v2 = Normalize( v.v2.v2 );
             [ v.v1.v1, v.v1.v2, v.v2.v1, v.v2.v2 ] = QDNormalize( v.v1.v1, v.v1.v2, v.v2.v1, v.v2.v2 );
             if all( v.v1.v2 == 0, 'all' )
-                v.v1.v2 = [];
+                if isempty( v.v1.v1 )
+                    v.v1.v2 = [];
+                else
+                    v.v1.v2 = 0;
+                end
             end
             if all( v.v2.v2 == 0, 'all' )
-                v.v2.v2 = [];
+                if isempty( v.v2.v1 )
+                    v.v2.v2 = [];
+                else
+                    v.v2.v2 = 0;
+                end
             end
             if all( v.v2 == 0, 'all' )
-                v.v2 = [];
+                if isempty( v.v1 )
+                    v.v2 = [];
+                else
+                    v.v2 = 0;
+                end
             end
         end
 

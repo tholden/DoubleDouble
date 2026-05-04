@@ -18,7 +18,11 @@ classdef QuadDouble < ED.BaseQuadDouble & ED.ExtDouble & ED.QuadDoubleProperties
                 v.v2 = in.v2;
             elseif isa( in, 'DoubleDouble' )
                 v.v1 = in;
-                v.v2 = [];
+                if isempty( v.v1 )
+                    v.v2 = [];
+                else
+                    v.v2 = 0;
+                end
             elseif isa( in, 'ED.ExtDouble' )
                 C = cell( 1, 4 );
                 [ C{ : } ] = ToSumOfDoubles( in );
@@ -26,7 +30,11 @@ classdef QuadDouble < ED.BaseQuadDouble & ED.ExtDouble & ED.QuadDoubleProperties
                 v.v2 = DoubleDouble.MakeStatic( C{ 3 }, C{ 4 } );
             else
                 v.v1 = DoubleDouble( double( in ) );
-                v.v2 = [];
+                if isempty( v.v1 )
+                    v.v2 = [];
+                else
+                    v.v2 = 0;
+                end
             end
         end
 
@@ -43,7 +51,7 @@ classdef QuadDouble < ED.BaseQuadDouble & ED.ExtDouble & ED.QuadDoubleProperties
     methods ( Static )
 
         function v = ones( varargin )
-            v = QuadDouble.MakeStatic( DoubleDouble.ones( varargin{:} ), [] );
+            v = QuadDouble.MakeStatic( DoubleDouble.ones( varargin{:} ), 0 );
         end
 
         function v = empty( varargin )
@@ -51,19 +59,19 @@ classdef QuadDouble < ED.BaseQuadDouble & ED.ExtDouble & ED.QuadDoubleProperties
         end
 
         function v = zeros( varargin )
-            v = QuadDouble.MakeStatic( DoubleDouble.zeros( varargin{:} ), [] );
+            v = QuadDouble.MakeStatic( DoubleDouble.zeros( varargin{:} ), 0 );
         end
 
         function v = eye( varargin )
-            v = QuadDouble.MakeStatic( DoubleDouble.eye( varargin{:} ), [] );
+            v = QuadDouble.MakeStatic( DoubleDouble.eye( varargin{:} ), 0 );
         end
 
         function v = NaN( varargin )
-            v = QuadDouble.MakeStatic( DoubleDouble.NaN( varargin{:} ), [] );
+            v = QuadDouble.MakeStatic( DoubleDouble.NaN( varargin{:} ), 0 );
         end
 
         function v = Inf( varargin )
-            v = QuadDouble.MakeStatic( DoubleDouble.Inf( varargin{:} ), [] );
+            v = QuadDouble.MakeStatic( DoubleDouble.Inf( varargin{:} ), 0 );
         end
 
         function v = rand( varargin )
@@ -75,7 +83,7 @@ classdef QuadDouble < ED.BaseQuadDouble & ED.ExtDouble & ED.QuadDoubleProperties
         end
 
         function v = randi( imax, varargin )
-            v = QuadDouble.MakeStatic( DoubleDouble( randi( imax, varargin{:}, 'double' ) ), [] );
+            v = QuadDouble.MakeStatic( DoubleDouble( randi( imax, varargin{:}, 'double' ) ), 0 );
         end
 
     end
@@ -96,7 +104,7 @@ classdef QuadDouble < ED.BaseQuadDouble & ED.ExtDouble & ED.QuadDoubleProperties
             if isempty( a1 )
                 v.v2 = v.v1;
             elseif all( a2 == 0, 'all' )
-                v.v2 = [];
+                v.v2 = 0;
             else
                 v.v2 = DoubleDouble( a2 );
             end

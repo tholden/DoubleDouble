@@ -18,7 +18,11 @@ classdef QuadDoubleSlow < ED.BaseDoubleDouble & ED.ExtDouble & ED.QuadDoubleProp
                 v.v2 = in.v2;
             elseif isa( in, 'DoubleDouble' )
                 v.v1 = in;
-                v.v2 = [];
+                if isempty( v.v1 )
+                    v.v2 = [];
+                else
+                    v.v2 = 0;
+                end
             elseif isa( in, 'ED.ExtDouble' )
                 C = cell( 1, 4 );
                 [ C{ : } ] = ToSumOfDoubles( in );
@@ -26,7 +30,11 @@ classdef QuadDoubleSlow < ED.BaseDoubleDouble & ED.ExtDouble & ED.QuadDoubleProp
                 v.v2 = DoubleDouble.MakeStatic( C{ 3 }, C{ 4 } );
             else
                 v.v1 = DoubleDouble( double( in ) );
-                v.v2 = [];
+                if isempty( v.v1 )
+                    v.v2 = [];
+                else
+                    v.v2 = 0;
+                end
             end
         end
 
@@ -51,7 +59,7 @@ classdef QuadDoubleSlow < ED.BaseDoubleDouble & ED.ExtDouble & ED.QuadDoubleProp
     methods ( Static )
 
         function v = ones( varargin )
-            v = QuadDoubleSlow.MakeStatic( DoubleDouble( ones( varargin{:}, 'double' ) ), [] );
+            v = QuadDoubleSlow.MakeStatic( DoubleDouble( ones( varargin{:}, 'double' ) ), 0 );
         end
 
         function v = empty( varargin )
@@ -59,19 +67,19 @@ classdef QuadDoubleSlow < ED.BaseDoubleDouble & ED.ExtDouble & ED.QuadDoubleProp
         end
 
         function v = zeros( varargin )
-            v = QuadDoubleSlow.MakeStatic( DoubleDouble( zeros( varargin{:}, 'double' ) ), [] );
+            v = QuadDoubleSlow.MakeStatic( DoubleDouble( zeros( varargin{:}, 'double' ) ), 0 );
         end
 
         function v = eye( varargin )
-            v = QuadDoubleSlow.MakeStatic( DoubleDouble( eye( varargin{:}, 'double' ) ), [] );
+            v = QuadDoubleSlow.MakeStatic( DoubleDouble( eye( varargin{:}, 'double' ) ), 0 );
         end
 
         function v = NaN( varargin )
-            v = QuadDoubleSlow.MakeStatic( DoubleDouble.NaN( varargin{:} ), [] );
+            v = QuadDoubleSlow.MakeStatic( DoubleDouble.NaN( varargin{:} ), 0 );
         end
 
         function v = Inf( varargin )
-            v = QuadDoubleSlow.MakeStatic( DoubleDouble.Inf( varargin{:} ), [] );
+            v = QuadDoubleSlow.MakeStatic( DoubleDouble.Inf( varargin{:} ), 0 );
         end
 
         function v = randn( varargin )
@@ -83,7 +91,7 @@ classdef QuadDoubleSlow < ED.BaseDoubleDouble & ED.ExtDouble & ED.QuadDoubleProp
         end
 
         function v = randi( imax, varargin )
-            v = QuadDoubleSlow.MakeStatic( DoubleDouble( randi( imax, varargin{:}, 'double' ) ), [] );
+            v = QuadDoubleSlow.MakeStatic( DoubleDouble( randi( imax, varargin{:}, 'double' ) ), 0 );
         end
 
     end
@@ -96,7 +104,7 @@ classdef QuadDoubleSlow < ED.BaseDoubleDouble & ED.ExtDouble & ED.QuadDoubleProp
             if isempty( a1 )
                 v.v2 = v.v1;
             elseif all( a2 == 0, 'all' )
-                v.v2 = [];
+                v.v2 = 0;
             else
                 v.v2 = DoubleDouble( a2 );
             end

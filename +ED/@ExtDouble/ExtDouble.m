@@ -39,7 +39,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 end
                 x1 = cat( Dim, a.v1, b.v1 );
                 if all( a.v2 == 0, 'all' ) && all( b.v2 == 0, 'all' )
-                    x2 = [];
+                    x2 = 0;
                 else
                     a = FillV2( a );
                     b = FillV2( b );
@@ -241,7 +241,11 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 v.v1 = Assign( v.v1, 0, Select );
                 v.v1 = Assign( v.v1, v.pi.v1, ~Select );
                 if all( Select, 'all' )
-                    v.v2 = [];
+                    if isempty( v.v1 )
+                        v.v2 = [];
+                    else
+                        v.v2 = 0;
+                    end
                 else
                     v = FillV2( v );
                     v.v2 = Assign( v.v2, 0, Select );
@@ -328,7 +332,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             if nargin < 2
                 x1 = diag( v.v1 );
                 if all( v.v2 == 0, 'all' )
-                    x2 = [];
+                    x2 = 0;
                 else
                     x2 = diag( v.v2 );
                 end
@@ -336,7 +340,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             else
                 x1 = diag( v.v1, k );
                 if all( v.v2 == 0, 'all' )
-                    x2 = [];
+                    x2 = 0;
                 else
                     x2 = diag( v.v2, k );
                 end
@@ -348,7 +352,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             if nargin < 2
                 x1 = tril( v.v1 );
                 if all( v.v2 == 0, 'all' )
-                    x2 = [];
+                    x2 = 0;
                 else
                     x2 = tril( v.v2 );
                 end
@@ -356,7 +360,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             else
                 x1 = tril( v.v1, k );
                 if all( v.v2 == 0, 'all' )
-                    x2 = [];
+                    x2 = 0;
                 else
                     x2 = tril( v.v2, k );
                 end
@@ -368,7 +372,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             if nargin < 2
                 x1 = triu( v.v1 );
                 if all( v.v2 == 0, 'all' )
-                    x2 = [];
+                    x2 = 0;
                 else
                     x2 = triu( v.v2 );
                 end
@@ -376,7 +380,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             else
                 x1 = triu( v.v1, k );
                 if all( v.v2 == 0, 'all' )
-                    x2 = [];
+                    x2 = 0;
                 else
                     x2 = triu( v.v2, k );
                 end
@@ -574,14 +578,14 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 a2 = a.v2;
             else
                 a1 = a;
-                a2 = [];
+                a2 = 0;
             end
             if isa( b, 'ED.ExtDouble' )
                 b1 = b.v1;
                 b2 = b.v2;
             else
                 b1 = b;
-                b2 = [];
+                b2 = 0;
             end
             a2IsZero = all( a2 == 0, 'all' );
             b2IsZero = all( b2 == 0, 'all' );
@@ -604,14 +608,14 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 a2 = a.v2;
             else
                 a1 = a;
-                a2 = [];
+                a2 = 0;
             end
             if isa( b, 'ED.ExtDouble' )
                 b1 = b.v1;
                 b2 = b.v2;
             else
                 b1 = b;
-                b2 = [];
+                b2 = 0;
             end
             a2IsZero = all( a2 == 0, 'all' );
             b2IsZero = all( b2 == 0, 'all' );
@@ -634,14 +638,14 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 a2 = a.v2;
             else
                 a1 = a;
-                a2 = [];
+                a2 = 0;
             end
             if isa( b, 'ED.ExtDouble' )
                 b1 = b.v1;
                 b2 = b.v2;
             else
                 b1 = b;
-                b2 = [];
+                b2 = 0;
             end
             a2IsZero = all( a2 == 0, 'all' );
             b2IsZero = all( b2 == 0, 'all' );
@@ -664,14 +668,14 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 a2 = a.v2;
             else
                 a1 = a;
-                a2 = [];
+                a2 = 0;
             end
             if isa( b, 'ED.ExtDouble' )
                 b1 = b.v1;
                 b2 = b.v2;
             else
                 b1 = b;
-                b2 = [];
+                b2 = 0;
             end
             a2IsZero = all( a2 == 0, 'all' );
             b2IsZero = all( b2 == 0, 'all' );
@@ -694,14 +698,14 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 a2 = a.v2;
             else
                 a1 = a;
-                a2 = [];
+                a2 = 0;
             end
             if isa( b, 'ED.ExtDouble' )
                 b1 = b.v1;
                 b2 = b.v2;
             else
                 b1 = b;
-                b2 = [];
+                b2 = 0;
             end
             a2IsZero = all( a2 == 0, 'all' );
             b2IsZero = all( b2 == 0, 'all' );
@@ -724,14 +728,14 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 a2 = a.v2;
             else
                 a1 = a;
-                a2 = [];
+                a2 = 0;
             end
             if isa( b, 'ED.ExtDouble' )
                 b1 = b.v1;
                 b2 = b.v2;
             else
                 b1 = b;
-                b2 = [];
+                b2 = 0;
             end
             a2IsZero = all( a2 == 0, 'all' );
             b2IsZero = all( b2 == 0, 'all' );
@@ -924,7 +928,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             end
             Indices = cell2mat( Indices );
             if v2Empty
-                v = v.Make( cell2mat( xv1 ), [] );
+                v = v.Make( cell2mat( xv1 ), 0 );
             else
                 v = v.Make( cell2mat( xv1 ), cell2mat( xv2 ) );
             end
@@ -1049,7 +1053,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             end
             if isempty( b )
                 if isempty( a )
-                    s = a.Make( 0, [] ); s = s( zeros( 0,1 ) );
+                    s = zeros( 0, 1, 'like', a );
                     i = [];
                     return
                 end
@@ -1106,7 +1110,11 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                     i = a.v1 > b.v1;
                     s = b;
                     s.v1 = Assign( s.v1, Index( a.v1, i ), i );
-                    s.v2 = [];
+                    if isempty( s.v1 )
+                        s.v2 = [];
+                    else
+                        s.v2 = 0;
+                    end
                 else
                     a = FillV2( a );
                     b = FillV2( b );
@@ -1177,7 +1185,11 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                     i = a.v1 < b.v1;
                     s = b;
                     s.v1 = Assign( s.v1, Index( a.v1, i ), i );
-                    s.v2 = [];
+                    if isempty( s.v1 )
+                        s.v2 = [];
+                    else
+                        s.v2 = 0;
+                    end
                 else
                     a = FillV2( a ); b = FillV2( b );
                     i = ( a.v1 < b.v1 ) | ( ( a.v1 == b.v1 ) & ( a.v2 < b.v2 ) );
@@ -1585,11 +1597,11 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
         function v = floor( v )
             x1 = floor( v.v1 );
             if all( v.v2 == 0, 'all' )
-                x2 = [];
+                x2 = 0;
             else
                 Select = find( x1 == v.v1 );
                 if isempty( Select )
-                    x2 = [];
+                    x2 = 0;
                 else
                     x2 = zeros( size( x1 ), 'like', x1 );
                     x2 = Assign( x2, floor( Index( v.v2, Select ) ), Select );
@@ -1602,11 +1614,11 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
         function v = ceil( v )
             x1 = ceil( v.v1 );
             if all( v.v2 == 0, 'all' )
-                x2 = [];
+                x2 = 0;
             else
                 Select = find( x1 == v.v1 );
                 if isempty( Select )
-                    x2 = [];
+                    x2 = 0;
                 else
                     x2 = zeros( size( x1 ), 'like', x1 );
                     x2 = Assign( x2, ceil( Index( v.v2, Select ) ), Select );
@@ -1619,11 +1631,11 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
         function v = fix( v )
             x1 = fix( v.v1 );
             if all( v.v2 == 0, 'all' )
-                x2 = [];
+                x2 = 0;
             else
                 Select = find( x1 == v.v1 );
                 if isempty( Select )
-                    x2 = [];
+                    x2 = 0;
                 else
                     x2 = zeros( size( x1 ), 'like', x1 );
                     x2 = Assign( x2, fix( Index( v.v2, Select ) ), Select );
@@ -1636,11 +1648,11 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
         function v = round( v )
             x1 = round( v.v1 );
             if all( v.v2 == 0, 'all' )
-                x2 = [];
+                x2 = 0;
             else
                 Select = find( x1 == v.v1 );
                 if isempty( Select )
-                    x2 = [];
+                    x2 = 0;
                 else
                     x2 = zeros( size( x1 ), 'like', x1 );
                     x2 = Assign( x2, round( Index( v.v2, Select ) ), Select );
@@ -1739,7 +1751,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
 
             x1 = pow2( s.v1, m );
             if all( s.v2 == 0, 'all' )
-                x2 = [];
+                x2 = 0;
             else
                 x2 = pow2( s.v2, m );
             end
@@ -1761,7 +1773,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
         end
 
         function x = log( v )
-            x = v.Make( log( v.v1 ), [] );
+            x = v.Make( log( v.v1 ), 0 );
             for i = 1 : v.LogSteps
                 x = x + v .* exp( -x ) - 1.0;
             end
@@ -1908,7 +1920,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
         end
 
         function v = atan( v )
-            v = atan2( v, v.Make( 1, [] ) );
+            v = atan2( v, v.Make( 1, 0 ) );
         end
 
         function v = atan2( y, x )
@@ -2069,13 +2081,13 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             elseif DetP < 0
                 v = -prod( diag( u ) );
             else
-                v = v.Make( NaN, [] );
+                v = v.Make( NaN, 0 );
             end
         end
 
         function v = inv( v )
             n = size( v, 1 );
-            v = v \ v.Make( eye( n ), [] );
+            v = v \ v.Make( eye( n ), 0 );
         end
 
         function [ v, p ] = chol( v, type )
@@ -2215,7 +2227,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             AOriginal = A;
             if all( A.v2 == 0, 'all' )
                 [ C, ia, ic ] = unique( A.v1, 'rows', varargin{:} );
-                C = AOriginal.Make( C, [] );
+                C = AOriginal.Make( C, 0 );
             else
                 A = [ A.v1, A.v2 ];
                 [ C, ia, ic ] = unique( A, 'rows', varargin{:} );

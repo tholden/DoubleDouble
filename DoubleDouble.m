@@ -2,9 +2,9 @@ classdef DoubleDouble < ED.BaseDoubleDouble & ED.ExtDouble
 
     properties ( Constant, GetAccess = public )
 
-        zero   = DoubleDouble.MakeStatic( 0, [] );
-        one    = DoubleDouble.MakeStatic( 1, [] );
-        tiny   = DoubleDouble.MakeStatic( 4.93038065763132e-32, [] );
+        zero   = DoubleDouble.MakeStatic( 0, 0 );
+        one    = DoubleDouble.MakeStatic( 1, 0 );
+        tiny   = DoubleDouble.MakeStatic( 4.93038065763132e-32, 0 );
         pi     = DoubleDouble.MakeStatic( 3.141592653589793116e+00, 1.224646799147353207e-16 );
         piT2   = DoubleDouble.MakeStatic( 6.283185307179586232e+00,  2.449293598294706414e-16 );
         piD2   = DoubleDouble.MakeStatic( 1.570796326794896558e+00,  6.123233995736766036e-17 );
@@ -49,7 +49,11 @@ classdef DoubleDouble < ED.BaseDoubleDouble & ED.ExtDouble
                 [ v.v1, v.v2 ] = ToSumOfDoubles( in );
             else
                 v.v1 = double( in );
-                v.v2 = [];
+                if isempty( v.v1 )
+                    v.v2 = [];
+                else
+                    v.v2 = 0;
+                end
             end
         end
 
@@ -74,7 +78,7 @@ classdef DoubleDouble < ED.BaseDoubleDouble & ED.ExtDouble
     methods ( Static )
 
         function v = ones( varargin )
-            v = DoubleDouble.MakeStatic( ones( varargin{:}, 'double' ), [] );
+            v = DoubleDouble.MakeStatic( ones( varargin{:}, 'double' ), 0 );
         end
 
         function v = empty( varargin )
@@ -82,19 +86,19 @@ classdef DoubleDouble < ED.BaseDoubleDouble & ED.ExtDouble
         end
 
         function v = zeros( varargin )
-            v = DoubleDouble.MakeStatic( zeros( varargin{:}, 'double' ), [] );
+            v = DoubleDouble.MakeStatic( zeros( varargin{:}, 'double' ), 0 );
         end
 
         function v = eye( varargin )
-            v = DoubleDouble.MakeStatic( eye( varargin{:}, 'double' ), [] );
+            v = DoubleDouble.MakeStatic( eye( varargin{:}, 'double' ), 0 );
         end
 
         function v = NaN( varargin )
-            v = DoubleDouble.MakeStatic( NaN( varargin{:}, 'double' ), [] );
+            v = DoubleDouble.MakeStatic( NaN( varargin{:}, 'double' ), 0 );
         end
 
         function v = Inf( varargin )
-            v = DoubleDouble.MakeStatic( Inf( varargin{:}, 'double' ), [] );
+            v = DoubleDouble.MakeStatic( Inf( varargin{:}, 'double' ), 0 );
         end
 
         function v = rand( varargin )
@@ -106,7 +110,7 @@ classdef DoubleDouble < ED.BaseDoubleDouble & ED.ExtDouble
         end
 
         function v = randi( imax, varargin )
-            v = DoubleDouble.MakeStatic( randi( imax, varargin{:}, 'double' ), [] );
+            v = DoubleDouble.MakeStatic( randi( imax, varargin{:}, 'double' ), 0 );
         end
 
     end
@@ -119,7 +123,7 @@ classdef DoubleDouble < ED.BaseDoubleDouble & ED.ExtDouble
             if isempty( a1 )
                 v.v2 = v.v1;
             elseif all( a2 == 0, 'all' )
-                v.v2 = [];
+                v.v2 = 0;
             else
                 v.v2 = double( a2 );
             end

@@ -1,9 +1,9 @@
 classdef OctoDouble < ED.BaseDoubleDouble & ED.ExtDouble
 
     properties ( Constant, GetAccess = public )
-        zero   = OctoDouble.MakeStatic( QuadDouble.zero, [] );
-        one    = OctoDouble.MakeStatic( QuadDouble.one, [] );
-        tiny   = OctoDouble.MakeStatic( QuadDouble.MakeStatic( DoubleDouble.MakeStatic( 2.30824465444643394519e-128, [] ), [] ), [] );
+        zero   = OctoDouble.MakeStatic( QuadDouble.zero, 0 );
+        one    = OctoDouble.MakeStatic( QuadDouble.one, 0 );
+        tiny   = OctoDouble.MakeStatic( QuadDouble.MakeStatic( DoubleDouble.MakeStatic( 2.30824465444643394519e-128, 0 ), 0 ), 0 );
         pi     = OctoDouble.MakeStatic( QuadDouble.MakeStatic( DoubleDouble.MakeStatic( 3.14159265358979311600e+00, 1.22464679914735320717e-16 ), DoubleDouble.MakeStatic( -2.99476980971833966589e-33, 1.11245422086336528155e-49 ) ), QuadDouble.MakeStatic( DoubleDouble.MakeStatic( 5.67223197964031574414e-66, 1.74498621613524860120e-83 ), DoubleDouble.MakeStatic( 6.02937273224953984001e-100, 1.91012354687998999148e-116 ) ) );
         log_2  = OctoDouble.MakeStatic( QuadDouble.MakeStatic( DoubleDouble.MakeStatic( 6.93147180559945286227e-01, 2.31904681384629955842e-17 ), DoubleDouble.MakeStatic( 5.70770843841621206578e-34, -3.58243221060181142336e-50 ) ), QuadDouble.MakeStatic( DoubleDouble.MakeStatic( -1.35216967579886295691e-66, 6.08063874024081390981e-83 ), DoubleDouble.MakeStatic( 2.89550243323471468856e-99, 2.35138671214564105578e-116 ) ) );
         log_10 = OctoDouble.MakeStatic( QuadDouble.MakeStatic( DoubleDouble.MakeStatic( 2.30258509299404590109e+00, -2.17075622338224935076e-16 ), DoubleDouble.MakeStatic( -9.98426245446577657012e-33, -4.02335745445020637879e-49 ) ), QuadDouble.MakeStatic( DoubleDouble.MakeStatic( 1.92889952896933719193e-65, -5.21257011815125512829e-82 ), DoubleDouble.MakeStatic( -2.60373698986932938056e-98, 8.29741762082190113745e-115 ) ) );
@@ -47,7 +47,11 @@ classdef OctoDouble < ED.BaseDoubleDouble & ED.ExtDouble
                 v.v2 = in.v2;
             elseif isa( in, 'QuadDouble' ) || isa( in, 'QuadDoubleSlow' ) || isa( in, 'ED.QuadDoubleConstant' ) || isa( in, 'DoubleDouble' )
                 v.v1 = QuadDouble( in );
-                v.v2 = [];
+                if isempty( v.v1 )
+                    v.v2 = [];
+                else
+                    v.v2 = 0;
+                end
             elseif isa( in, 'ED.ExtDouble' )
                 C = cell( 1, 4 );
                 [ C{ : } ] = ToSumOfDoubles( in );
@@ -55,7 +59,11 @@ classdef OctoDouble < ED.BaseDoubleDouble & ED.ExtDouble
                 v.v2 = DoubleDouble.MakeStatic( C{ 3 }, C{ 4 } );
             else
                 v.v1 = QuadDouble( DoubleDouble( double( in ) ) );
-                v.v2 = [];
+                if isempty( v.v1 )
+                    v.v2 = [];
+                else
+                    v.v2 = 0;
+                end
             end
 
         end
@@ -81,7 +89,7 @@ classdef OctoDouble < ED.BaseDoubleDouble & ED.ExtDouble
     methods ( Static )
 
         function v = ones( varargin )
-            v = OctoDouble.MakeStatic( QuadDouble( ones( varargin{:}, 'double' ) ), [] );
+            v = OctoDouble.MakeStatic( QuadDouble( ones( varargin{:}, 'double' ) ), 0 );
         end
 
         function v = empty( varargin )
@@ -89,19 +97,19 @@ classdef OctoDouble < ED.BaseDoubleDouble & ED.ExtDouble
         end
 
         function v = zeros( varargin )
-            v = OctoDouble.MakeStatic( QuadDouble( zeros( varargin{:}, 'double' ) ), [] );
+            v = OctoDouble.MakeStatic( QuadDouble( zeros( varargin{:}, 'double' ) ), 0 );
         end
 
         function v = eye( varargin )
-            v = OctoDouble.MakeStatic( QuadDouble( eye( varargin{:}, 'double' ) ), [] );
+            v = OctoDouble.MakeStatic( QuadDouble( eye( varargin{:}, 'double' ) ), 0 );
         end
 
         function v = NaN( varargin )
-            v = OctoDouble.MakeStatic( QuadDouble.NaN( varargin{:} ), [] );
+            v = OctoDouble.MakeStatic( QuadDouble.NaN( varargin{:} ), 0 );
         end
 
         function v = Inf( varargin )
-            v = OctoDouble.MakeStatic( QuadDouble.Inf( varargin{:} ), [] );
+            v = OctoDouble.MakeStatic( QuadDouble.Inf( varargin{:} ), 0 );
         end
 
         function v = randn( varargin )
@@ -113,7 +121,7 @@ classdef OctoDouble < ED.BaseDoubleDouble & ED.ExtDouble
         end
 
         function v = randi( imax, varargin )
-            v = OctoDouble.MakeStatic( QuadDouble( randi( imax, varargin{:}, 'double' ) ), [] );
+            v = OctoDouble.MakeStatic( QuadDouble( randi( imax, varargin{:}, 'double' ) ), 0 );
         end
 
     end
@@ -126,7 +134,7 @@ classdef OctoDouble < ED.BaseDoubleDouble & ED.ExtDouble
             if isempty( a1 )
                 v.v2 = v.v1;
             elseif all( a2 == 0, 'all' )
-                v.v2 = [];
+                v.v2 = 0;
             else
                 v.v2 = QuadDouble( a2 );
             end
