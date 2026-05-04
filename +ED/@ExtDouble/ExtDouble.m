@@ -839,8 +839,8 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             Blocks = arrayfun( @( x ) ones( x, 1 ), Size, 'UniformOutput', false );
             Blocks{ Dim } = Size( Dim );
             xv1 = mat2cell( v.v1, Blocks{:} );
-            v2_empty = isempty( v.v2 );
-            if ~v2_empty
+            v2Empty = isempty( v.v2 );
+            if ~v2Empty
                 xv2 = mat2cell( v.v2, Blocks{:} );
             end
             Indices = cell( size( xv1 ) );
@@ -849,25 +849,25 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 if ( length( cm ) > 1 ) && strcmpi( cm( 1 : 2 ), 'ab' )
                     a = abs( v );
                     xa1 = mat2cell( a.v1, Blocks{:} );
-                    a2_empty = isempty( a.v2 );
-                    if ~a2_empty
+                    a2Empty = isempty( a.v2 );
+                    if ~a2Empty
                         xa2 = mat2cell( a.v2, Blocks{:} );
                     end
                 else
                     xa1 = xv1;
-                    a2_empty = v2_empty;
-                    if ~a2_empty
+                    a2Empty = v2Empty;
+                    if ~a2Empty
                         xa2 = xv2;
                     end
                 end
                 for i = 1 : numel( xv1 )
-                    if a2_empty
+                    if a2Empty
                         [ ~, Indices{ i } ] = sort( xa1{ i }( : ), varargin{:} );
                     else
                         [ ~, Indices{ i } ] = sortrows( [ xa1{ i }( : ), xa2{ i }( : ) ], varargin{:} );
                     end
                     xv1{ i } = Index( xv1{ i }, Indices{ i } );
-                    if ~v2_empty
+                    if ~v2Empty
                         xv2{ i } = Index( xv2{ i }, Indices{ i } );
                     end
                 end
@@ -880,33 +880,33 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                     b = angle( v );
                 end
                 xa1 = mat2cell( a.v1, Blocks{:} );
-                a2_empty = isempty( a.v2 );
-                if ~a2_empty
+                a2Empty = isempty( a.v2 );
+                if ~a2Empty
                     xa2 = mat2cell( a.v2, Blocks{:} );
                 end
                 xb1 = mat2cell( b.v1, Blocks{:} );
-                b2_empty = isempty( b.v2 );
-                if ~b2_empty
+                b2Empty = isempty( b.v2 );
+                if ~b2Empty
                     xb2 = mat2cell( b.v2, Blocks{:} );
                 end
                 for i = 1 : numel( xv1 )
-                    sort_cols = [ xa1{ i }( : ) ];
-                    if ~a2_empty
-                        sort_cols = [ sort_cols, xa2{ i }( : ) ];
+                    ToSort = [ xa1{ i }( : ) ];
+                    if ~a2Empty
+                        ToSort = [ ToSort, xa2{ i }( : ) ]; %#ok<AGROW>
                     end
-                    sort_cols = [ sort_cols, xb1{ i }( : ) ];
-                    if ~b2_empty
-                        sort_cols = [ sort_cols, xb2{ i }( : ) ];
+                    ToSort = [ ToSort, xb1{ i }( : ) ]; %#ok<AGROW>
+                    if ~b2Empty
+                        ToSort = [ ToSort, xb2{ i }( : ) ]; %#ok<AGROW>
                     end
-                    [ ~, Indices{ i } ] = sortrows( sort_cols, varargin{:} );
+                    [ ~, Indices{ i } ] = sortrows( ToSort, varargin{:} );
                     xv1{ i } = Index( xv1{ i }, Indices{ i } );
-                    if ~v2_empty
+                    if ~v2Empty
                         xv2{ i } = Index( xv2{ i }, Indices{ i } );
                     end
                 end
             end
             Indices = cell2mat( Indices );
-            if v2_empty
+            if v2Empty
                 v = v.Make( cell2mat( xv1 ), [] );
             else
                 v = v.Make( cell2mat( xv1 ), cell2mat( xv2 ) );
