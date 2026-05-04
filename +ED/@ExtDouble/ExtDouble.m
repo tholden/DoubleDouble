@@ -2201,10 +2201,6 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             v = Plus( a, -b );
         end
 
-    end
-
-    methods ( Sealed, Access = private )
-
         function v = ForwardElimination( v, L ) % For lower triangular L, x = ForwardElimination( b, L ) solves L*x = b.
             [ m, n ] = size( L );
             mn = min( m, n );
@@ -2243,7 +2239,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
 
     end
 
-    methods ( Static, Access = private )
+    methods ( Static, Access = protected )
 
         function [ varargout ] = ExpandSingleton( varargin )
             l = cellfun( @( x ) length( size( x ) ), varargin, 'UniformOutput', true );
