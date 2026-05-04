@@ -1,7 +1,6 @@
 classdef QuadDoubleConstant < ED.BaseDoubleDouble & ED.ExtDouble
 
     properties ( Constant )
-        empty = ED.QuadDoubleConstant;
         zero = ED.QuadDoubleConstant;
         one = ED.QuadDoubleConstant;
         tiny = ED.QuadDoubleConstant;

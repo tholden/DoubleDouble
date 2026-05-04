@@ -2,7 +2,6 @@ classdef DoubleDouble < ED.BaseDoubleDouble & ED.ExtDouble
 
     properties ( Constant, GetAccess = public )
 
-        empty  = DoubleDouble.MakeStatic( [], [] );
         zero   = DoubleDouble.MakeStatic( 0, [] );
         one    = DoubleDouble.MakeStatic( 1, [] );
         tiny   = DoubleDouble.MakeStatic( 4.93038065763132e-32, [] );
@@ -12,8 +11,9 @@ classdef DoubleDouble < ED.BaseDoubleDouble & ED.ExtDouble
         piD16  = DoubleDouble.MakeStatic( 1.963495408493620697e-01,  7.654042494670957545e-18 );
         log_2  = DoubleDouble.MakeStatic( 6.931471805599452862e-01,  2.319046813846299558e-17 );
         log_10 = DoubleDouble.MakeStatic( 2.302585092994045901e+00, -2.170756223382249351e-16 );
-        ExpRescale        = 9;
-        LogSteps          = 2;
+
+        ExpRescale = 9;
+        LogSteps   = 2;
 
         InverseFactorial = DoubleDouble.MakeStatic( ...
             [ 1.66666666666666657e-01; 4.16666666666666644e-02; 8.33333333333333322e-03; 1.38888888888888894e-03; 1.98412698412698413e-04; 2.48015873015873016e-05; 2.75573192239858925e-06; 2.75573192239858883e-07; 2.50521083854417202e-08; 2.08767569878681002e-09; 1.60590438368216133e-10; 1.14707455977297245e-11; 7.64716373181981641e-13; 4.77947733238738525e-14; 2.81145725434552060e-15 ], ...
@@ -32,7 +32,7 @@ classdef DoubleDouble < ED.BaseDoubleDouble & ED.ExtDouble
     methods
 
         function v = DoubleDouble( in, varargin )
-            if nargin == 0 || isempty( in )
+            if nargin == 0
                 v.v1 = [];
                 v.v2 = [];
                 return
@@ -75,6 +75,10 @@ classdef DoubleDouble < ED.BaseDoubleDouble & ED.ExtDouble
 
         function v = ones( varargin )
             v = DoubleDouble.MakeStatic( ones( varargin{:}, 'double' ), [] );
+        end
+
+        function v = empty( varargin )
+            v = DoubleDouble.MakeStatic( double.empty( varargin{:} ), [] );
         end
 
         function v = zeros( varargin )

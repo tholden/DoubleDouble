@@ -2,7 +2,6 @@ classdef ( Abstract ) BaseExtDoubleProperties
 
     properties ( Abstract, Constant )
 
-        empty
         zero
         one
         tiny

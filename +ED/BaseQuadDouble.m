@@ -15,27 +15,28 @@ classdef ( Abstract ) BaseQuadDouble < ED.BaseDoubleDouble
             %     v = b.Make( x1, x2 );
             % end
 
-            a = ED.BaseQuadDouble.PromoteStatic( a );
-            b = ED.BaseQuadDouble.PromoteStatic( b );
+            a = ED.BaseQuadDouble.FullInflate( ED.BaseQuadDouble.PromoteStatic( a ) );
+            b = ED.BaseQuadDouble.FullInflate( ED.BaseQuadDouble.PromoteStatic( b ) );
             [ s0, s1, s2, s3 ] = QDPlusQD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
             v = QuadDouble.MakeStatic( DoubleDouble.MakeStatic( s0, s1 ), DoubleDouble.MakeStatic( s2, s3 ) );
         end
 
         function v = Times( a, b )
-            a = ED.BaseQuadDouble.PromoteStatic( a );
-            b = ED.BaseQuadDouble.PromoteStatic( b );
+            a = ED.BaseQuadDouble.FullInflate( ED.BaseQuadDouble.PromoteStatic( a ) );
+            b = ED.BaseQuadDouble.FullInflate( ED.BaseQuadDouble.PromoteStatic( b ) );
             [ s0, s1, s2, s3 ] = QDTimesQD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
             v = QuadDouble.MakeStatic( DoubleDouble.MakeStatic( s0, s1 ), DoubleDouble.MakeStatic( s2, s3 ) );
         end
 
         function v = RDivide( a, b )
-            a = ED.BaseQuadDouble.PromoteStatic( a );
-            b = ED.BaseQuadDouble.PromoteStatic( b );
+            a = ED.BaseQuadDouble.FullInflate( ED.BaseQuadDouble.PromoteStatic( a ) );
+            b = ED.BaseQuadDouble.FullInflate( ED.BaseQuadDouble.PromoteStatic( b ) );
             [ s0, s1, s2, s3 ] = QDDividedByQD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
             v = QuadDouble.MakeStatic( DoubleDouble.MakeStatic( s0, s1 ), DoubleDouble.MakeStatic( s2, s3 ) );
         end
 
         function v = Normalize( v )
+            v = ED.BaseQuadDouble.FullInflate( v );
             [ s0, s1, s2, s3 ] = QDNormalize( v.v1.v1, v.v1.v2, v.v2.v1, v.v2.v2 );
             v = QuadDouble.MakeStatic( DoubleDouble.MakeStatic( s0, s1 ), DoubleDouble.MakeStatic( s2, s3 ) );
         end
@@ -46,6 +47,18 @@ classdef ( Abstract ) BaseQuadDouble < ED.BaseDoubleDouble
 
         function v = PromoteStatic( a ) % TODO Remove
             v = QuadDouble( a );
+        end
+
+        function v = FullInflate( v )
+            if isempty( v.v2 )
+                v.v2 = zeros( size( v.v1 ), 'like', v.v1 );
+            end
+            if isempty( v.v1.v2 )
+                v.v1.v2 = zeros( size( v.v1.v1 ), 'like', v.v1.v1 );
+            end
+            if isempty( v.v2.v2 )
+                v.v2.v2 = zeros( size( v.v2.v1 ), 'like', v.v2.v1 );
+            end
         end
 
     end

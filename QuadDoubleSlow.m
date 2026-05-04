@@ -3,9 +3,9 @@ classdef QuadDoubleSlow < ED.BaseDoubleDouble & ED.ExtDouble & ED.QuadDoubleProp
     methods
 
         function v = QuadDoubleSlow( in, varargin )
-            if nargin == 0 || isempty( in )
+            if nargin == 0
                 v.v1 = DoubleDouble.empty;
-                v.v2 = DoubleDouble.empty;
+                v.v2 = [];
                 return
             end
             if nargin >= 2
@@ -52,6 +52,10 @@ classdef QuadDoubleSlow < ED.BaseDoubleDouble & ED.ExtDouble & ED.QuadDoubleProp
 
         function v = ones( varargin )
             v = QuadDoubleSlow.MakeStatic( DoubleDouble( ones( varargin{:}, 'double' ) ), [] );
+        end
+
+        function v = empty( varargin )
+            v = QuadDoubleSlow.MakeStatic( DoubleDouble( double.empty( varargin{:} ) ), [] );
         end
 
         function v = zeros( varargin )

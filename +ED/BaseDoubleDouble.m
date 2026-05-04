@@ -77,6 +77,9 @@ classdef ( Abstract ) BaseDoubleDouble
         end
 
         function v = Normalize( v )
+            if isempty( v.v2 )
+                v.v2 = 0;
+            end
             v.v1 = Normalize( v.v1 );
             v.v2 = Normalize( v.v2 );
             [ v.v1, v.v2 ] = DDNormalize( v.v1, v.v2 );
