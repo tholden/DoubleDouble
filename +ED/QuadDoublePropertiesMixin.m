@@ -3,9 +3,9 @@ classdef ( Abstract ) QuadDoublePropertiesMixin < ED.BaseExtDoubleProperties
     properties ( Constant, GetAccess = public )
 
         empty  = ED.QuadDoubleConstant.MakeStatic( DoubleDouble.empty, DoubleDouble.empty );
-        zero   = ED.QuadDoubleConstant.MakeStatic( DoubleDouble.zero, 0 );
-        one    = ED.QuadDoubleConstant.MakeStatic( DoubleDouble.one, 0 );
-        tiny   = ED.QuadDoubleConstant.MakeStatic( DoubleDouble.MakeStatic( 1.21543267145725000000e-63, 0 ), 0 );
+        zero   = ED.QuadDoubleConstant.MakeStatic( DoubleDouble.zero, [] );
+        one    = ED.QuadDoubleConstant.MakeStatic( DoubleDouble.one, [] );
+        tiny   = ED.QuadDoubleConstant.MakeStatic( DoubleDouble.MakeStatic( 1.21543267145725000000e-63, [] ), [] );
         pi     = ED.QuadDoubleConstant.MakeStatic( DoubleDouble.MakeStatic( 3.14159265358979311600e+00, 1.22464679914735320717e-16 ), DoubleDouble.MakeStatic( -2.99476980971833966589e-33, 1.11245422086336528166e-49 ) );
         piT2   = ED.QuadDoubleConstant.MakeStatic( DoubleDouble.MakeStatic( 6.28318530717958623200e+00, 2.44929359829470641444e-16 ), DoubleDouble.MakeStatic( -5.98953961943667933152e-33, 2.22490844172673056346e-49 ) );
         piD2   = ED.QuadDoubleConstant.MakeStatic( DoubleDouble.MakeStatic( 1.57079632679489655800e+00, 6.12323399573676603611e-17 ), DoubleDouble.MakeStatic( -1.49738490485916983288e-33, 5.56227110431682640865e-50 ) );

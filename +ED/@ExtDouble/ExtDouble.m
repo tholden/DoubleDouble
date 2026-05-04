@@ -848,7 +848,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             end
             if isempty( b )
                 if isempty( a )
-                    s = a.Make( 0,0 ); s = s( zeros( 0,1 ) );
+                    s = a.Make( 0, [] ); s = s( zeros( 0,1 ) );
                     i = [];
                     return
                 end
@@ -1634,7 +1634,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
         end
 
         function v = atan( v )
-            v = atan2( v, v.Make( 1, 0 ) );
+            v = atan2( v, v.Make( 1, [] ) );
         end
 
         function v = atan2( y, x )
