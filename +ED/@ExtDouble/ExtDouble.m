@@ -719,17 +719,9 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 if strcmpi( cm( 1 ), 'r' )
                     a = real( v );
                     b = imag( v );
-                elseif ( length( cm ) > 1 ) && strcmpi( cm( 1 : 2 ), 'ab' )
+                else
                     a = abs( v );
                     b = angle( v );
-                else
-                    if isreal( v )
-                        a = real( v );
-                        b = imag( v );
-                    else
-                        a = abs( v );
-                        b = angle( v );
-                    end
                 end
                 xa1 = mat2cell( a.v1, Blocks{:} );
                 xa2 = mat2cell( a.v2, Blocks{:} );
