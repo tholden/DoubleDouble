@@ -78,7 +78,9 @@ classdef ( Abstract ) BaseDoubleDouble
 
         function v = Normalize( v )
             if all( v.v2 == 0, 'all' )
-                v.v2 = 0;
+                v.v1 = Normalize( v.v1 );
+                v.v2 = [];
+                return
             end
             v.v1 = Normalize( v.v1 );
             v.v2 = Normalize( v.v2 );
