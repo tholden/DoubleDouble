@@ -31,16 +31,23 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 v = a;
             else
                 b = varargin{ 1 };
-                if length( varargin ) > 1
-                    v = cat( Dim, cat( Dim, a, b ), varargin{ 2 : end } );
+                if ~isa( a, 'ED.ExtDouble' )
+                    a = b.Promote( a );
+                end
+                if ~isa( b, 'ED.ExtDouble' )
+                    b = a.Promote( b );
+                end
+                x1 = cat( Dim, a.v1, b.v1 );
+                if isempty( a.v2 ) && isempty( b.v2 )
+                    x2 = [];
                 else
-                    if ~isa( a, 'ED.ExtDouble' )
-                        a = b.Promote( a );
-                    end
-                    if ~isa( b, 'ED.ExtDouble' )
-                        b = a.Promote( b );
-                    end
-                    v = a.Make( cat( Dim, a.v1, b.v1 ), cat( Dim, a.v2, b.v2 ) );
+                    a = FillV2( a );
+                    b = FillV2( b );
+                    x2 = cat( Dim, a.v2, b.v2 );
+                end
+                v = a.Make( x1, x2 );
+                if length( varargin ) > 1
+                    v = cat( Dim, v, varargin{ 2 : end } );
                 end
             end
         end
@@ -2117,6 +2124,12 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
     end
 
     methods ( Sealed, Access = protected )
+
+        function v = FillV2( v )
+            if isempty( v.v2 )
+                v.v2 = zeros( size( v.v1 ), 'like', v.v1 );
+            end
+        end
 
         function v = MTimes( a, b )
             [ R, c ] = size( a );
