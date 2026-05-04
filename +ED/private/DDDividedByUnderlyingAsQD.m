@@ -1,0 +1,29 @@
+function [ s0, s1, s2, s3 ] = DDDividedByUnderlyingAsQD( a0, a1, b0 )
+    Rescale = abs( a0 ) > 2 ^ 969;
+    if any( Rescale, 'all' )
+        ScaleDown = 2 ^ -53;
+        a0( Rescale ) = a0( Rescale ) * ScaleDown;
+        a1( Rescale ) = a1( Rescale ) * ScaleDown;
+    end
+    q0 = a0 ./ b0;
+    [ r0, r1 ] = UnderlyingTimesUnderlying( b0, q0 );
+    [ r0, r1, r2, r3 ] = DDPlusDDAsQD( a0, a1, -r0, -r1 );
+    q1 = r0 ./ b0;
+    [ t0, t1 ] = UnderlyingTimesUnderlying( b0, q1 );
+    [ r0, r1, r2, r3 ] = QDPlusDD( r0, r1, r2, r3, -t0, -t1 );
+    q2 = r0 ./ b0;
+    [ t0, t1 ] = UnderlyingTimesUnderlying( b0, q2 );
+    [ r0, r1, r2, r3 ] = QDPlusDD( r0, r1, r2, r3, -t0, -t1 );
+    q3 = r0 ./ b0;
+    [ t0, t1 ] = UnderlyingTimesUnderlying( b0, q3 );
+    [ r0, ~, ~, ~ ] = QDPlusDD( r0, r1, r2, r3, -t0, -t1 );
+    q4 = r0 ./ b0;
+    [ s0, s1, s2, s3 ] = Renorm5( q0, q1, q2, q3, q4 );
+    if any( Rescale, 'all' )
+        ScaleUp = 2 ^ 53;
+        s0( Rescale ) = s0( Rescale ) * ScaleUp;
+        s1( Rescale ) = s1( Rescale ) * ScaleUp;
+        s2( Rescale ) = s2( Rescale ) * ScaleUp;
+        s3( Rescale ) = s3( Rescale ) * ScaleUp;
+    end
+end
