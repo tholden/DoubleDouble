@@ -49,7 +49,7 @@ classdef DoubleDouble < ED.BaseDoubleDouble & ED.ExtDouble
                 [ v.v1, v.v2 ] = ToSumOfDoubles( in );
             else
                 v.v1 = double( in );
-                v.v2 = 0;
+                v.v2 = [];
             end
         end
 
@@ -115,7 +115,7 @@ classdef DoubleDouble < ED.BaseDoubleDouble & ED.ExtDouble
             if isempty( a1 )
                 v.v2 = v.v1;
             elseif all( a2 == 0, 'all' )
-                v.v2 = 0;
+                v.v2 = [];
             else
                 v.v2 = double( a2 );
             end
