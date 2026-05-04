@@ -840,7 +840,9 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             Blocks{ Dim } = Size( Dim );
             xv1 = mat2cell( v.v1, Blocks{:} );
             v2_empty = isempty( v.v2 );
-            if ~v2_empty, xv2 = mat2cell( v.v2, Blocks{:} ); end
+            if ~v2_empty
+                xv2 = mat2cell( v.v2, Blocks{:} );
+            end
             Indices = cell( size( xv1 ) );
 
             if isreal( v )
@@ -848,11 +850,15 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                     a = abs( v );
                     xa1 = mat2cell( a.v1, Blocks{:} );
                     a2_empty = isempty( a.v2 );
-                    if ~a2_empty, xa2 = mat2cell( a.v2, Blocks{:} ); end
+                    if ~a2_empty
+                        xa2 = mat2cell( a.v2, Blocks{:} );
+                    end
                 else
                     xa1 = xv1;
                     a2_empty = v2_empty;
-                    if ~a2_empty, xa2 = xv2; end
+                    if ~a2_empty
+                        xa2 = xv2;
+                    end
                 end
                 for i = 1 : numel( xv1 )
                     if a2_empty
@@ -861,7 +867,9 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                         [ ~, Indices{ i } ] = sortrows( [ xa1{ i }( : ), xa2{ i }( : ) ], varargin{:} );
                     end
                     xv1{ i } = Index( xv1{ i }, Indices{ i } );
-                    if ~v2_empty, xv2{ i } = Index( xv2{ i }, Indices{ i } ); end
+                    if ~v2_empty
+                        xv2{ i } = Index( xv2{ i }, Indices{ i } );
+                    end
                 end
             else
                 if strcmpi( cm( 1 ), 'r' )
@@ -873,18 +881,28 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 end
                 xa1 = mat2cell( a.v1, Blocks{:} );
                 a2_empty = isempty( a.v2 );
-                if ~a2_empty, xa2 = mat2cell( a.v2, Blocks{:} ); end
+                if ~a2_empty
+                    xa2 = mat2cell( a.v2, Blocks{:} );
+                end
                 xb1 = mat2cell( b.v1, Blocks{:} );
                 b2_empty = isempty( b.v2 );
-                if ~b2_empty, xb2 = mat2cell( b.v2, Blocks{:} ); end
+                if ~b2_empty
+                    xb2 = mat2cell( b.v2, Blocks{:} );
+                end
                 for i = 1 : numel( xv1 )
                     sort_cols = [ xa1{ i }( : ) ];
-                    if ~a2_empty, sort_cols = [ sort_cols, xa2{ i }( : ) ]; end
+                    if ~a2_empty
+                        sort_cols = [ sort_cols, xa2{ i }( : ) ];
+                    end
                     sort_cols = [ sort_cols, xb1{ i }( : ) ];
-                    if ~b2_empty, sort_cols = [ sort_cols, xb2{ i }( : ) ]; end
+                    if ~b2_empty
+                        sort_cols = [ sort_cols, xb2{ i }( : ) ];
+                    end
                     [ ~, Indices{ i } ] = sortrows( sort_cols, varargin{:} );
                     xv1{ i } = Index( xv1{ i }, Indices{ i } );
-                    if ~v2_empty, xv2{ i } = Index( xv2{ i }, Indices{ i } ); end
+                    if ~v2_empty
+                        xv2{ i } = Index( xv2{ i }, Indices{ i } );
+                    end
                 end
             end
             Indices = cell2mat( Indices );
@@ -916,7 +934,11 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
-                if isempty( v.v2 ), x2 = cell( size( x1 ) ); else, x2 = mat2cell( v.v2, Blocks{:} ); end
+                if isempty( v.v2 )
+                    x2 = cell( size( x1 ) );
+                else
+                    x2 = mat2cell( v.v2, Blocks{:} );
+                end
                 s = v.Make( x1{ 1 }, x2{ 1 } );
                 for i = 2 : Length
                     s = s.Plus( v.Make( x1{ i }, x2{ i } ) );
@@ -967,7 +989,11 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
-                if isempty( v.v2 ), x2 = cell( size( x1 ) ); else, x2 = mat2cell( v.v2, Blocks{:} ); end
+                if isempty( v.v2 )
+                    x2 = cell( size( x1 ) );
+                else
+                    x2 = mat2cell( v.v2, Blocks{:} );
+                end
                 s = v.Make( x1{ 1 }, x2{ 1 } );
                 for i = 2 : Length
                     s = s.Times( v.Make( x1{ i }, x2{ i } ) );
@@ -1022,7 +1048,11 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                     Blocks = num2cell( Size );
                     Blocks{ Dim } = ones( Length, 1 );
                     x1 = mat2cell( a.v1, Blocks{:} );
-                    if isempty( a.v2 ), x2 = cell( size( x1 ) ); else, x2 = mat2cell( a.v2, Blocks{:} ); end
+                    if isempty( a.v2 )
+                        x2 = cell( size( x1 ) );
+                    else
+                        x2 = mat2cell( a.v2, Blocks{:} );
+                    end
                     s = a.Make( x1{ 1 }, x2{ 1 } );
                     Size( Dim ) = 1;
                     i = ones( Size );
@@ -1090,7 +1120,11 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                     Blocks = num2cell( Size );
                     Blocks{ Dim } = ones( Length, 1 );
                     x1 = mat2cell( a.v1, Blocks{:} );
-                    if isempty( a.v2 ), x2 = cell( size( x1 ) ); else, x2 = mat2cell( a.v2, Blocks{:} ); end
+                    if isempty( a.v2 )
+                        x2 = cell( size( x1 ) );
+                    else
+                        x2 = mat2cell( a.v2, Blocks{:} );
+                    end
                     s = a.Make( x1{ 1 }, x2{ 1 } );
                     Size( Dim ) = 1;
                     i = ones( Size );
@@ -1158,7 +1192,11 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
-                if isempty( v.v2 ), x2 = cell( size( x1 ) ); else, x2 = mat2cell( v.v2, Blocks{:} ); end
+                if isempty( v.v2 )
+                    x2 = cell( size( x1 ) );
+                else
+                    x2 = mat2cell( v.v2, Blocks{:} );
+                end
                 s = v.Make( x1{ 1 }, x2{ 1 } );
                 c1 = cell( size( x1 ) );
                 c2 = cell( size( x2 ) );
@@ -1219,7 +1257,11 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
-                if isempty( v.v2 ), x2 = cell( size( x1 ) ); else, x2 = mat2cell( v.v2, Blocks{:} ); end
+                if isempty( v.v2 )
+                    x2 = cell( size( x1 ) );
+                else
+                    x2 = mat2cell( v.v2, Blocks{:} );
+                end
                 s = v.Make( x1{ 1 }, x2{ 1 } );
                 c1 = cell( size( x1 ) );
                 c2 = cell( size( x2 ) );
@@ -1284,7 +1326,11 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
-                if isempty( v.v2 ), x2 = cell( size( x1 ) ); else, x2 = mat2cell( v.v2, Blocks{:} ); end
+                if isempty( v.v2 )
+                    x2 = cell( size( x1 ) );
+                else
+                    x2 = mat2cell( v.v2, Blocks{:} );
+                end
                 s = v.Make( x1{ 1 }, x2{ 1 } );
                 c1 = cell( size( x1 ) );
                 c2 = cell( size( x2 ) );
@@ -1345,7 +1391,11 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
-                if isempty( v.v2 ), x2 = cell( size( x1 ) ); else, x2 = mat2cell( v.v2, Blocks{:} ); end
+                if isempty( v.v2 )
+                    x2 = cell( size( x1 ) );
+                else
+                    x2 = mat2cell( v.v2, Blocks{:} );
+                end
                 s = v.Make( x1{ 1 }, x2{ 1 } );
                 c1 = cell( size( x1 ) );
                 c2 = cell( size( x2 ) );
@@ -1406,7 +1456,11 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
                 x1 = mat2cell( v.v1, Blocks{:} );
-                if isempty( v.v2 ), x2 = cell( size( x1 ) ); else, x2 = mat2cell( v.v2, Blocks{:} ); end
+                if isempty( v.v2 )
+                    x2 = cell( size( x1 ) );
+                else
+                    x2 = mat2cell( v.v2, Blocks{:} );
+                end
                 s = v.Make( x1{ 1 }, x2{ 1 } );
                 c1 = cell( size( x1 ) );
                 c2 = cell( size( x2 ) );
