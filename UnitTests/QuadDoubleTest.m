@@ -620,7 +620,7 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             % Verify that A*AInv = I
             I = A * AInv; %#ok<MINV>
             EyeVal = eye( size( I ) );
-            TestCase.verifyEqual( double( I ), EyeVal, 'RelTol', TestCase.RelTol );
+            TestCase.verifyEqual( double( I ), EyeVal, 'AbsTol', TestCase.AbsTol );
         end
 
         function TestChol( TestCase )
