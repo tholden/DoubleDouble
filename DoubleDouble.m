@@ -35,8 +35,9 @@ classdef DoubleDouble < ED.BaseDoubleDouble & ED.ExtDouble
                 return
             end
             if nargin >= 2
+                in = DoubleDouble( in );
                 for i = 1 : length( varargin )
-                    in = DoubleDouble.Plus( in, varargin{ i } );
+                    in = Plus( in, varargin{ i } );
                 end
             end
             if isa( in, 'DoubleDouble' )

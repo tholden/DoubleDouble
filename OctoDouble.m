@@ -35,8 +35,9 @@ classdef OctoDouble < ED.BaseDoubleDouble & ED.ExtDouble
                 return
             end
             if nargin >= 2
+                in = OctoDouble( in );
                 for i = 1 : length( varargin )
-                    in = OctoDouble.Plus( in, varargin{ i } );
+                    in = Plus( in, varargin{ i } );
                 end
             end
             if isa( in, 'OctoDouble' )

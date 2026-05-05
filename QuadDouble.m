@@ -9,8 +9,9 @@ classdef QuadDouble < ED.BaseQuadDouble & ED.ExtDouble & ED.QuadDoubleProperties
                 return
             end
             if nargin >= 2
+                in = QuadDouble( in );
                 for i = 1 : length( varargin )
-                    in = QuadDouble.Plus( in, varargin{ i } );
+                    in = Plus( in, varargin{ i } );
                 end
             end
             if isa( in, 'QuadDouble' ) || isa( in, 'QuadDoubleSlow' ) || isa( in, 'ED.QuadDoubleConstant' )
