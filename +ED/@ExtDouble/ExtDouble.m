@@ -1817,16 +1817,19 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             % sin( pi/16 ) = 0.5 * sqrt( 2 - sqrt( 2 + sqrt( 2 ) ) )
             % we can compute sin( x ) from sin( s ), cos( s ).  This greatly increases the convergence of the sine Taylor series.
 
-            z = round( v ./ v.piT2 );
-            r = v - v.piT2 .* z;
+            piT2 = TimesPowerOf2( v.pi, 2 );
+            z = round( v ./ piT2 );
+            r = v - piT2 .* z;
 
-            q = floor( r.v1 ./ v.piD2.v1 + 0.5 );
-            t = r - v.piD2 .* q;
+            piD2 = TimesPowerOf2( v.pi, 0.5 );
+            q = floor( r.v1 ./ piD2.v1 + 0.5 );
+            t = r - piD2 .* q;
             j = q;
             abs_j = abs( j );
 
-            q = floor( t.v1 ./ v.piD16.v1 + 0.5 );
-            t = t - v.piD16 .* q;
+            piD16 = TimesPowerOf2( v.pi, 0.0625 );
+            q = floor( t.v1 ./ piD16.v1 + 0.5 );
+            t = t - piD16 .* q;
             k = q;
             abs_k = abs( k );
 
