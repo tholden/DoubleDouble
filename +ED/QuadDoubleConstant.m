@@ -8,8 +8,8 @@ classdef QuadDoubleConstant < ED.BaseDoubleDouble & ED.ExtDouble
         piT2 = ED.QuadDoubleConstant;
         piD2 = ED.QuadDoubleConstant;
         piD16 = ED.QuadDoubleConstant;
-        log_2 = ED.QuadDoubleConstant;
-        log_10 = ED.QuadDoubleConstant;
+        log2 = ED.QuadDoubleConstant;
+        log10 = ED.QuadDoubleConstant;
         ExpRescale = ED.QuadDoubleConstant;
         LogSteps = ED.QuadDoubleConstant;
         InverseFactorial = ED.QuadDoubleConstant;

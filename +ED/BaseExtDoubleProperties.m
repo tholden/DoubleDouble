@@ -10,8 +10,8 @@ classdef ( Abstract ) BaseExtDoubleProperties
         piT2
         piD2
         piD16
-        log_2
-        log_10
+        log2
+        log10
         SinTable
         CosTable
         ExpRescale

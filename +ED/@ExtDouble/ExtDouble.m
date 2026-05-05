@@ -1719,8 +1719,8 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             inv_k = 1.0 / k;
             Threshold = inv_k .* v.tiny.v1;
 
-            m = floor( v.v1 ./ v.log_2.v1 + 0.5 );
-            r = v - v.log_2 .* m;
+            m = floor( v.v1 ./ v.log2.v1 + 0.5 );
+            r = v - v.log2 .* m;
             r = r.TimesPowerOf2( inv_k );
 
             p = r .* r;
@@ -1780,11 +1780,11 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
         end
 
         function v = log2( v )
-            v = log( v ) ./ v.log_2;
+            v = log( v ) ./ v.log2;
         end
 
         function v = log10( v )
-            v = log( v ) ./ v.log_10;
+            v = log( v ) ./ v.log10;
         end
 
         function v = logm( v )

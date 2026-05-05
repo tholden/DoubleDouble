@@ -9,8 +9,8 @@ classdef ( Abstract ) QuadDoublePropertiesMixin < ED.BaseExtDoubleProperties
         piT2   = ED.QuadDoubleConstant.MakeStatic( DoubleDouble.MakeStatic( 6.28318530717958623200e+00, 2.44929359829470641444e-16 ), DoubleDouble.MakeStatic( -5.98953961943667933152e-33, 2.22490844172673056346e-49 ) );
         piD2   = ED.QuadDoubleConstant.MakeStatic( DoubleDouble.MakeStatic( 1.57079632679489655800e+00, 6.12323399573676603611e-17 ), DoubleDouble.MakeStatic( -1.49738490485916983288e-33, 5.56227110431682640865e-50 ) );
         piD16  = ED.QuadDoubleConstant.MakeStatic( DoubleDouble.MakeStatic( 1.96349540849362069750e-01, 7.65404249467095754484e-18 ), DoubleDouble.MakeStatic( -1.87173113107396229118e-34, 6.95283888039603300966e-51 ) );
-        log_2  = ED.QuadDoubleConstant.MakeStatic( DoubleDouble.MakeStatic( 6.93147180559945286227e-01, 2.31904681384629955842e-17 ), DoubleDouble.MakeStatic( 5.70770843841621206578e-34, -3.58243221060181142336e-50 ) );
-        log_10 = ED.QuadDoubleConstant.MakeStatic( DoubleDouble.MakeStatic( 2.30258509299404590109e+00, -2.17075622338224935076e-16 ), DoubleDouble.MakeStatic( -9.98426245446577657012e-33, -4.02335745445020637879e-49 ) );
+        log2  = ED.QuadDoubleConstant.MakeStatic( DoubleDouble.MakeStatic( 6.93147180559945286227e-01, 2.31904681384629955842e-17 ), DoubleDouble.MakeStatic( 5.70770843841621206578e-34, -3.58243221060181142336e-50 ) );
+        log10 = ED.QuadDoubleConstant.MakeStatic( DoubleDouble.MakeStatic( 2.30258509299404590109e+00, -2.17075622338224935076e-16 ), DoubleDouble.MakeStatic( -9.98426245446577657012e-33, -4.02335745445020637879e-49 ) );
 
         ExpRescale = 12;
         LogSteps   = 3;

@@ -9,8 +9,8 @@ classdef DoubleDouble < ED.BaseDoubleDouble & ED.ExtDouble
         piT2   = DoubleDouble.MakeStatic( 6.283185307179586232e+00,  2.449293598294706414e-16 );
         piD2   = DoubleDouble.MakeStatic( 1.570796326794896558e+00,  6.123233995736766036e-17 );
         piD16  = DoubleDouble.MakeStatic( 1.963495408493620697e-01,  7.654042494670957545e-18 );
-        log_2  = DoubleDouble.MakeStatic( 6.931471805599452862e-01,  2.319046813846299558e-17 );
-        log_10 = DoubleDouble.MakeStatic( 2.302585092994045901e+00, -2.170756223382249351e-16 );
+        log2  = DoubleDouble.MakeStatic( 6.931471805599452862e-01,  2.319046813846299558e-17 );
+        log10 = DoubleDouble.MakeStatic( 2.302585092994045901e+00, -2.170756223382249351e-16 );
 
         ExpRescale = 9;
         LogSteps   = 2;
