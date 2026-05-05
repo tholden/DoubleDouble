@@ -2411,9 +2411,12 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             a2 = a.Make( a.v2, 0 );
         end
 
-        function v = vpa( v )
+        function v = vpa( v, Digits )
             w = cell( 1, 2 ^ floor( v.PromotionOrder ) );
-            digits( max( 18 * numel( w ), digits ) );
+            if nargin < 2
+                Digits = 32;
+            end
+            digits( max( [ Digits, 18 * numel( w ), digits ] ) );
             [ w{:} ] = ToSumOfDoubles( v );
             try
                 w = cellfun( @( x ) vpa( x, BoostPrecision = false ), w, 'UniformOutput', false ); % Requires R2026a.
