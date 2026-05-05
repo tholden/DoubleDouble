@@ -542,7 +542,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 for n = 2 : N
                     Power = Power .* Power;
                     Select = find( Binary( :, end + 1 - n ) == '1' );
-                    vv =  vv.Assign( vv.Index( Select ) .*  Power.Index( Select ), Select );
+                    vv =  vv.Assign( vv.Index( Select ) .* Power.Index( Select ), Select );
                 end
                 v =  v.Assign( vv, bHalfInteger );
             end
@@ -1905,7 +1905,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
 
         function v = asin( v )
             assert( all( abs( Index( v.v1, ':' ) ) <= 1 ) );
-            v = atan2( v, sqrt( max( 1 - v.*v, 0 ) ) );
+            v = atan2( v, sqrt( max( 1 - v .* v, 0 ) ) );
         end
 
         function v = cos( v )
@@ -1914,7 +1914,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
 
         function v = acos( v )
             assert( all( abs( Index( v.v1, ':' ) ) <= 1 ) );
-            v = atan2( sqrt( max( 1 - v.*v, 0 ) ), v );
+            v = atan2( sqrt( max( 1 - v .* v, 0 ) ), v );
         end
 
         function v = tan( v )
@@ -1927,7 +1927,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
         end
 
         function v = atan2( y, x )
-            r = sqrt( x.*x + y.*y );
+            r = sqrt( x .* x + y .* y );
             xx = x ./ r;
             yy = y ./ r;
             Select = abs( xx.v1 ) > abs( yy.v1 );
@@ -1959,7 +1959,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
         end
 
         function v = asinh( v )
-            v = log( v + sqrt( v.*v + 1 ) );
+            v = log( v + sqrt( v .* v + 1 ) );
         end
 
         function v = cosh( v )
@@ -1969,7 +1969,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
         end
 
         function v = acosh( v )
-            v = log( v + sqrt( v.*v - 1 ) );
+            v = log( v + sqrt( v .* v - 1 ) );
         end
 
         function [ sinh_v, cosh_v ] = sinhcosh( v )
