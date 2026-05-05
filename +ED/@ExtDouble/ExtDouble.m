@@ -2425,7 +2425,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             try
                 w = cellfun( @( x ) vpa( x, BoostPrecision = false ), w, 'UniformOutput', false ); % Requires R2026a.
             catch
-                w = cellfun( @( x ) vpa( x ), w, 'UniformOutput', false );
+                w = cellfun( @( x ) vpa( sym( x, 'f' ) ), w, 'UniformOutput', false );
             end
             v = w{ 1 };
             for k = 2 : length( w )
