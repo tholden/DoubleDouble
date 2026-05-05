@@ -2411,7 +2411,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             a2 = a.Make( a.v2, 0 );
         end
 
-        function v = vpa( v, Digits )
+        function v = vpa( v, Digits, varargin )
             w = cell( 1, 2 ^ floor( v.PromotionOrder ) );
             if nargin < 2
                 Digits = 32;
