@@ -4,8 +4,8 @@ classdef QuadDoubleSlowTest < matlab.unittest.TestCase
 
     properties
 
-        AbsTol = 1e-30;  % Absolute tolerance for comparisons
-        RelTol = 1e-15;  % Relative tolerance for comparisons
+        AbsTol = 1e-60;  % Absolute tolerance for comparisons
+        RelTol = 1e-60;  % Relative tolerance for comparisons
 
         % Test data
         SmallValues;
@@ -20,6 +20,7 @@ classdef QuadDoubleSlowTest < matlab.unittest.TestCase
 
         function CreateTestData( TestCase )
             % Create test data for use in tests
+            digits( 150 );
             TestCase.SmallValues = QuadDoubleSlow( [ 1e-10, 2e-10, 3e-10 ] );
             TestCase.MediumValues = QuadDoubleSlow( [ 1, 2, 3 ] );
             TestCase.LargeValues = QuadDoubleSlow( [ 1e10, 2e10, 3e10 ] );
@@ -58,26 +59,10 @@ classdef QuadDoubleSlowTest < matlab.unittest.TestCase
             [ L_QD, U_QD, ~ ] = lu( QD );
             [ L_QDS, U_QDS, ~ ] = lu( QDS );
 
-            TestCase.verifyEqual( double( L_QDS - L_QD ), zeros( size( Data ) ), 'AbsTol', 1e-28 );
-            TestCase.verifyEqual( double( U_QDS - U_QD ), zeros( size( Data ) ), 'AbsTol', 1e-28 );
+            TestCase.verifyEqual( double( L_QDS - L_QD ), zeros( size( Data ) ), 'AbsTol', TestCase.AbsTol );
+            TestCase.verifyEqual( double( U_QDS - U_QD ), zeros( size( Data ) ), 'AbsTol', TestCase.AbsTol );
         end
 
-        function TestCrossValidationVPA( TestCase )
-            % Verify that QuadDoubleSlow is accurate compared to VPA
-            Data = [ 1.123, -2.456; 3.789, -4.012 ];
-
-            VPAData = vpa( sym( Data, 'f' ), 135 );
-            QDS = QuadDoubleSlow( Data );
-
-            % Test basic arithmetic operations
-            ResVPA = VPAData * VPAData + VPAData - ( VPAData / 2 );
-            ResQDS = QDS * QDS + QDS - ( QDS / 2 );
-
-            [ v1, v2, v3, v4 ] = ToSumOfDoubles( ResQDS );
-            ResQDS_VPA = vpa( v1, 135 ) + vpa( v2, 135 ) + vpa( v3, 135 ) + vpa( v4, 135 );
-
-            TestCase.verifyEqual( double( ResQDS_VPA - ResVPA ), zeros( size( Data ) ), 'AbsTol', 1e-60 );
-        end
 
         % Constructor tests
         function TestConstructorEmpty( TestCase )
@@ -222,25 +207,39 @@ classdef QuadDoubleSlowTest < matlab.unittest.TestCase
 
         % Arithmetic operator tests
         function TestPlus( TestCase )
-            A = QuadDoubleSlow( [ 1, 2, 3 ] );
-            B = QuadDoubleSlow( [ 4, 5, 6 ] );
+            A = QuadDoubleSlow( [ 1.5, -2.7, 3.1 ] ) ./ 7 + exp( QuadDoubleSlow( 0.1 ) );
+            B = QuadDoubleSlow( [ 0.8, 5.5, -1.2 ] ) .* sqrt( QuadDoubleSlow( 2 ) );
+            A_vpa = vpa( A );
+            B_vpa = vpa( B );
+            
             C = A + B;
-            TestCase.verifyEqual( double( C ), [ 5, 7, 9 ] );
+            expected = A_vpa + B_vpa;
+            rel_err = abs( vpa( C ) - expected ) ./ abs( expected );
+            TestCase.verifyLessThanOrEqual( double( max( rel_err, [], 'all' ) ), TestCase.RelTol );
 
             % Test with scalar double
             D = A + 10;
-            TestCase.verifyEqual( double( D ), [ 11, 12, 13 ] );
+            expectedD = A_vpa + 10;
+            rel_errD = abs( vpa( D ) - expectedD ) ./ abs( expectedD );
+            TestCase.verifyLessThanOrEqual( double( max( rel_errD, [], 'all' ) ), TestCase.RelTol );
         end
 
         function TestMinus( TestCase )
-            A = QuadDoubleSlow( [ 5, 7, 9 ] );
-            B = QuadDoubleSlow( [ 1, 2, 3 ] );
+            A = QuadDoubleSlow( [ 1.5, -2.7, 3.1 ] ) ./ 7 + exp( QuadDoubleSlow( 0.1 ) );
+            B = QuadDoubleSlow( [ 0.8, 5.5, -1.2 ] ) .* sqrt( QuadDoubleSlow( 2 ) );
+            A_vpa = vpa( A );
+            B_vpa = vpa( B );
+            
             C = A - B;
-            TestCase.verifyEqual( double( C ), [ 4, 5, 6 ] );
+            expected = A_vpa - B_vpa;
+            rel_err = abs( vpa( C ) - expected ) ./ abs( expected );
+            TestCase.verifyLessThanOrEqual( double( max( rel_err, [], 'all' ) ), TestCase.RelTol );
 
             % Test with scalar double
             D = A - 5;
-            TestCase.verifyEqual( double( D ), [ 0, 2, 4 ] );
+            expectedD = A_vpa - 5;
+            rel_errD = abs( vpa( D ) - expectedD ) ./ abs( expectedD );
+            TestCase.verifyLessThanOrEqual( double( max( rel_errD, [], 'all' ) ), TestCase.RelTol );
         end
 
         function TestUminus( TestCase )
@@ -250,36 +249,57 @@ classdef QuadDoubleSlowTest < matlab.unittest.TestCase
         end
 
         function TestTimes( TestCase )
-            A = QuadDoubleSlow( [ 2, 3, 4 ] );
-            B = QuadDoubleSlow( [ 5, 6, 7 ] );
+            A = QuadDoubleSlow( [ 1.5, -2.7, 3.1 ] ) ./ 7 + exp( QuadDoubleSlow( 0.1 ) );
+            B = QuadDoubleSlow( [ 0.8, 5.5, -1.2 ] ) .* sqrt( QuadDoubleSlow( 2 ) );
+            A_vpa = vpa( A );
+            B_vpa = vpa( B );
+            
             C = A .* B;
-            TestCase.verifyEqual( double( C ), [ 10, 18, 28 ] );
+            expected = A_vpa .* B_vpa;
+            rel_err = abs( vpa( C ) - expected ) ./ abs( expected );
+            TestCase.verifyLessThanOrEqual( double( max( rel_err, [], 'all' ) ), TestCase.RelTol );
 
             % Test with scalar double
             D = A .* 2;
-            TestCase.verifyEqual( double( D ), [ 4, 6, 8 ] );
+            expectedD = A_vpa .* 2;
+            rel_errD = abs( vpa( D ) - expectedD ) ./ abs( expectedD );
+            TestCase.verifyLessThanOrEqual( double( max( rel_errD, [], 'all' ) ), TestCase.RelTol );
         end
 
         function TestMtimes( TestCase )
-            A = QuadDoubleSlow( [ 1, 2; 3, 4 ] );
-            B = QuadDoubleSlow( [ 5, 6; 7, 8 ] );
+            A = QuadDoubleSlow( [ 1.5, -2.7; 3.1, 0.4 ] ) ./ 7 + exp( QuadDoubleSlow( 0.1 ) );
+            B = QuadDoubleSlow( [ 0.8, 5.5; -1.2, 2.3 ] ) .* sqrt( QuadDoubleSlow( 2 ) );
+            A_vpa = vpa( A );
+            B_vpa = vpa( B );
+            
             C = A * B;
-            TestCase.verifyEqual( double( C ), [ 19, 22; 43, 50 ] );
+            expected = A_vpa * B_vpa;
+            rel_err = abs( vpa( C ) - expected ) ./ abs( expected );
+            TestCase.verifyLessThanOrEqual( double( max( rel_err, [], 'all' ) ), TestCase.RelTol );
 
             % Test with scalar
             D = A * 2;
-            TestCase.verifyEqual( double( D ), [ 2, 4; 6, 8 ] );
+            expectedD = A_vpa * 2;
+            rel_errD = abs( vpa( D ) - expectedD ) ./ abs( expectedD );
+            TestCase.verifyLessThanOrEqual( double( max( rel_errD, [], 'all' ) ), TestCase.RelTol );
         end
 
         function TestRdivide( TestCase )
-            A = QuadDoubleSlow( [ 10, 20, 30 ] );
-            B = QuadDoubleSlow( [ 2, 4, 5 ] );
+            A = QuadDoubleSlow( [ 1.5, -2.7, 3.1 ] ) ./ 7 + exp( QuadDoubleSlow( 0.1 ) );
+            B = QuadDoubleSlow( [ 0.8, 5.5, -1.2 ] ) .* sqrt( QuadDoubleSlow( 2 ) );
+            A_vpa = vpa( A );
+            B_vpa = vpa( B );
+            
             C = A ./ B;
-            TestCase.verifyEqual( double( C ), [ 5, 5, 6 ] );
+            expected = A_vpa ./ B_vpa;
+            rel_err = abs( vpa( C ) - expected ) ./ abs( expected );
+            TestCase.verifyLessThanOrEqual( double( max( rel_err, [], 'all' ) ), TestCase.RelTol );
 
             % Test with scalar double
             D = A ./ 2;
-            TestCase.verifyEqual( double( D ), [ 5, 10, 15 ] );
+            expectedD = A_vpa ./ 2;
+            rel_errD = abs( vpa( D ) - expectedD ) ./ abs( expectedD );
+            TestCase.verifyLessThanOrEqual( double( max( rel_errD, [], 'all' ) ), TestCase.RelTol );
         end
 
         function TestLdivide( TestCase )
@@ -456,10 +476,15 @@ classdef QuadDoubleSlowTest < matlab.unittest.TestCase
             TestCase.verifyEqual( double( S ), [ 2, 3, 4 ] );
         end
         function TestExp( TestCase )
-            A = QuadDoubleSlow( [ 0, 1, log( 10 ) ] );
+            vals = [0.123, 1.2345, 10.567, 100.23, 0.99] / 10;
+            A = QuadDoubleSlow( vals );
+            
+            gt_v = vpa( vals, BoostPrecision = false );
+            expected = exp( gt_v );
+            
             E = exp( A );
-            Expected = [ 1, exp( 1 ), 10 ];
-            TestCase.verifyEqual( double( E ), Expected, 'RelTol', TestCase.RelTol );
+            rel_err = abs( vpa( E ) - expected ) ./ abs( expected );
+            TestCase.verifyLessThanOrEqual( double( max( rel_err, [], 'all' ) ), TestCase.RelTol );
         end
 
         function TestExpm1( TestCase )
@@ -470,10 +495,15 @@ classdef QuadDoubleSlowTest < matlab.unittest.TestCase
         end
 
         function TestLog( TestCase )
-            A = QuadDoubleSlow( [ 1, exp( 1 ), 10 ] );
+            vals = [0.123, 1.2345, 10.567, 100.23, 0.99];
+            A = QuadDoubleSlow( vals );
+            
+            gt_v = vpa( vals, BoostPrecision = false );
+            expected = log( gt_v );
+            
             L = log( A );
-            Expected = [ 0, 1, log( 10 ) ];
-            TestCase.verifyEqual( double( L ), Expected, 'RelTol', TestCase.RelTol );
+            rel_err = abs( vpa( L ) - expected ) ./ abs( expected );
+            TestCase.verifyLessThanOrEqual( double( max( rel_err, [], 'all' ) ), TestCase.RelTol );
         end
 
         function TestLog10( TestCase )

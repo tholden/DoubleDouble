@@ -4,8 +4,8 @@ classdef OctoDoubleTest < matlab.unittest.TestCase
 
     properties
 
-        AbsTol = 1e-30;  % Absolute tolerance for comparisons
-        RelTol = 1e-15;  % Relative tolerance for comparisons
+        AbsTol = 1e-120;  % Absolute tolerance for comparisons
+        RelTol = 1e-120;  % Relative tolerance for comparisons
 
         % Test data
         SmallValues;
@@ -20,6 +20,7 @@ classdef OctoDoubleTest < matlab.unittest.TestCase
 
         function CreateTestData( TestCase )
             % Create test data for use in tests
+            digits( 300 );
             TestCase.SmallValues = OctoDouble( [ 1e-10, 2e-10, 3e-10 ] );
             TestCase.MediumValues = OctoDouble( [ 1, 2, 3 ] );
             TestCase.LargeValues = OctoDouble( [ 1e10, 2e10, 3e10 ] );
@@ -33,28 +34,6 @@ classdef OctoDoubleTest < matlab.unittest.TestCase
 
     methods ( Test )
 
-        function TestCrossValidationVPA( TestCase )
-            % Verify that OctoDouble produces identical results to VPA
-            % at full extended precision.
-            Data = [ 1.123, -2.456; 3.789, -4.012 ];
-
-            VPAData = vpa( sym( Data, 'f' ), 135 );
-            QDS = OctoDouble( Data );
-
-            % Test basic arithmetic operations
-            ResVPA = VPAData * VPAData + VPAData - ( VPAData / 2 );
-            ResQDS = QDS * QDS + QDS - ( QDS / 2 );
-
-            [ v1, v2, v3, v4, v5, v6, v7, v8 ] = ToSumOfDoubles( ResQDS );
-            ResQDS_VPA = vpa( v1, 135 ) + vpa( v2, 135 ) + vpa( v3, 135 ) + vpa( v4, 135 ) + vpa( v5, 135 ) + vpa( v6, 135 ) + vpa( v7, 135 ) + vpa( v8, 135 );
-
-            TestCase.verifyEqual( double( ResQDS_VPA - ResVPA ), zeros( size( Data ) ), 'AbsTol', 1e-120 );
-
-            % Test linear algebra routines ( LU decomposition )
-            % Not supported for VPA matrices efficiently with same exact outputs ( P, L, U may differ ).
-            % But we can skip it for cross validation with VPA since VPA lu can behave differently.
-            % Or just skip LU in TestCrossValidation since it is tested in TestLU.
-        end
 
         function TestCrossValidationQuadDouble( TestCase )
             % Verify that OctoDouble closely matches QuadDouble up to QuadDouble precision.
@@ -70,17 +49,17 @@ classdef OctoDoubleTest < matlab.unittest.TestCase
             [ v1, v2, v3, v4, ~, ~, ~, ~ ] = ToSumOfDoubles( ResOD );
             [ q1, q2, q3, q4 ] = ToSumOfDoubles( ResQD );
 
-            TestCase.verifyEqual( v1, q1, 'AbsTol', 1e-60 );
-            TestCase.verifyEqual( v2, q2, 'AbsTol', 1e-60 );
-            TestCase.verifyEqual( v3, q3, 'AbsTol', 1e-60 );
-            TestCase.verifyEqual( v4, q4, 'AbsTol', 1e-60 );
+            TestCase.verifyEqual( v1, q1, 'AbsTol', TestCase.AbsTol );
+            TestCase.verifyEqual( v2, q2, 'AbsTol', TestCase.AbsTol );
+            TestCase.verifyEqual( v3, q3, 'AbsTol', TestCase.AbsTol );
+            TestCase.verifyEqual( v4, q4, 'AbsTol', TestCase.AbsTol );
 
             % Test linear algebra routines ( LU decomposition )
             [ L_QD, U_QD, ~ ] = lu( QD );
             [ L_OD, U_OD, ~ ] = lu( OD );
 
-            TestCase.verifyEqual( double( L_OD - L_QD ), zeros( size( Data ) ), 'AbsTol', 1e-28 );
-            TestCase.verifyEqual( double( U_OD - U_QD ), zeros( size( Data ) ), 'AbsTol', 1e-28 );
+            TestCase.verifyEqual( double( L_OD - L_QD ), zeros( size( Data ) ), 'AbsTol', TestCase.AbsTol );
+            TestCase.verifyEqual( double( U_OD - U_QD ), zeros( size( Data ) ), 'AbsTol', TestCase.AbsTol );
         end
 
         % Constructor tests
@@ -223,25 +202,39 @@ classdef OctoDoubleTest < matlab.unittest.TestCase
 
         % Arithmetic operator tests
         function TestPlus( TestCase )
-            A = OctoDouble( [ 1, 2, 3 ] );
-            B = OctoDouble( [ 4, 5, 6 ] );
+            A = OctoDouble( [ 1.5, -2.7, 3.1 ] ) ./ 7 + exp( OctoDouble( 0.1 ) );
+            B = OctoDouble( [ 0.8, 5.5, -1.2 ] ) .* sqrt( OctoDouble( 2 ) );
+            A_vpa = vpa( A );
+            B_vpa = vpa( B );
+            
             C = A + B;
-            TestCase.verifyEqual( double( C ), [ 5, 7, 9 ] );
+            expected = A_vpa + B_vpa;
+            rel_err = abs( vpa( C ) - expected ) ./ abs( expected );
+            TestCase.verifyLessThanOrEqual( double( max( rel_err, [], 'all' ) ), TestCase.RelTol );
 
             % Test with scalar double
             D = A + 10;
-            TestCase.verifyEqual( double( D ), [ 11, 12, 13 ] );
+            expectedD = A_vpa + 10;
+            rel_errD = abs( vpa( D ) - expectedD ) ./ abs( expectedD );
+            TestCase.verifyLessThanOrEqual( double( max( rel_errD, [], 'all' ) ), TestCase.RelTol );
         end
 
         function TestMinus( TestCase )
-            A = OctoDouble( [ 5, 7, 9 ] );
-            B = OctoDouble( [ 1, 2, 3 ] );
+            A = OctoDouble( [ 1.5, -2.7, 3.1 ] ) ./ 7 + exp( OctoDouble( 0.1 ) );
+            B = OctoDouble( [ 0.8, 5.5, -1.2 ] ) .* sqrt( OctoDouble( 2 ) );
+            A_vpa = vpa( A );
+            B_vpa = vpa( B );
+            
             C = A - B;
-            TestCase.verifyEqual( double( C ), [ 4, 5, 6 ] );
+            expected = A_vpa - B_vpa;
+            rel_err = abs( vpa( C ) - expected ) ./ abs( expected );
+            TestCase.verifyLessThanOrEqual( double( max( rel_err, [], 'all' ) ), TestCase.RelTol );
 
             % Test with scalar double
             D = A - 5;
-            TestCase.verifyEqual( double( D ), [ 0, 2, 4 ] );
+            expectedD = A_vpa - 5;
+            rel_errD = abs( vpa( D ) - expectedD ) ./ abs( expectedD );
+            TestCase.verifyLessThanOrEqual( double( max( rel_errD, [], 'all' ) ), TestCase.RelTol );
         end
 
         function TestUminus( TestCase )
@@ -251,36 +244,57 @@ classdef OctoDoubleTest < matlab.unittest.TestCase
         end
 
         function TestTimes( TestCase )
-            A = OctoDouble( [ 2, 3, 4 ] );
-            B = OctoDouble( [ 5, 6, 7 ] );
+            A = OctoDouble( [ 1.5, -2.7, 3.1 ] ) ./ 7 + exp( OctoDouble( 0.1 ) );
+            B = OctoDouble( [ 0.8, 5.5, -1.2 ] ) .* sqrt( OctoDouble( 2 ) );
+            A_vpa = vpa( A );
+            B_vpa = vpa( B );
+            
             C = A .* B;
-            TestCase.verifyEqual( double( C ), [ 10, 18, 28 ] );
+            expected = A_vpa .* B_vpa;
+            rel_err = abs( vpa( C ) - expected ) ./ abs( expected );
+            TestCase.verifyLessThanOrEqual( double( max( rel_err, [], 'all' ) ), TestCase.RelTol );
 
             % Test with scalar double
             D = A .* 2;
-            TestCase.verifyEqual( double( D ), [ 4, 6, 8 ] );
+            expectedD = A_vpa .* 2;
+            rel_errD = abs( vpa( D ) - expectedD ) ./ abs( expectedD );
+            TestCase.verifyLessThanOrEqual( double( max( rel_errD, [], 'all' ) ), TestCase.RelTol );
         end
 
         function TestMtimes( TestCase )
-            A = OctoDouble( [ 1, 2; 3, 4 ] );
-            B = OctoDouble( [ 5, 6; 7, 8 ] );
+            A = OctoDouble( [ 1.5, -2.7; 3.1, 0.4 ] ) ./ 7 + exp( OctoDouble( 0.1 ) );
+            B = OctoDouble( [ 0.8, 5.5; -1.2, 2.3 ] ) .* sqrt( OctoDouble( 2 ) );
+            A_vpa = vpa( A );
+            B_vpa = vpa( B );
+            
             C = A * B;
-            TestCase.verifyEqual( double( C ), [ 19, 22; 43, 50 ] );
+            expected = A_vpa * B_vpa;
+            rel_err = abs( vpa( C ) - expected ) ./ abs( expected );
+            TestCase.verifyLessThanOrEqual( double( max( rel_err, [], 'all' ) ), TestCase.RelTol );
 
             % Test with scalar
             D = A * 2;
-            TestCase.verifyEqual( double( D ), [ 2, 4; 6, 8 ] );
+            expectedD = A_vpa * 2;
+            rel_errD = abs( vpa( D ) - expectedD ) ./ abs( expectedD );
+            TestCase.verifyLessThanOrEqual( double( max( rel_errD, [], 'all' ) ), TestCase.RelTol );
         end
 
         function TestRdivide( TestCase )
-            A = OctoDouble( [ 10, 20, 30 ] );
-            B = OctoDouble( [ 2, 4, 5 ] );
+            A = OctoDouble( [ 1.5, -2.7, 3.1 ] ) ./ 7 + exp( OctoDouble( 0.1 ) );
+            B = OctoDouble( [ 0.8, 5.5, -1.2 ] ) .* sqrt( OctoDouble( 2 ) );
+            A_vpa = vpa( A );
+            B_vpa = vpa( B );
+            
             C = A ./ B;
-            TestCase.verifyEqual( double( C ), [ 5, 5, 6 ] );
+            expected = A_vpa ./ B_vpa;
+            rel_err = abs( vpa( C ) - expected ) ./ abs( expected );
+            TestCase.verifyLessThanOrEqual( double( max( rel_err, [], 'all' ) ), TestCase.RelTol );
 
             % Test with scalar double
             D = A ./ 2;
-            TestCase.verifyEqual( double( D ), [ 5, 10, 15 ] );
+            expectedD = A_vpa ./ 2;
+            rel_errD = abs( vpa( D ) - expectedD ) ./ abs( expectedD );
+            TestCase.verifyLessThanOrEqual( double( max( rel_errD, [], 'all' ) ), TestCase.RelTol );
         end
 
         function TestLdivide( TestCase )
@@ -457,10 +471,15 @@ classdef OctoDoubleTest < matlab.unittest.TestCase
             TestCase.verifyEqual( double( S ), [ 2, 3, 4 ] );
         end
         function TestExp( TestCase )
-            A = OctoDouble( [ 0, 1, log( 10 ) ] );
+            vals = [0.123, 1.2345, 10.567, 100.23, 0.99] / 10;
+            A = OctoDouble( vals );
+            
+            gt_v = vpa( vals, BoostPrecision = false );
+            expected = exp( gt_v );
+            
             E = exp( A );
-            Expected = [ 1, exp( 1 ), 10 ];
-            TestCase.verifyEqual( double( E ), Expected, 'RelTol', TestCase.RelTol );
+            rel_err = abs( vpa( E ) - expected ) ./ abs( expected );
+            TestCase.verifyLessThanOrEqual( double( max( rel_err, [], 'all' ) ), TestCase.RelTol );
         end
 
         function TestExpm1( TestCase )
@@ -471,10 +490,15 @@ classdef OctoDoubleTest < matlab.unittest.TestCase
         end
 
         function TestLog( TestCase )
-            A = OctoDouble( [ 1, exp( 1 ), 10 ] );
+            vals = [0.123, 1.2345, 10.567, 100.23, 0.99];
+            A = OctoDouble( vals );
+            
+            gt_v = vpa( vals, BoostPrecision = false );
+            expected = log( gt_v );
+            
             L = log( A );
-            Expected = [ 0, 1, log( 10 ) ];
-            TestCase.verifyEqual( double( L ), Expected, 'RelTol', TestCase.RelTol );
+            rel_err = abs( vpa( L ) - expected ) ./ abs( expected );
+            TestCase.verifyLessThanOrEqual( double( max( rel_err, [], 'all' ) ), TestCase.RelTol );
         end
 
         function TestLog10( TestCase )
