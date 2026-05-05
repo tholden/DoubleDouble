@@ -2407,10 +2407,8 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
         end
 
         function [ a1, a2 ] = Split( a )
-            [ c1, c2 ] = Split( a.v1 );
-            [ c3, c4 ] = Split( a.v2 );
-            a1 = a.Make( c1, c3 );
-            a2 = a.Make( c2, c4 );
+            a1 = a.Make( a.v1, 0 );
+            a2 = a.Make( a.v2, 0 );
         end
 
     end
