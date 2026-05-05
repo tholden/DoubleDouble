@@ -11,6 +11,7 @@ classdef QuadDoubleConstant < ED.BaseDoubleDouble & ED.ExtDouble
 
         ExpRescale = ED.QuadDoubleConstant;
         LogSteps   = ED.QuadDoubleConstant;
+        SqrtSteps  = ED.QuadDoubleConstant;
 
         InverseFactorial = ED.QuadDoubleConstant;
         SinTable         = ED.QuadDoubleConstant;

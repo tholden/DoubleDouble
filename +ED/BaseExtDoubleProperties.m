@@ -13,6 +13,7 @@ classdef ( Abstract ) BaseExtDoubleProperties
         CosTable
         ExpRescale
         LogSteps
+        SqrtSteps
 
     end
 

@@ -1671,9 +1671,11 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             vSelect = v.Index( Select );
             x = 1 ./ sqrt( vSelect.v1 );
             vx = v.Promote( vSelect.v1 .* x );
-            t = vSelect - vx .* vx;
-            t = vx + t.v1 .* ( x * 0.5 );
-            v = v.Assign( t, Select );
+            for i = 1 : v.SqrtSteps
+                t = vSelect - vx .* vx;
+                vx = vx + t .* ( x * 0.5 );
+            end
+            v = v.Assign( vx, Select );
         end
 
         function v = sqrt( v )
@@ -1681,9 +1683,11 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             vSelect = v.Index( Select );
             x = 1 ./ sqrt( vSelect.v1 );
             vx = v.Promote( vSelect.v1 .* x );
-            t = vSelect - vx .* vx;
-            t = vx + t.v1 .* ( x * 0.5 );
-            v = v.Assign( t, Select );
+            for i = 1 : v.SqrtSteps
+                t = vSelect - vx .* vx;
+                vx = vx + t .* ( x * 0.5 );
+            end
+            v = v.Assign( vx, Select );
         end
 
         function v = sqrtm( v )
