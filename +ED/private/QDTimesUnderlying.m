@@ -6,14 +6,9 @@ function [ s0, s1, s2, s3 ] = QDTimesUnderlying( a0, a1, a2, a3, b )
     ss0 = p0;
     [ ss1, s2_1 ] = UnderlyingPlusUnderlying( q0, p1 );
     [ s2_1, q1, p2 ] = ThreeSum( s2_1, q1, p2 );
-    [ q1, q2, ~ ] = ThreeSum2( q1, q2, p3 );
+    [ q1, q2, p3_err ] = ThreeSum( q1, q2, p3 );
     ss3 = q1;
-    s4 = q2 + p2;
+    [ s4, e_s4 ] = UnderlyingPlusUnderlying( q2, p2 );
+    s4 = s4 + ( e_s4 + p3_err );
     [ s0, s1, s2, s3 ] = Renorm5( ss0, ss1, s2_1, ss3, s4 );
-end
-
-function [ a, b, c ] = ThreeSum2( a, b, c )
-    [ t1, t2 ] = UnderlyingPlusUnderlying( a, b );
-    [ a, t3 ]  = UnderlyingPlusUnderlying( c, t1 );
-    b = t2 + t3;
 end

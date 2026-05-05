@@ -5,6 +5,7 @@ function [ s0, s1, s2, s3 ] = QDPlusDD( a0, a1, a2, a3, b0, b1 )
     s2 = a2;
     [ s2, t0, t1 ] = ThreeSum( s2, t0, t1 );
     [ s3, t0 ] = UnderlyingPlusUnderlying( t0, a3 );
-    t0 = t0 + t1;
+    [ t0, e1 ] = UnderlyingPlusUnderlying( t0, t1 );
+    t0 = t0 + e1;
     [ s0, s1, s2, s3 ] = Renorm5( s0, s1, s2, s3, t0 );
 end
