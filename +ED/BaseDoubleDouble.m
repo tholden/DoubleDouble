@@ -105,7 +105,7 @@ classdef ( Abstract ) BaseDoubleDouble
         function [ a, b, c, Na, Nb, Nc ] = JointPromotion( a, b )
             Na = PromotionOrder( a );
             Nb = PromotionOrder( b );
-            if ( Na ~= Nb ) && ( abs( Na - Nb ) < 0.5 )
+            if ( Na ~= Nb ) && ( floor( Na ) == floor( Nb ) )
                 if Na > Nb
                     b = a.Promote( b );
                     Nb = Na;
@@ -122,20 +122,22 @@ classdef ( Abstract ) BaseDoubleDouble
                 Nc = Nb;
             end
             if ( Na > 0 ) && all( a.v2 == 0, 'all' )
-                Na = Na - 1;
                 a = a.v1;
+                Na = PromotionOrder( a );
             end
             if ( Nb > 0 ) && all( b.v2 == 0, 'all' )
-                Nb = Nb - 1;
                 b = b.v1;
+                Nb = PromotionOrder( b );
             end
-            if Na < Nc
-                a = Promote( c.v1, a );
-                Na = max( Na, Nc - 1 );
+            d = c.v1;
+            Nd = PromotionOrder( d );
+            if Na < Nd
+                a = d.Promote( a );
+                Na = Nd;
             end
-            if Nb < Nc
-                b = Promote( c.v1, b );
-                Nb = max( Nb, Nc - 1 );
+            if Nb < Nd
+                b = d.Promote( b );
+                Nb = Nd;
             end
         end
 
