@@ -2412,16 +2412,17 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
 
         function [ a1, a2 ] = Split( a )
             a1 = a.Make( a.v1, 0 );
-            a2 = a.Make( a.v2, 0 );
+            a2 = a.Make( a.v2, 0, a.v3 );
         end
 
         function v = vpa( v, Digits, varargin )
+            Original = v;
             w = cell( 1, 2 ^ floor( v.PromotionOrder ) );
             if nargin < 2
                 Digits = 32;
             end
             digits( max( [ Digits, 18 * numel( w ), digits ] ) );
-            [ w{:} ] = ToSumOfDoubles( v );
+            [ w{:} ] = ToSumOfDoubles( Original );
             try
                 w = cellfun( @( x ) vpa( x, BoostPrecision = false ), w, 'UniformOutput', false ); % Requires R2026a.
             catch
@@ -2433,6 +2434,18 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                     break
                 end
                 v = v + w{ k };
+            end
+            if isa( Original, 'ED.BaseDoubleDouble' ) && ~all( Original.v3 == 0, 'all' )
+                if isa( Original.v3, 'ED.ExtDouble' )
+                    v = v + vpa( Original.v3, Digits, varargin{:} );
+                else
+                    V3Unpacked = ED.BaseDoubleDouble.UnpackV3( Original );
+                    try
+                        v = v + vpa( V3Unpacked, BoostPrecision = false );
+                    catch
+                        v = v + vpa( sym( V3Unpacked, 'f' ) );
+                    end
+                end
             end
         end
 

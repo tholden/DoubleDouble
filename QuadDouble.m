@@ -91,7 +91,7 @@ classdef QuadDouble < ED.BaseQuadDouble & ED.ExtDouble & ED.QuadDoubleProperties
 
     methods ( Access = protected )
 
-        function v = Make( ~, a1, a2 )
+        function v = Make( ~, a1, a2, ~ )
             v = QuadDouble.MakeStatic( a1, a2 );
         end
 
