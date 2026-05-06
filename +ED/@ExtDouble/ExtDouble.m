@@ -127,7 +127,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             end
             disp( '     +' );
             if all( v.v2 == 0, 'all' )
-                disp( '     []' );
+                disp( 0 );
             else
                 disp( v.v2 );
             end
