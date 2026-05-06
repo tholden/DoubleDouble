@@ -1,53 +1,48 @@
-function [ R1, R2, R3 ] = DDDividedByUnderlying( A1, A2, A3, B )
+function [ r1, r2 ] = DDDividedByUnderlying( a1, a2, b )
     % Rescale to prevent overflow in intermediate products ( cf. QD library )
-    Rescale = abs( A1 ) > 2 ^ 969;
+    Rescale = abs( a1 ) > 2 ^ 969;
     if any( Rescale( : ) )
         ScaleDown = 2 ^ -53;
-        A1( Rescale ) = A1( Rescale ) * ScaleDown;
-        A2( Rescale ) = A2( Rescale ) * ScaleDown;
-        A3( Rescale ) = A3( Rescale ) * ScaleDown;
+        a1( Rescale ) = a1( Rescale ) * ScaleDown;
+        a2( Rescale ) = a2( Rescale ) * ScaleDown;
     end
-    R1 = A1 ./ B;
-    [ P1, P2 ] = UnderlyingTimesUnderlying( R1, B );
-    [ S, E ] = UnderlyingPlusUnderlying( A1, -P1 );
-    E = E + A2;
-    E = E - P2;
-    T = S + E;
-    R2 = T ./ B;
-    R3 = A3 ./ B;
-    [ R1, R2, R3 ] = DDNormalize( R1, R2, R3 );
+    r1 = a1 ./ b;
+    [ p1, p2 ] = UnderlyingTimesUnderlying( r1, b );
+    [ s, e ] = UnderlyingPlusUnderlying( a1, -p1 );
+    e = e + a2;
+    e = e - p2;
+    t = s + e;
+    r2 = t ./ b;
+    [ r1, r2 ] = DDNormalize( r1, r2 );
     if any( Rescale( : ) )
         ScaleUp = 2 ^ 53;
-        R1( Rescale ) = R1( Rescale ) * ScaleUp;
-        R2( Rescale ) = R2( Rescale ) * ScaleUp;
-        R3( Rescale ) = R3( Rescale ) * ScaleUp;
+        r1( Rescale ) = r1( Rescale ) * ScaleUp;
+        r2( Rescale ) = r2( Rescale ) * ScaleUp;
     end
-    Select = B == 0;
+    Select = b == 0;
     if any( Select( : ) )
-        if ( isscalar( Select ) ) && ( numel( A1 ) > 1 )
-            Select = repmat( Select, size( A1 ) );
-        elseif ( numel( Select ) > 1 ) && ( isscalar( A1 ) )
-            A1 = repmat( A1, size( Select ) );
+        if ( isscalar( Select ) ) && ( numel( a1 ) > 1 )
+            Select = repmat( Select, size( a1 ) );
+        elseif ( numel( Select ) > 1 ) && ( isscalar( a1 ) )
+            a1 = repmat( a1, size( Select ) );
         end
-        A1Select = A1( Select );
-        A1Select = sign( A1Select ) .* Inf;
-        R1( Select ) = A1Select;
-        R2( Select ) = A1Select;
-        R3( Select ) = 0;
+        a1Select = a1( Select );
+        a1Select = sign( a1Select ) .* Inf;
+        r1( Select ) = a1Select;
+        r2( Select ) = a1Select;
     end
-    Select = isinf( B );
+    Select = isinf( b );
     if any( Select( : ) )
-        if ( isscalar( Select ) ) && ( numel( A1 ) > 1 )
-            Select = repmat( Select, size( A1 ) );
-        elseif ( numel( Select ) > 1 ) && ( isscalar( A1 ) )
-            A1 = repmat( A1, size( Select ) );
+        if ( isscalar( Select ) ) && ( numel( a1 ) > 1 )
+            Select = repmat( Select, size( a1 ) );
+        elseif ( numel( Select ) > 1 ) && ( isscalar( a1 ) )
+            a1 = repmat( a1, size( Select ) );
         end
-        A1Select = A1( Select );
-        A1SelectSelect = ~isfinite( A1Select );
-        A1Select = 0;
-        A1Select( A1SelectSelect ) = NaN;
-        R1( Select ) = A1Select;
-        R2( Select ) = A1Select;
-        R3( Select ) = 0;
+        a1Select = a1( Select );
+        a1SelectSelect = ~isfinite( a1Select );
+        a1Select = 0;
+        a1Select( a1SelectSelect ) = NaN;
+        r1( Select ) = a1Select;
+        r2( Select ) = a1Select;
     end
 end

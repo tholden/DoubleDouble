@@ -44,7 +44,6 @@ classdef DoubleDouble < ED.BaseDoubleDouble & ED.ExtDouble
             if isa( in, 'DoubleDouble' )
                 v.v1 = in.v1;
                 v.v2 = in.v2;
-                v.v3 = in.v3;
             elseif isa( in, 'ED.ExtDouble' )
                 [ v.v1, v.v2 ] = ToSumOfDoubles( in );
             else
@@ -69,11 +68,8 @@ classdef DoubleDouble < ED.BaseDoubleDouble & ED.ExtDouble
 
     methods ( Access = protected )
 
-        function v = Make( ~, A1, A2, A3 )
-            if nargin < 4
-                A3 = 0;
-            end
-            v = DoubleDouble.MakeStatic( A1, A2, A3 );
+        function v = Make( ~, a1, a2 )
+            v = DoubleDouble.MakeStatic( a1, a2 );
         end
 
     end
@@ -120,25 +116,15 @@ classdef DoubleDouble < ED.BaseDoubleDouble & ED.ExtDouble
 
     methods ( Static, Access = { ?ED.BaseDoubleDouble, ?ED.BaseExtDoubleProperties } )
 
-        function v = MakeStatic( A1, A2, A3 )
+        function v = MakeStatic( a1, a2 )
             v = DoubleDouble;
-            v.v1 = double( A1 );
-            if isempty( A1 )
+            v.v1 = double( a1 );
+            if isempty( a1 )
                 v.v2 = v.v1;
-            elseif all( A2 == 0, 'all' )
+            elseif all( a2 == 0, 'all' )
                 v.v2 = 0;
             else
-                v.v2 = double( A2 );
-            end
-            if nargin >= 3 && ~all( A3 == 0, 'all' )
-                if v.v2 == 0
-                    v.v3 = single( 0 );
-                else
-                    [~, E] = log2( abs( v.v2 ) );
-                    v.v3 = single( pow2( double( A3 ), -E ) );
-                end
-            else
-                v.v3 = single( 0 );
+                v.v2 = double( a2 );
             end
         end
 
