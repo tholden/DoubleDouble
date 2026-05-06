@@ -58,7 +58,9 @@ classdef ( Abstract ) BaseQuadDouble < ED.BaseDoubleDouble
                 elseif Nb >= FloorNc - 1
                     [ x1, x2, x3, x4 ] = DDTimesUnderlyingAsQD( b.v1, b.v2, a );
                 else
-                    [ x1, x2, x3, x4 ] = UnderlyingTimesUnderlyingAsQD( a, b );
+                    [ x1, x2 ] = UnderlyingTimesUnderlying( a, b );
+                    x3 = 0;
+                    x4 = 0;
                 end
             end
             v = c.Make( c.v1.Make( x1, x2 ), c.v1.Make( x3, x4 ) );
