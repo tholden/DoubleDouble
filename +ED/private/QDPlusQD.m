@@ -5,7 +5,7 @@ function [ x0, x1, x2, x3 ] = QDPlusQD( a0, a1, a2, a3, b0, b1, b2, b3 )
     % Only the final lowest-order accumulation is sloppy.
 
     % CatDim = ndims( a0 ) + 1;
-    % z = cat( CatDim, a0, a1, a2, a3, b0, b1, b2, b3 );
+    % z = cat( CatDim, a0, a1 + 0 * a0, a2 + 0 * a0, a3 + 0 * a0, b0, b1 + 0 * b0, b2 + 0 * b0, b3 + 0 * b0 );
     % if isreal( z )
     %     z = sort( z, CatDim, 'descend', 'ComparisonMethod', 'abs' );
     % else
