@@ -45,11 +45,8 @@ function [ x0, x1, x2, x3 ] = QDPlusQD( a0, a1, a2, a3, b0, b1, b2, b3 )
     % Merge e0, e2, s3:
     [ s3, e0, e2 ] = ThreeSum( s3, e0, e2 );
 
-    % Accumulate remaining residuals: e0, e1, e2, e3
-    [ e0, e1, e3 ] = ThreeSum( e0, e1, e3 );
-    [ e1, e2 ] = UnderlyingPlusUnderlying( e1, e2 );
-    [ e0, e1 ] = UnderlyingPlusUnderlying( e0, e1 );
-    [ s3, e0, e1 ] = ThreeSum( s3, e0, e1 );
-
-    [ x0, x1, x2, x3 ] = Renorm5( s0, s1, s2, s3, e0 );
+    % Accumulate remaining residuals using a single QDPlusUnderlying
+    % for performance, as they are all O(eps^4) or smaller.
+    e_sum = e0 + e1 + e2 + e3;
+    [ x0, x1, x2, x3 ] = QDPlusUnderlying( s0, s1, s2, s3, e_sum );
 end

@@ -9,9 +9,12 @@ function [ p0, p1, p2, p3 ] = DDTimesDDAsQD( a0, a1, b0, b1 )
     [ s0, t0 ] = UnderlyingPlusUnderlying( p2, q1 );
     [ s1, t1 ] = UnderlyingPlusUnderlying( p3, q2 );
     [ s1, t0 ] = UnderlyingPlusUnderlying( s1, t0 );
-    s2 = t0 + t1;
+    [ s2, e_s2 ] = UnderlyingPlusUnderlying( t0, t1 );
     p2 = s0;
-    [ p3, q0 ] = ThreeSum2( q3, q0, s1 );
-    p4 = q0 + s2;
+    [ p3, q0, e_q0 ] = ThreeSum( q3, q0, s1 );
+    [ p4, e_p4 ] = UnderlyingPlusUnderlying( q0, s2 );
     [ p0, p1, p2, p3 ] = Renorm5( p0, p1, p2, p3, p4 );
+    [ p0, p1, p2, p3 ] = QDPlusUnderlying( p0, p1, p2, p3, e_s2 );
+    [ p0, p1, p2, p3 ] = QDPlusUnderlying( p0, p1, p2, p3, e_q0 );
+    [ p0, p1, p2, p3 ] = QDPlusUnderlying( p0, p1, p2, p3, e_p4 );
 end
