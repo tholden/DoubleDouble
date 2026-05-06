@@ -18,12 +18,12 @@ function [ x0, x1, x2, x3 ] = QDPlusQD( a0, a1, a2, a3, b0, b1, b2, b3 )
     % sz = size( z );
     % zFlat = reshape( z, [], sz( end ) );
     % a0 = reshape( zFlat( :, 1 ), sz( 1 : end - 1 ) );
-    % a1 = reshape( zFlat( :, 2 ), sz( 1 : end - 1 ) );
-    % a2 = reshape( zFlat( :, 3 ), sz( 1 : end - 1 ) );
-    % a3 = reshape( zFlat( :, 4 ), sz( 1 : end - 1 ) );
-    % b0 = reshape( zFlat( :, 5 ), sz( 1 : end - 1 ) );
-    % b1 = reshape( zFlat( :, 6 ), sz( 1 : end - 1 ) );
-    % b2 = reshape( zFlat( :, 7 ), sz( 1 : end - 1 ) );
+    % b0 = reshape( zFlat( :, 2 ), sz( 1 : end - 1 ) );
+    % a1 = reshape( zFlat( :, 3 ), sz( 1 : end - 1 ) );
+    % b1 = reshape( zFlat( :, 4 ), sz( 1 : end - 1 ) );
+    % a2 = reshape( zFlat( :, 5 ), sz( 1 : end - 1 ) );
+    % b2 = reshape( zFlat( :, 6 ), sz( 1 : end - 1 ) );
+    % a3 = reshape( zFlat( :, 7 ), sz( 1 : end - 1 ) );
     % b3 = reshape( zFlat( :, 8 ), sz( 1 : end - 1 ) );
 
     % ---- pairwise TwoSum on matching components ----
