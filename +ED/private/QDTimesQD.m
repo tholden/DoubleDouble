@@ -46,7 +46,18 @@ function [ s0, s1, s2, s3 ] = QDTimesQD( a0, a1, a2, a3, b0, b1, b2, b3 )
     [ t0, t1 ] = UnderlyingPlusUnderlying( q3_2, ss1 );
     [ t1, e_t1c ] = UnderlyingPlusUnderlying( t1, q4_2 );
     t1 = t1 + e_t1c;
-    % O( eps^4 ) terms -- Nine-One-Sum
-    t1 = t1 + a1.*b3 + a2.*b2 + a3.*b1 + q6 + q7 + q8 + q9 + ss2 + ss2_err;
+    % O( eps^4 ) terms -- Accurate cascade
+    [ t1, e1 ] = UnderlyingPlusUnderlying( t1, a1.*b3 );
+    [ t1, e2 ] = UnderlyingPlusUnderlying( t1, a2.*b2 );
+    [ t1, e3 ] = UnderlyingPlusUnderlying( t1, a3.*b1 );
+    [ t1, e4 ] = UnderlyingPlusUnderlying( t1, q6 );
+    [ t1, e5 ] = UnderlyingPlusUnderlying( t1, q7 );
+    [ t1, e6 ] = UnderlyingPlusUnderlying( t1, q8 );
+    [ t1, e7 ] = UnderlyingPlusUnderlying( t1, q9 );
+    [ t1, e8 ] = UnderlyingPlusUnderlying( t1, ss2 );
+    [ t1, e9 ] = UnderlyingPlusUnderlying( t1, ss2_err );
+    err_sum = e1 + e2 + e3 + e4 + e5 + e6 + e7 + e8 + e9;
+    [ t1, err_sum ] = UnderlyingPlusUnderlying( t1, err_sum );
+    [ t0, t1 ] = UnderlyingPlusUnderlying( t0, t1 );
     [ s0, s1, s2, s3 ] = Renorm5( p0, p1, ss0, t0, t1 );
 end

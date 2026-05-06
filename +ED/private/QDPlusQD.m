@@ -4,6 +4,28 @@ function [ x0, x1, x2, x3 ] = QDPlusQD( a0, a1, a2, a3, b0, b1, b2, b3 )
     % the error terms through ThreeSum to track all rounding errors.
     % Only the final lowest-order accumulation is sloppy.
 
+    % CatDim = ndims( a0 ) + 1;
+    % z = cat( CatDim, a0, a1, a2, a3, b0, b1, b2, b3 );
+    % if isreal( z )
+    %     z = sort( z, CatDim, 'descend', 'ComparisonMethod', 'abs' );
+    % else
+    %     zr = real( z );
+    %     zi = imag( z );
+    %     zr = sort( zr, CatDim, 'descend', 'ComparisonMethod', 'abs' );
+    %     zi = sort( zi, CatDim, 'descend', 'ComparisonMethod', 'abs' );
+    %     z = complex( zr, zi );
+    % end
+    % sz = size( z );
+    % zFlat = reshape( z, [], sz( end ) );
+    % a0 = reshape( zFlat( :, 1 ), sz( 1 : end - 1 ) );
+    % a1 = reshape( zFlat( :, 2 ), sz( 1 : end - 1 ) );
+    % a2 = reshape( zFlat( :, 3 ), sz( 1 : end - 1 ) );
+    % a3 = reshape( zFlat( :, 4 ), sz( 1 : end - 1 ) );
+    % b0 = reshape( zFlat( :, 5 ), sz( 1 : end - 1 ) );
+    % b1 = reshape( zFlat( :, 6 ), sz( 1 : end - 1 ) );
+    % b2 = reshape( zFlat( :, 7 ), sz( 1 : end - 1 ) );
+    % b3 = reshape( zFlat( :, 8 ), sz( 1 : end - 1 ) );
+
     % ---- pairwise TwoSum on matching components ----
     % This computes 4 exact sums + 4 exact errors = 8 terms total.
     [ s0, e0 ] = UnderlyingPlusUnderlying( a0, b0 );
@@ -24,10 +46,10 @@ function [ x0, x1, x2, x3 ] = QDPlusQD( a0, a1, a2, a3, b0, b1, b2, b3 )
     [ s3, e0, e2 ] = ThreeSum( s3, e0, e2 );
 
     % Accumulate remaining residuals: e0, e1, e2, e3
-    [ e0, e1_2 ] = UnderlyingPlusUnderlying( e0, e1 );
-    [ e0, e1_3 ] = UnderlyingPlusUnderlying( e0, e2 );
-    [ e0, e1_4 ] = UnderlyingPlusUnderlying( e0, e3 );
-    e0 = e0 + ( e1_2 + e1_3 + e1_4 );
+    [ e0, e1, e3 ] = ThreeSum( e0, e1, e3 );
+    [ e1, e2 ] = UnderlyingPlusUnderlying( e1, e2 );
+    [ e0, e1 ] = UnderlyingPlusUnderlying( e0, e1 );
+    [ s3, e0, e1 ] = ThreeSum( s3, e0, e1 );
 
     [ x0, x1, x2, x3 ] = Renorm5( s0, s1, s2, s3, e0 );
 end

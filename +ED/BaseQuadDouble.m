@@ -178,13 +178,13 @@ classdef ( Abstract ) BaseQuadDouble < ED.BaseDoubleDouble
                     b = b.v1;
                 end
             end
-            if Na < Nc - 0.5
-                a = Promote( c.v1.v1, a );
-                Na = max( Na, Nc - 2 );
+            if Na < Nc - 1.5
+                a = Promote( c.v1, a );
+                Na = Nc - 1;
             end
-            if Nb < Nc - 0.5
-                b = Promote( c.v1.v1, b );
-                Nb = max( Nb, Nc - 2 );
+            if Nb < Nc - 1.5
+                b = Promote( c.v1, b );
+                Nb = Nc - 1;
             end
         end
 
