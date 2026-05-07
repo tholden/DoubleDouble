@@ -41,7 +41,7 @@ classdef OctoDouble < ED.BaseDoubleDouble & ED.ExtDouble
                     in = Plus( in, varargin{ i } );
                 end
             end
-            if isa( in, 'OctoDouble' )
+            if isa( in, 'OctoDouble' ) || isa( in, 'OctoDoubleAlt' ) || isa( in, 'OctoDoubleSlow' )
                 v.v1 = in.v1;
                 v.v2 = in.v2;
             elseif isa( in, 'QuadDouble' ) || isa( in, 'QuadDoubleSlow' ) || isa( in, 'ED.QuadDoubleConstant' ) || isa( in, 'DoubleDouble' )
@@ -52,10 +52,10 @@ classdef OctoDouble < ED.BaseDoubleDouble & ED.ExtDouble
                     v.v2 = 0;
                 end
             elseif isa( in, 'ED.ExtDouble' )
-                C = cell( 1, 4 );
+                C = cell( 1, 8 );
                 [ C{ : } ] = ToSumOfDoubles( in );
-                v.v1 = DoubleDouble.MakeStatic( C{ 1 }, C{ 2 } );
-                v.v2 = DoubleDouble.MakeStatic( C{ 3 }, C{ 4 } );
+                v.v1 = QuadDouble.MakeStatic( DoubleDouble.MakeStatic( C{ 1 }, C{ 2 } ), DoubleDouble.MakeStatic( C{ 3 }, C{ 4 } ) );
+                v.v2 = QuadDouble.MakeStatic( DoubleDouble.MakeStatic( C{ 5 }, C{ 6 } ), DoubleDouble.MakeStatic( C{ 7 }, C{ 8 } ) );
             else
                 v.v1 = QuadDouble( DoubleDouble( double( in ) ) );
                 if isempty( v.v1 )
