@@ -42,8 +42,8 @@ classdef OctoDouble < ED.BaseDoubleDouble & ED.ExtDouble
                 end
             end
             if isa( in, 'OctoDouble' ) || isa( in, 'OctoDoubleAlt' ) || isa( in, 'OctoDoubleSlow' )
-                v.v1 = in.v1;
-                v.v2 = in.v2;
+                v.v1 = QuadDouble( in.v1 );
+                v.v2 = QuadDouble( in.v2 );
             elseif isa( in, 'QuadDouble' ) || isa( in, 'QuadDoubleSlow' ) || isa( in, 'ED.QuadDoubleConstant' ) || isa( in, 'DoubleDouble' )
                 v.v1 = QuadDouble( in );
                 if isempty( v.v1 )
