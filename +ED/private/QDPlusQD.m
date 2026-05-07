@@ -4,8 +4,10 @@ function [ x0, x1, x2, x3 ] = QDPlusQD( a0, a1, a2, a3, b0, b1, b2, b3 )
     % the error terms through ThreeSum to track all rounding errors.
     % Only the final lowest-order accumulation is sloppy.
 
+    % [ a0, a1, a2, a3, b0, b1, b2, b3 ] = ED.ExpandSingleton( a0, a1, a2, a3, b0, b1, b2, b3 );
     % CatDim = ndims( a0 ) + 1;
-    % z = cat( CatDim, a0, a1 + 0 * a0, a2 + 0 * a0, a3 + 0 * a0, b0, b1 + 0 * b0, b2 + 0 * b0, b3 + 0 * b0 );
+    % z = cat( CatDim, a0, b0, a1, b1, a2, b2, a3, b3 );
+
     % if isreal( z )
     %     z = sort( z, CatDim, 'descend', 'ComparisonMethod', 'abs' );
     % else
@@ -15,16 +17,17 @@ function [ x0, x1, x2, x3 ] = QDPlusQD( a0, a1, a2, a3, b0, b1, b2, b3 )
     %     zi = sort( zi, CatDim, 'descend', 'ComparisonMethod', 'abs' );
     %     z = complex( zr, zi );
     % end
+
     % sz = size( z );
     % zFlat = reshape( z, [], sz( end ) );
-    % a0 = reshape( zFlat( :, 1 ), sz( 1 : end - 1 ) );
-    % b0 = reshape( zFlat( :, 2 ), sz( 1 : end - 1 ) );
-    % a1 = reshape( zFlat( :, 3 ), sz( 1 : end - 1 ) );
-    % b1 = reshape( zFlat( :, 4 ), sz( 1 : end - 1 ) );
-    % a2 = reshape( zFlat( :, 5 ), sz( 1 : end - 1 ) );
-    % b2 = reshape( zFlat( :, 6 ), sz( 1 : end - 1 ) );
-    % a3 = reshape( zFlat( :, 7 ), sz( 1 : end - 1 ) );
-    % b3 = reshape( zFlat( :, 8 ), sz( 1 : end - 1 ) );
+    % a0 = reshape( zFlat( :, 1 ), sz( 1 : ( end - 1 ) ) );
+    % b0 = reshape( zFlat( :, 2 ), sz( 1 : ( end - 1 ) ) );
+    % a1 = reshape( zFlat( :, 3 ), sz( 1 : ( end - 1 ) ) );
+    % b1 = reshape( zFlat( :, 4 ), sz( 1 : ( end - 1 ) ) );
+    % a2 = reshape( zFlat( :, 5 ), sz( 1 : ( end - 1 ) ) );
+    % b2 = reshape( zFlat( :, 6 ), sz( 1 : ( end - 1 ) ) );
+    % a3 = reshape( zFlat( :, 7 ), sz( 1 : ( end - 1 ) ) );
+    % b3 = reshape( zFlat( :, 8 ), sz( 1 : ( end - 1 ) ) );
 
     % ---- pairwise TwoSum on matching components ----
     % This computes 4 exact sums + 4 exact errors = 8 terms total.
