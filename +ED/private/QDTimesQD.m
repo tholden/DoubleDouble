@@ -1,71 +1,61 @@
 function [ s0, s1, s2, s3 ] = QDTimesQD( a0, a1, a2, a3, b0, b1, b2, b3 )
-    % Accurate multiplication ( cf. qd_real::accurate_mul in QD library ).
-    % Uses 10 UnderlyingTimesUnderlyings and Nine-Two-Sum for O( eps^3 ) accumulation.
-    % All intermediate additions use TwoSum for correct rounding.
-    % Calculate all 13 possible exact products up to O(eps^4)
-    [ p00, q00 ] = UnderlyingTimesUnderlying( a0, b0 );
-    [ p01, q01 ] = UnderlyingTimesUnderlying( a0, b1 );
-    [ p10, q10 ] = UnderlyingTimesUnderlying( a1, b0 );
-    
-    [ p02, q02 ] = UnderlyingTimesUnderlying( a0, b2 );
-    [ p11, q11 ] = UnderlyingTimesUnderlying( a1, b1 );
-    [ p20, q20 ] = UnderlyingTimesUnderlying( a2, b0 );
-    
-    [ p03, q03 ] = UnderlyingTimesUnderlying( a0, b3 );
-    [ p12, q12 ] = UnderlyingTimesUnderlying( a1, b2 );
-    [ p21, q21 ] = UnderlyingTimesUnderlying( a2, b1 );
-    [ p30, q30 ] = UnderlyingTimesUnderlying( a3, b0 );
-    
-    [ p13, q13 ] = UnderlyingTimesUnderlying( a1, b3 );
-    [ p22, q22 ] = UnderlyingTimesUnderlying( a2, b2 );
-    [ p31, q31 ] = UnderlyingTimesUnderlying( a3, b1 );
+    % Accurate QD*QD multiplication ( cf. qd_real::accurate_mul in QD library ).
+    % Computes 10 exact products (TwoProd), accumulates via Six-Three-Sum
+    % and Nine-Two-Sum, then renormalizes.
 
-    % Use the fast cascade for the dominant terms to establish the base QD
-    [ p01, p10, q00 ] = ThreeSum( p01, p10, q00 );
-    
-    [ p10, q01, q10 ] = ThreeSum( p10, q01, q10 );
-    [ p02, p11, p20 ] = ThreeSum( p02, p11, p20 );
-    
-    [ ss0, t0 ] = UnderlyingPlusUnderlying( p10, p02 );
-    [ ss1, t1 ] = UnderlyingPlusUnderlying( q01, p11 );
-    [ ss2, e_ss2 ] = UnderlyingPlusUnderlying( q10, p20 );
-    
-    [ ss1, t0_2 ] = UnderlyingPlusUnderlying( ss1, t0 );
-    [ ss2_t, e_t ] = UnderlyingPlusUnderlying( t0_2, t1 );
-    [ ss2, e_ss2b ] = UnderlyingPlusUnderlying( ss2, ss2_t );
-    
-    [ q00, p03 ] = UnderlyingPlusUnderlying( q00, p03 );
-    [ p12, p21 ] = UnderlyingPlusUnderlying( p12, p21 );
-    [ p30, p13 ] = UnderlyingPlusUnderlying( p30, p13 );
-    [ p22, p31 ] = UnderlyingPlusUnderlying( p22, p31 );
-    
-    [ t0, t1 ] = UnderlyingPlusUnderlying( q00, p12 );
-    [ t1_sum, e_t1 ] = UnderlyingPlusUnderlying( t1, p03 );
-    [ t1_sum, e_t1b ] = UnderlyingPlusUnderlying( t1_sum, p21 );
-    
-    [ r0, r1 ] = UnderlyingPlusUnderlying( p30, p22 );
-    [ r1_sum, e_r1 ] = UnderlyingPlusUnderlying( r1, p13 );
-    [ r1_sum, e_r1b ] = UnderlyingPlusUnderlying( r1_sum, p31 );
-    
-    [ q3_2, q4_2 ] = UnderlyingPlusUnderlying( t0, r0 );
-    [ q4_sum, e_q4 ] = UnderlyingPlusUnderlying( q4_2, t1_sum );
-    [ q4_sum, e_q4b ] = UnderlyingPlusUnderlying( q4_sum, r1_sum );
-    
-    [ t0, t1 ] = UnderlyingPlusUnderlying( q3_2, ss1 );
-    [ t1, e_t1c ] = UnderlyingPlusUnderlying( t1, q4_sum );
-    
-    % Base QuadDouble
-    [ p0, p1, p2, p3 ] = Renorm5( p00, p01, ss0, t0, t1 );
-    
-    % ss2 is O(eps^2), so it must be added separately to prevent swallowing 
-    % the O(eps^4) terms during sloppy addition.
-    [ p0, p1, p2, p3 ] = QDPlusUnderlying( p0, p1, p2, p3, ss2 );
-    
-    % Cascade all remaining O(eps^3) and smaller tracked error terms accurately.
-    % Using a single sloppy sum is safe here because DoubleDouble has 106 bits
-    % (~32 digits) of precision, so an O(eps^3) term will not swallow an O(eps^4) term.
-    e_sum = e_ss2 + e_ss2b + e_t + e_t1 + e_t1b + e_r1 + e_r1b + e_q4 + e_q4b + e_t1c + ...
-            q02 + q11 + q20 + q03 + q12 + q21 + q30 + q13 + q22 + q31;
-            
-    [ s0, s1, s2, s3 ] = QDPlusUnderlying( p0, p1, p2, p3, e_sum );
+    [ p0, q0 ] = UnderlyingTimesUnderlying( a0, b0 );
+
+    [ p1, q1 ] = UnderlyingTimesUnderlying( a0, b1 );
+    [ p2, q2 ] = UnderlyingTimesUnderlying( a1, b0 );
+
+    [ p3, q3 ] = UnderlyingTimesUnderlying( a0, b2 );
+    [ p4, q4 ] = UnderlyingTimesUnderlying( a1, b1 );
+    [ p5, q5 ] = UnderlyingTimesUnderlying( a2, b0 );
+
+    % Start accumulation
+    [ p1, p2, q0 ] = ThreeSum( p1, p2, q0 );
+
+    % Six-Three-Sum of p2, q1, q2, p3, p4, p5.
+    [ p2, q1, q2 ] = ThreeSum( p2, q1, q2 );
+    [ p3, p4, p5 ] = ThreeSum( p3, p4, p5 );
+
+    % Compute (s0, s1, s2) = (p2, q1, q2) + (p3, p4, p5).
+    [ s0, t0 ] = UnderlyingPlusUnderlying( p2, p3 );
+    [ s1, t1 ] = UnderlyingPlusUnderlying( q1, p4 );
+    s2 = q2 + p5;
+    [ s1, t0 ] = UnderlyingPlusUnderlying( s1, t0 );
+    s2 = s2 + ( t0 + t1 );
+
+    % O(eps^3) order terms
+    [ p6, q6 ] = UnderlyingTimesUnderlying( a0, b3 );
+    [ p7, q7 ] = UnderlyingTimesUnderlying( a1, b2 );
+    [ p8, q8 ] = UnderlyingTimesUnderlying( a2, b1 );
+    [ p9, q9 ] = UnderlyingTimesUnderlying( a3, b0 );
+
+    % Nine-Two-Sum of q0, s1, q3, q4, q5, p6, p7, p8, p9.
+    [ q0, q3 ] = UnderlyingPlusUnderlying( q0, q3 );
+    [ q4, q5 ] = UnderlyingPlusUnderlying( q4, q5 );
+    [ p6, p7 ] = UnderlyingPlusUnderlying( p6, p7 );
+    [ p8, p9 ] = UnderlyingPlusUnderlying( p8, p9 );
+
+    % Compute (t0, t1) = (q0, q3) + (q4, q5).
+    [ t0, t1 ] = UnderlyingPlusUnderlying( q0, q4 );
+    t1 = t1 + ( q3 + q5 );
+
+    % Compute (r0, r1) = (p6, p7) + (p8, p9).
+    [ r0, r1 ] = UnderlyingPlusUnderlying( p6, p8 );
+    r1 = r1 + ( p7 + p9 );
+
+    % Compute (q3, q4) = (t0, t1) + (r0, r1).
+    [ q3, q4 ] = UnderlyingPlusUnderlying( t0, r0 );
+    q4 = q4 + ( t1 + r1 );
+
+    % Compute (t0, t1) = (q3, q4) + s1.
+    [ t0, t1 ] = UnderlyingPlusUnderlying( q3, s1 );
+    t1 = t1 + q4;
+
+    % O(eps^4) terms -- Nine-One-Sum (sloppy)
+    t1 = t1 + a1 .* b3 + a2 .* b2 + a3 .* b1 + q6 + q7 + q8 + q9 + s2;
+
+    [ s0, s1, s2, s3 ] = Renorm5( p0, p1, s0, t0, t1 );
 end
