@@ -465,15 +465,15 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 v = BackSubstitution( v, a );
                 return
             end
-            if ED.ExtDouble.IsEqualWithExpansion( triu( a, 1 ), 0 )
+            if all( triu( a, 1 ) == 0, 'all' )
                 % Lower triangular
                 v = ForwardElimination( v, a );
                 return
-            elseif ED.ExtDouble.IsEqualWithExpansion( tril( a, -1 ), 0 )
+            elseif all( tril( a, -1 ) == 0, 'all' )
                 % Upper triangular
                 v = BackSubstitution( v, a );
                 return
-            elseif ED.ExtDouble.IsEqualWithExpansion( a, a' )
+            elseif all( a == a', 'all' )
                 [ L, d ] = ldl( a, 'vector_d' );
                 if all( all( isfinite( L ) ) ) && all( isfinite( d ) )
                     % Positive definite
@@ -519,7 +519,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             if ~any( bHalfInteger )
                 v = exp( b .* log( a ) );
             else
-                [ a, b, bHalfInteger ] = ED.ExtDouble.ExpandSingleton( a, b, bHalfInteger );
+                [ a, b, bHalfInteger ] = ED.ExpandSingleton( a, b, bHalfInteger );
                 v = a.ones( size( a ) );
                 bNonHalfInteger = find( ~bHalfInteger );
                 bHalfInteger = find( bHalfInteger );
@@ -1105,7 +1105,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 if ~isa( b, 'ED.ExtDouble' )
                     b = a.Promote( b );
                 end
-                [ a, b ] = ED.ExtDouble.ExpandSingleton( a, b );
+                [ a, b ] = ED.ExpandSingleton( a, b );
                 if all( a.v2 == 0, 'all' ) && all( b.v2 == 0, 'all' )
                     i = a.v1 > b.v1;
                     s = b;
@@ -1180,7 +1180,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 if ~isa( b, 'ED.ExtDouble' )
                     b = a.Promote( b );
                 end
-                [ a, b ] = ED.ExtDouble.ExpandSingleton( a, b );
+                [ a, b ] = ED.ExpandSingleton( a, b );
                 if all( a.v2 == 0, 'all' ) && all( b.v2 == 0, 'all' )
                     i = a.v1 < b.v1;
                     s = b;
@@ -2560,55 +2560,6 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 j = ( k + 1 ) : n;
                 t = sum( v.Index( j, ':' ) .* U.Index( k, j ).', 1 );
                 v = v.Assign( ( v.Index( k, ':' ) - t ) ./ U.Index( k, k ), k, ':' );
-            end
-        end
-
-    end
-
-    methods ( Static, Access = protected )
-
-        function [ varargout ] = ExpandSingleton( varargin )
-            l = cellfun( @( x ) length( size( x ) ), varargin, 'UniformOutput', true );
-            n = length( varargin );
-            ss = ones( n, max( l ) );
-            for i = 1 : n
-                ss( i, 1 : l( i ) ) = size( varargin{ i } );
-            end
-            if all( ss == ss( 1, : ), 'all' )
-                varargout = varargin;
-                return
-            end
-            s = max( ss, [], 1 );
-            isZeroDim = any( ss == 0, 1 );
-            if any( isZeroDim )
-                if any( any( ss( :, isZeroDim ) > 1 ) )
-                    error( 'Arrays have incompatible sizes for this operation.' );
-                end
-                s( isZeroDim ) = 0;
-            end
-            if all( s <= 1 )
-                varargout = varargin;
-                return
-            end
-            varargout = cell( 1, n );
-            for i = 1 : n
-                RepFactor = ones( 1, max( length( s ), 2 ) );
-                mask = find( ( ss( i, : ) == 1 ) & ( s ~= 1 ) );
-                RepFactor( mask ) = s( mask );
-                varargout{ i } = repmat( varargin{ i }, RepFactor );
-            end
-        end
-
-        function v = IsEqualWithExpansion( a, b, varargin )
-            v = a == b;
-            v = all( v( : ) );
-            if nargin > 2
-                for i = 1 : length( varargin )
-                    if ~v
-                        break
-                    end
-                    v = v && ED.ExtDouble.IsEqualWithExpansion( a, varargin{ i } );
-                end
             end
         end
 
