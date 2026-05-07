@@ -1,4 +1,15 @@
 function [ c0, c1, c2, c3 ] = Renorm5( c0, c1, c2, c3, c4 )
+
+    if ~isreal( c0 ) || ~isreal( c1 ) || ~isreal( c2 ) || ~isreal( c3 ) || ~isreal( c4 )
+        [ c0r, c1r, c2r, c3r ] = Renorm5( real( c0 ), real( c1 ), real( c2 ), real( c3 ), real( c4 ) );
+        [ c0i, c1i, c2i, c3i ] = Renorm5( imag( c0 ), imag( c1 ), imag( c2 ), imag( c3 ), imag( c4 ) );
+        c0 = complex( c0r, c0i );
+        c1 = complex( c1r, c1i );
+        c2 = complex( c2r, c2i );
+        c3 = complex( c3r, c3i );
+        return
+    end
+
     [ c3, c4 ] = DDNormalize( c3, c4 );
     [ c2, c3 ] = DDNormalize( c2, c3 );
     [ c1, c2 ] = DDNormalize( c1, c2 );
