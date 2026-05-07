@@ -17,9 +17,6 @@ classdef QuadDouble < ED.BaseQuadDouble & ED.ExtDouble & ED.QuadDoubleProperties
             if isa( in, 'QuadDouble' ) || isa( in, 'QuadDoubleSlow' ) || isa( in, 'ED.QuadDoubleConstant' )
                 v.v1 = in.v1;
                 v.v2 = in.v2;
-                if isa( in, 'ED.BaseQuadDouble' )
-                    v.v3 = in.v3;
-                end
             elseif isa( in, 'DoubleDouble' )
                 v.v1 = in;
                 if isempty( v.v1 )
@@ -94,18 +91,15 @@ classdef QuadDouble < ED.BaseQuadDouble & ED.ExtDouble & ED.QuadDoubleProperties
 
     methods ( Access = protected )
 
-        function v = Make( ~, a1, a2, a3 )
-            if nargin < 4
-                a3 = 0;
-            end
-            v = QuadDouble.MakeStatic( a1, a2, a3 );
+        function v = Make( ~, a1, a2 )
+            v = QuadDouble.MakeStatic( a1, a2 );
         end
 
     end
 
     methods ( Static, Access = { ?ED.BaseDoubleDouble, ?ED.BaseExtDoubleProperties } )
 
-        function v = MakeStatic( a1, a2, a3 )
+        function v = MakeStatic( a1, a2 )
             v = QuadDouble;
             v.v1 = DoubleDouble( a1 );
             if isempty( a1 )
@@ -114,9 +108,6 @@ classdef QuadDouble < ED.BaseQuadDouble & ED.ExtDouble & ED.QuadDoubleProperties
                 v.v2 = 0;
             else
                 v.v2 = DoubleDouble( a2 );
-            end
-            if nargin >= 3 && ~all( a3 == 0, 'all' )
-                v.v3 = a3;
             end
         end
 

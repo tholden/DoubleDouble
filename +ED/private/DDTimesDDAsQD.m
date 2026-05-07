@@ -1,4 +1,4 @@
-function [ p0, p1, p2, p3, p4 ] = DDTimesDDAsQD( a0, a1, b0, b1 )
+function [ p0, p1, p2, p3 ] = DDTimesDDAsQD( a0, a1, b0, b1 )
     [ p0, q0 ] = UnderlyingTimesUnderlying( a0, b0 );
     [ p1, q1 ] = UnderlyingTimesUnderlying( a0, b1 );
     [ p2, q2 ] = UnderlyingTimesUnderlying( a1, b0 );
@@ -12,8 +12,9 @@ function [ p0, p1, p2, p3, p4 ] = DDTimesDDAsQD( a0, a1, b0, b1 )
     [ s2, e_s2 ] = UnderlyingPlusUnderlying( t0, t1 );
     p2 = s0;
     [ p3, q0, e_q0 ] = ThreeSum( q3, q0, s1 );
-    [ p4_new, e_p4 ] = UnderlyingPlusUnderlying( q0, s2 );
-    [ p0, p1, p2, p3, p4 ] = Renorm5( p0, p1, p2, p3, p4_new );
-    e_sum = e_s2 + e_q0 + e_p4 + p4;
-    [ p0, p1, p2, p3, p4 ] = QDPlusUnderlying( p0, p1, p2, p3, e_sum );
+    [ p4, e_p4 ] = UnderlyingPlusUnderlying( q0, s2 );
+    [ p0, p1, p2, p3 ] = Renorm5( p0, p1, p2, p3, p4 );
+    [ p0, p1, p2, p3 ] = QDPlusUnderlying( p0, p1, p2, p3, e_s2 );
+    [ p0, p1, p2, p3 ] = QDPlusUnderlying( p0, p1, p2, p3, e_q0 );
+    [ p0, p1, p2, p3 ] = QDPlusUnderlying( p0, p1, p2, p3, e_p4 );
 end

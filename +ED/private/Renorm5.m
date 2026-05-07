@@ -1,4 +1,4 @@
-function [ c0, c1, c2, c3, c4 ] = Renorm5( c0, c1, c2, c3, c4 )
+function [ c0, c1, c2, c3 ] = Renorm5( c0, c1, c2, c3, c4 )
     [ c4, c5 ] = DDNormalize( c3, c4 );
     [ c3, c4 ] = DDNormalize( c2, c4 );
     [ c2, c3 ] = DDNormalize( c1, c3 );
@@ -69,5 +69,5 @@ function [ c0, c1, c2, c3, c4 ] = Renorm5( c0, c1, c2, c3, c4 )
         end
     end
 
-    c0 = s0; c1 = s1; c2 = s2; c3 = s3; c4 = 0;
+    c0 = s0; c1 = s1; c2 = s2; c3 = s3;
 end

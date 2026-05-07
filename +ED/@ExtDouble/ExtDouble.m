@@ -2427,11 +2427,6 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             catch
                 w = cellfun( @( x ) vpa( sym( x, 'f' ) ), w, 'UniformOutput', false );
             end
-            % Collect v3 corrections from BaseQuadDouble hierarchy.
-            vpaV3 = 0;
-            if isa( v, 'ED.BaseQuadDouble' )
-                vpaV3 = vpaV3 + ED.ExtDouble.VpaOfV3( v.v3, Digits );
-            end
             v = w{ 1 };
             for k = 2 : length( w )
                 if isempty( w{ k } )
@@ -2439,7 +2434,6 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 end
                 v = v + w{ k };
             end
-            v = v + vpaV3;
         end
 
     end
@@ -2572,22 +2566,6 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
     end
 
     methods ( Static, Access = protected )
-
-        function Result = VpaOfV3( V3, Digits )
-            if all( V3 == 0, 'all' )
-                Result = 0;
-                return
-            end
-            if isa( V3, 'ED.ExtDouble' )
-                Result = vpa( V3, Digits );
-            else
-                try
-                    Result = vpa( V3, BoostPrecision = false );
-                catch
-                    Result = vpa( sym( V3, 'f' ) );
-                end
-            end
-        end
 
         function [ varargout ] = ExpandSingleton( varargin )
             l = cellfun( @( x ) length( size( x ) ), varargin, 'UniformOutput', true );
