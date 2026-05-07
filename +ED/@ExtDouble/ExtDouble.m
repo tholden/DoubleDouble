@@ -572,124 +572,24 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             end
         end
 
-        function v = lt( a, b )
-            if isa( a, 'ED.ExtDouble' )
-                a1 = a.v1;
-                a2 = a.v2;
-            else
-                a1 = a;
-                a2 = 0;
-            end
-            if isa( b, 'ED.ExtDouble' )
-                b1 = b.v1;
-                b2 = b.v2;
-            else
-                b1 = b;
-                b2 = 0;
-            end
-            a2IsZero = all( a2 == 0, 'all' );
-            b2IsZero = all( b2 == 0, 'all' );
-            if a2IsZero && b2IsZero
-                v = a1 < b1;
-            else
-                if a2IsZero
-                    a2 = 0;
-                end
-                if b2IsZero
-                    b2 = 0;
-                end
-                v = ( a1 < b1 ) | ( ( a1 == b1 ) & ( a2 < b2 ) );
-            end
+        function a = lt( a, b )
+            a = a - b;
+            a = ( a.v1 < 0 ) | ( ( a.v1 == 0 ) & ( a.v2 < 0 ) );
         end
 
-        function v = gt( a, b )
-            if isa( a, 'ED.ExtDouble' )
-                a1 = a.v1;
-                a2 = a.v2;
-            else
-                a1 = a;
-                a2 = 0;
-            end
-            if isa( b, 'ED.ExtDouble' )
-                b1 = b.v1;
-                b2 = b.v2;
-            else
-                b1 = b;
-                b2 = 0;
-            end
-            a2IsZero = all( a2 == 0, 'all' );
-            b2IsZero = all( b2 == 0, 'all' );
-            if a2IsZero && b2IsZero
-                v = a1 > b1;
-            else
-                if a2IsZero
-                    a2 = 0;
-                end
-                if b2IsZero
-                    b2 = 0;
-                end
-                v = ( a1 > b1 ) | ( ( a1 == b1 ) & ( a2 > b2 ) );
-            end
+        function a = gt( a, b )
+            a = a - b;
+            a = ( a.v1 > 0 ) | ( ( a.v1 == 0 ) & ( a.v2 > 0 ) );
         end
 
-        function v = le( a, b )
-            if isa( a, 'ED.ExtDouble' )
-                a1 = a.v1;
-                a2 = a.v2;
-            else
-                a1 = a;
-                a2 = 0;
-            end
-            if isa( b, 'ED.ExtDouble' )
-                b1 = b.v1;
-                b2 = b.v2;
-            else
-                b1 = b;
-                b2 = 0;
-            end
-            a2IsZero = all( a2 == 0, 'all' );
-            b2IsZero = all( b2 == 0, 'all' );
-            if a2IsZero && b2IsZero
-                v = a1 <= b1;
-            else
-                if a2IsZero
-                    a2 = 0;
-                end
-                if b2IsZero
-                    b2 = 0;
-                end
-                v = ( a1 < b1 ) | ( ( a1 == b1 ) & ( a2 <= b2 ) );
-            end
+        function a = le( a, b )
+            a = a - b;
+            a = ( a.v1 < 0 ) | ( ( a.v1 == 0 ) & ( a.v2 <= 0 ) );
         end
 
-        function v = ge( a, b )
-            if isa( a, 'ED.ExtDouble' )
-                a1 = a.v1;
-                a2 = a.v2;
-            else
-                a1 = a;
-                a2 = 0;
-            end
-            if isa( b, 'ED.ExtDouble' )
-                b1 = b.v1;
-                b2 = b.v2;
-            else
-                b1 = b;
-                b2 = 0;
-            end
-            a2IsZero = all( a2 == 0, 'all' );
-            b2IsZero = all( b2 == 0, 'all' );
-            if a2IsZero && b2IsZero
-                v = a1 >= b1;
-            else
-                if a2IsZero
-                    a2 = 0;
-                end
-                if b2IsZero
-                    b2 = 0;
-                end
-                v = ( a1 > b1 ) | ( ( a1 == b1 ) & ( a2 >= b2 ) );
-            end
+        function a = ge( a, b )
+            a = a - b;
+            a = ( a.v1 > 0 ) | ( ( a.v1 == 0 ) & ( a.v2 >= 0 ) );
         end
 
         function v = ne( a, b )
