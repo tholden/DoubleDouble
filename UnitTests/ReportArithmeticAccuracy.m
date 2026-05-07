@@ -5,96 +5,96 @@ b = OctoDouble.rand(1000,1);
 
 %% QuadDouble addition test
 % Construct two dense QuadDouble numbers with 8 doubles of significance
-a_oct = QuadDouble( a );
-b_oct = QuadDouble( b );
-a_oct_vpa = vpa_(a_oct);
-b_oct_vpa = vpa_(b_oct);
-s_oct = vpa_(a_oct + b_oct);
-s_oct_vpa = a_oct_vpa + b_oct_vpa;
-err_oct = abs(s_oct - s_oct_vpa);
-rel_oct = err_oct ./ max( 1, abs(s_oct_vpa) );
-fprintf('QuadDouble addition error: %g\n', max( rel_oct ) );
+a_ = QuadDouble( a );
+b_ = QuadDouble( b );
+a_vpa = vpa_(a_);
+b_vpa = vpa_(b_);
+s = vpa_(a_ + b_);
+s_vpa = a_vpa + b_vpa;
+err = abs(s - s_vpa);
+rel = err ./ max( 1, abs(s_vpa) );
+fprintf('QuadDouble addition error: %g\n', max( rel ) );
 
 % Also test QuadDouble multiplication
-p_oct = vpa_(a_oct .* b_oct);
-p_oct_vpa = a_oct_vpa .* b_oct_vpa;
-err_oct_mul = abs(p_oct - p_oct_vpa);
-rel_oct_mul = err_oct_mul ./ max( 1, abs(p_oct_vpa) );
-fprintf('QuadDouble multiplication error: %g\n', max( rel_oct_mul ) );
+p = vpa_(a_ .* b_);
+p_vpa = a_vpa .* b_vpa;
+err_mul = abs(p - p_vpa);
+rel_mul = err_mul ./ max( 1, abs(p_vpa) );
+fprintf('QuadDouble multiplication error: %g\n', max( rel_mul ) );
 
 %% QuadDoubleSlow addition test
 % Construct two dense QuadDoubleSlow numbers with 8 doubles of significance
-a_oct = QuadDoubleSlow( a );
-b_oct = QuadDoubleSlow( b );
-a_oct_vpa = vpa_(a_oct);
-b_oct_vpa = vpa_(b_oct);
-s_oct = vpa_(a_oct + b_oct);
-s_oct_vpa = a_oct_vpa + b_oct_vpa;
-err_oct = abs(s_oct - s_oct_vpa);
-rel_oct = err_oct ./ max( 1, abs(s_oct_vpa) );
-fprintf('QuadDoubleSlow addition error: %g\n', max( rel_oct ) );
+a_ = QuadDoubleSlow( a );
+b_ = QuadDoubleSlow( b );
+a_vpa = vpa_(a_);
+b_vpa = vpa_(b_);
+s = vpa_(a_ + b_);
+s_vpa = a_vpa + b_vpa;
+err = abs(s - s_vpa);
+rel = err ./ max( 1, abs(s_vpa) );
+fprintf('QuadDoubleSlow addition error: %g\n', max( rel ) );
 
 % Also test QuadDoubleSlow multiplication
-p_oct = vpa_(a_oct .* b_oct);
-p_oct_vpa = a_oct_vpa .* b_oct_vpa;
-err_oct_mul = abs(p_oct - p_oct_vpa);
-rel_oct_mul = err_oct_mul ./ max( 1, abs(p_oct_vpa) );
-fprintf('QuadDoubleSlow multiplication error: %g\n', max( rel_oct_mul ) );
+p = vpa_(a_ .* b_);
+p_vpa = a_vpa .* b_vpa;
+err_mul = abs(p - p_vpa);
+rel_mul = err_mul ./ max( 1, abs(p_vpa) );
+fprintf('QuadDoubleSlow multiplication error: %g\n', max( rel_mul ) );
 
 %% OctoDouble addition test
 % Construct two dense OctoDouble numbers with 8 doubles of significance
-a_oct = OctoDouble( a );
-b_oct = OctoDouble( b );
-a_oct_vpa = vpa_(a_oct);
-b_oct_vpa = vpa_(b_oct);
-s_oct = vpa_(a_oct + b_oct);
-s_oct_vpa = a_oct_vpa + b_oct_vpa;
-err_oct = abs(s_oct - s_oct_vpa);
-rel_oct = err_oct ./ max( 1, abs(s_oct_vpa) );
-fprintf('OctoDouble addition error: %g\n', max( rel_oct ) );
+a_ = OctoDouble( a );
+b_ = OctoDouble( b );
+a_vpa = vpa_(a_);
+b_vpa = vpa_(b_);
+s = vpa_(a_ + b_);
+s_vpa = a_vpa + b_vpa;
+err = abs(s - s_vpa);
+rel = err ./ max( 1, abs(s_vpa) );
+fprintf('OctoDouble addition error: %g\n', max( rel ) );
 
 % Also test OctoDouble multiplication
-p_oct = vpa_(a_oct .* b_oct);
-p_oct_vpa = a_oct_vpa .* b_oct_vpa;
-err_oct_mul = abs(p_oct - p_oct_vpa);
-rel_oct_mul = err_oct_mul ./ max( 1, abs(p_oct_vpa) );
-fprintf('OctoDouble multiplication error: %g\n', max( rel_oct_mul ) );
+p = vpa_(a_ .* b_);
+p_vpa = a_vpa .* b_vpa;
+err_mul = abs(p - p_vpa);
+rel_mul = err_mul ./ max( 1, abs(p_vpa) );
+fprintf('OctoDouble multiplication error: %g\n', max( rel_mul ) );
 
 %% OctoDoubleAlt addition test
 % Construct two dense OctoDoubleAlt numbers with 8 doubles of significance
-a_oct = OctoDoubleAlt( a );
-b_oct = OctoDoubleAlt( b );
-a_oct_vpa = vpa_(a_oct);
-b_oct_vpa = vpa_(b_oct);
-s_oct = vpa_(a_oct + b_oct);
-s_oct_vpa = a_oct_vpa + b_oct_vpa;
-err_oct = abs(s_oct - s_oct_vpa);
-rel_oct = err_oct ./ max( 1, abs(s_oct_vpa) );
-fprintf('OctoDoubleAlt addition error: %g\n', max( rel_oct ) );
+a_ = OctoDoubleAlt( a );
+b_ = OctoDoubleAlt( b );
+a_vpa = vpa_(a_);
+b_vpa = vpa_(b_);
+s = vpa_(a_ + b_);
+s_vpa = a_vpa + b_vpa;
+err = abs(s - s_vpa);
+rel = err ./ max( 1, abs(s_vpa) );
+fprintf('OctoDoubleAlt addition error: %g\n', max( rel ) );
 
 % Also test OctoDoubleAlt multiplication
-p_oct = vpa_(a_oct .* b_oct);
-p_oct_vpa = a_oct_vpa .* b_oct_vpa;
-err_oct_mul = abs(p_oct - p_oct_vpa);
-rel_oct_mul = err_oct_mul ./ max( 1, abs(p_oct_vpa) );
-fprintf('OctoDoubleAlt multiplication error: %g\n', max( rel_oct_mul ) );
+p = vpa_(a_ .* b_);
+p_vpa = a_vpa .* b_vpa;
+err_mul = abs(p - p_vpa);
+rel_mul = err_mul ./ max( 1, abs(p_vpa) );
+fprintf('OctoDoubleAlt multiplication error: %g\n', max( rel_mul ) );
 
 %% OctoDoubleSlow addition test
 % Construct two dense OctoDoubleSlow numbers with 8 doubles of significance
-a_oct = OctoDoubleSlow( a );
-b_oct = OctoDoubleSlow( b );
-a_oct_vpa = vpa_(a_oct);
-b_oct_vpa = vpa_(b_oct);
-s_oct = vpa_(a_oct + b_oct);
-s_oct_vpa = a_oct_vpa + b_oct_vpa;
-err_oct = abs(s_oct - s_oct_vpa);
-rel_oct = err_oct ./ max( 1, abs(s_oct_vpa) );
-fprintf('OctoDoubleSlow addition error: %g\n', max( rel_oct ) );
+a_ = OctoDoubleSlow( a );
+b_ = OctoDoubleSlow( b );
+a_vpa = vpa_(a_);
+b_vpa = vpa_(b_);
+s = vpa_(a_ + b_);
+s_vpa = a_vpa + b_vpa;
+err = abs(s - s_vpa);
+rel = err ./ max( 1, abs(s_vpa) );
+fprintf('OctoDoubleSlow addition error: %g\n', max( rel ) );
 
 % Also test OctoDoubleSlow multiplication
-p_oct = vpa_(a_oct .* b_oct);
-p_oct_vpa = a_oct_vpa .* b_oct_vpa;
-err_oct_mul = abs(p_oct - p_oct_vpa);
-rel_oct_mul = err_oct_mul ./ max( 1, abs(p_oct_vpa) );
-fprintf('OctoDoubleSlow multiplication error: %g\n', max( rel_oct_mul ) );
+p = vpa_(a_ .* b_);
+p_vpa = a_vpa .* b_vpa;
+err_mul = abs(p - p_vpa);
+rel_mul = err_mul ./ max( 1, abs(p_vpa) );
+fprintf('OctoDoubleSlow multiplication error: %g\n', max( rel_mul ) );
 
