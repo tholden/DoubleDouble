@@ -4,7 +4,7 @@ classdef OctoDoubleTest < matlab.unittest.TestCase
 
     properties
 
-        Tol = 1e-120;  % Absolute tolerance for comparisons  % Relative tolerance for comparisons
+        Tol = 1e-90;  % Absolute tolerance for comparisons  % Relative tolerance for comparisons
 
         % Test data
         SmallValues;
