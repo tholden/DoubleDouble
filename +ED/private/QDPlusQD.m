@@ -3,19 +3,23 @@ function [ x0, x1, x2, x3 ] = QDPlusQD( a0, a1, a2, a3, b0, b1, b2, b3 )
     % Sorts all 8 components by decreasing magnitude, then cascades via
     % the sloppy_add accumulation structure for vectorized operation.
 
+    if ~isreal( a0 ) || ~isreal( a1 ) || ~isreal( a2 ) || ~isreal( a3 ) || ...
+            ~isreal( b0 ) || ~isreal( b1 ) || ~isreal( b2 ) || ~isreal( b3 )
+        [ x0r, x1r, x2r, x3r ] = QDPlusQD( real( a0 ), real( a1 ), real( a2 ), real( a3 ),  ...
+            real( b0 ), real( b1 ), real( b2 ), real( b3 ) );
+        [ x0i, x1i, x2i, x3i ] = QDPlusQD( imag( a0 ), imag( a1 ), imag( a2 ), imag( a3 ),  ...
+            imag( b0 ), imag( b1 ), imag( b2 ), imag( b3 ) );
+        x0 = complex( x0r, x0i );
+        x1 = complex( x1r, x1i );
+        x2 = complex( x2r, x2i );
+        x3 = complex( x3r, x3i );
+        return
+    end
+
     [ a0, a1, a2, a3, b0, b1, b2, b3 ] = ED.ExpandSingleton( a0, a1, a2, a3, b0, b1, b2, b3 );
     CatDim = ndims( a0 ) + 1;
     z = cat( CatDim, a0, b0, a1, b1, a2, b2, a3, b3 );
-
-    if isreal( z )
-        z = sort( z, CatDim, 'descend', 'ComparisonMethod', 'abs' );
-    else
-        zr = real( z );
-        zi = imag( z );
-        zr = sort( zr, CatDim, 'descend', 'ComparisonMethod', 'abs' );
-        zi = sort( zi, CatDim, 'descend', 'ComparisonMethod', 'abs' );
-        z = complex( zr, zi );
-    end
+    z = sort( z, CatDim, 'descend', 'ComparisonMethod', 'abs' );
 
     sz = size( z );
     zFlat = reshape( z, [], sz( end ) );
