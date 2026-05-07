@@ -5,6 +5,27 @@ rng( 'default' );
 a = OctoDouble.rand(1000,1);
 b = OctoDouble.rand(1000,1);
 
+%% DoubleDouble addition test
+% Construct two dense DoubleDouble numbers with 8 doubles of significance
+a_ = DoubleDouble( a );
+b_ = DoubleDouble( b );
+a_vpa = vpa_(a_);
+b_vpa = vpa_(b_);
+s = vpa_(a_ + b_);
+s_vpa = a_vpa + b_vpa;
+err = abs(s - s_vpa);
+rel = err ./ max( 1, abs(s_vpa) );
+max_rel = max( rel );
+fprintf('DoubleDouble   addition       error:\t%g\tIndices: %d\n', max_rel, find( rel.' == max_rel ) );
+
+% Also test DoubleDouble multiplication
+p = vpa_(a_ .* b_);
+p_vpa = a_vpa .* b_vpa;
+err = abs(p - p_vpa);
+rel = err ./ max( 1, abs(p_vpa) );
+max_rel = max( rel );
+fprintf('DoubleDouble   multiplication error:\t%g\tIndices: %d\n', max_rel, find( rel.' == max_rel ) );
+
 %% QuadDouble addition test
 % Construct two dense QuadDouble numbers with 8 doubles of significance
 a_ = QuadDouble( a );
