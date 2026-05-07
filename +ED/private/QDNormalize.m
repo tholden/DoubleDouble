@@ -1,4 +1,4 @@
-function [ c0, c1, c2, c3 ] = QDNormalize( c0, c1, c2, c3 )
+function [ c0, c1, c2, c3, c4 ] = QDNormalize( c0, c1, c2, c3 )
     [ c3, c4 ] = DDNormalize( c2, c3 );
     [ c2, c3 ] = DDNormalize( c1, c3 );
     [ c1, c2 ] = DDNormalize( c0, c2 );
@@ -9,6 +9,7 @@ function [ c0, c1, c2, c3 ] = QDNormalize( c0, c1, c2, c3 )
 
     s2 = zeros( size( s0 ), 'like', s0 );
     s3 = zeros( size( s0 ), 'like', s0 );
+    s4 = zeros( size( s0 ), 'like', s0 );
 
     Select = s1 ~= 0;
     if any( Select, 'all' )
@@ -36,5 +37,5 @@ function [ c0, c1, c2, c3 ] = QDNormalize( c0, c1, c2, c3 )
         end
     end
 
-    c0 = s0; c1 = s1; c2 = s2; c3 = s3;
+    c0 = s0; c1 = s1; c2 = s2; c3 = s3; c4 = 0;
 end

@@ -1,4 +1,4 @@
-function [ x0, x1, x2, x3 ] = QDPlusQD( a0, a1, a2, a3, b0, b1, b2, b3 )
+function [ x0, x1, x2, x3, x4 ] = QDPlusQD( a0, a1, a2, a3, b0, b1, b2, b3 )
     % IEEE-accurate QD+QD addition.
     % Uses pairwise TwoSum on matching components, then cascades
     % the error terms through ThreeSum to track all rounding errors.
@@ -48,5 +48,5 @@ function [ x0, x1, x2, x3 ] = QDPlusQD( a0, a1, a2, a3, b0, b1, b2, b3 )
     % Accumulate remaining residuals using a single QDPlusUnderlying
     % for performance, as they are all O(eps^4) or smaller.
     e_sum = e0 + e1 + e2 + e3;
-    [ x0, x1, x2, x3 ] = QDPlusUnderlying( s0, s1, s2, s3, e_sum );
+    [ x0, x1, x2, x3, x4 ] = QDPlusUnderlying( s0, s1, s2, s3, e_sum );
 end

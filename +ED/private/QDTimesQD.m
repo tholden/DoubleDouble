@@ -1,7 +1,13 @@
-function [ s0, s1, s2, s3 ] = QDTimesQD( a0, a1, a2, a3, b0, b1, b2, b3 )
+function [ s0, s1, s2, s3, s4 ] = QDTimesQD( a0, a1, a2, a3, b0, b1, b2, b3, a4, b4 )
     % Accurate multiplication ( cf. qd_real::accurate_mul in QD library ).
-    % Uses 10 UnderlyingTimesUnderlyings and Nine-Two-Sum for O( eps^3 ) accumulation.
-    % All intermediate additions use TwoSum for correct rounding.
+    % a4, b4 are optional 5th components (v3) from BaseQuadDouble.
+    if nargin < 9
+        a4 = 0;
+    end
+    if nargin < 10
+        b4 = 0;
+    end
+    
     % Calculate all 13 possible exact products up to O(eps^4)
     [ p00, q00 ] = UnderlyingTimesUnderlying( a0, b0 );
     [ p01, q01 ] = UnderlyingTimesUnderlying( a0, b1 );
@@ -55,17 +61,18 @@ function [ s0, s1, s2, s3 ] = QDTimesQD( a0, a1, a2, a3, b0, b1, b2, b3 )
     [ t1, e_t1c ] = UnderlyingPlusUnderlying( t1, q4_sum );
     
     % Base QuadDouble
-    [ p0, p1, p2, p3 ] = Renorm5( p00, p01, ss0, t0, t1 );
+    [ p0, p1, p2, p3, ~ ] = Renorm5( p00, p01, ss0, t0, t1 );
     
     % ss2 is O(eps^2), so it must be added separately to prevent swallowing 
     % the O(eps^4) terms during sloppy addition.
-    [ p0, p1, p2, p3 ] = QDPlusUnderlying( p0, p1, p2, p3, ss2 );
+    [ p0, p1, p2, p3, ~ ] = QDPlusUnderlying( p0, p1, p2, p3, ss2 );
     
-    % Cascade all remaining O(eps^3) and smaller tracked error terms accurately.
-    % Using a single sloppy sum is safe here because DoubleDouble has 106 bits
-    % (~32 digits) of precision, so an O(eps^3) term will not swallow an O(eps^4) term.
+    % Cascade all remaining O(eps^3) and smaller tracked error terms.
+    % Include v3 cross-terms: a4*b0 + a0*b4 contribute at O(eps^4).
     e_sum = e_ss2 + e_ss2b + e_t + e_t1 + e_t1b + e_r1 + e_r1b + e_q4 + e_q4b + e_t1c + ...
-            q02 + q11 + q20 + q03 + q12 + q21 + q30 + q13 + q22 + q31;
+            q02 + q11 + q20 + q03 + q12 + q21 + q30 + q13 + q22 + q31 + ...
+            a4 .* b0 + a0 .* b4;
             
-    [ s0, s1, s2, s3 ] = QDPlusUnderlying( p0, p1, p2, p3, e_sum );
+    [ s0, s1, s2, s3, ~ ] = QDPlusUnderlying( p0, p1, p2, p3, e_sum );
+    s4 = 0;
 end

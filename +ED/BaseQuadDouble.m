@@ -1,99 +1,107 @@
 classdef ( Abstract ) BaseQuadDouble < ED.BaseDoubleDouble
 
+    properties ( SetAccess = { ?ED.BaseQuadDouble, ?ED.BaseExtDoubleProperties }, GetAccess = public )
+
+        v3 = 0
+
+    end
+
     methods ( Access = protected )
 
         function v = Plus( a, b )
             [ a, b, c, Na, Nb, Nc, FloorNc ] = ED.BaseQuadDouble.JointPromotion( a, b );
             if Na == Nc
                 if Nb == Nc
-                    [ x1, x2, x3, x4 ] = QDPlusQD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
+                    [ x1, x2, x3, x4, x5 ] = QDPlusQD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
                 elseif Nb >= FloorNc - 1
-                    [ x1, x2, x3, x4 ] = QDPlusDD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1, b.v2 );
+                    [ x1, x2, x3, x4, x5 ] = QDPlusDD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1, b.v2 );
                 else
-                    [ x1, x2, x3, x4 ] = QDPlusUnderlying( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b );
+                    [ x1, x2, x3, x4, x5 ] = QDPlusUnderlying( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b );
                 end
             elseif Na >= FloorNc - 1
                 if Nb == Nc
-                    [ x1, x2, x3, x4 ] = QDPlusDD( b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2, a.v1, a.v2 );
+                    [ x1, x2, x3, x4, x5 ] = QDPlusDD( b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2, a.v1, a.v2 );
                 elseif Nb >= FloorNc - 1
-                    [ x1, x2, x3, x4 ] = DDPlusDDAsQD( a.v1, a.v2, b.v1, b.v2 );
+                    [ x1, x2, x3, x4, x5 ] = DDPlusDDAsQD( a.v1, a.v2, b.v1, b.v2 );
                 else
-                    [ x1, x2, x3, x4 ] = DDPlusUnderlyingAsQD( a.v1, a.v2, b );
+                    [ x1, x2, x3, x4, x5 ] = DDPlusUnderlyingAsQD( a.v1, a.v2, b );
                 end
             else
                 if Nb == Nc
-                    [ x1, x2, x3, x4 ] = QDPlusUnderlying( b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2, a );
+                    [ x1, x2, x3, x4, x5 ] = QDPlusUnderlying( b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2, a );
                 elseif Nb >= FloorNc - 1
-                    [ x1, x2, x3, x4 ] = DDPlusUnderlyingAsQD( b.v1, b.v2, a );
+                    [ x1, x2, x3, x4, x5 ] = DDPlusUnderlyingAsQD( b.v1, b.v2, a );
                 else
                     [ x1, x2 ] = UnderlyingPlusUnderlying( a, b );
                     x3 = 0;
                     x4 = 0;
+                    x5 = 0;
                 end
             end
-            v = c.Make( c.v1.Make( x1, x2 ), c.v1.Make( x3, x4 ) );
+            v = c.Make( c.v1.Make( x1, x2 ), c.v1.Make( x3, x4 ), x5 );
         end
 
         function v = Times( a, b )
             [ a, b, c, Na, Nb, Nc, FloorNc ] = ED.BaseQuadDouble.JointPromotion( a, b );
             if Na == Nc
                 if Nb == Nc
-                    [ x1, x2, x3, x4 ] = QDTimesQD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
+                    [ x1, x2, x3, x4, x5 ] = QDTimesQD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
                 elseif Nb >= FloorNc - 1
-                    [ x1, x2, x3, x4 ] = QDTimesDD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1, b.v2 );
+                    [ x1, x2, x3, x4, x5 ] = QDTimesDD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1, b.v2 );
                 else
-                    [ x1, x2, x3, x4 ] = QDTimesUnderlying( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b );
+                    [ x1, x2, x3, x4, x5 ] = QDTimesUnderlying( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b );
                 end
             elseif Na >= FloorNc - 1
                 if Nb == Nc
-                    [ x1, x2, x3, x4 ] = QDTimesDD( b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2, a.v1, a.v2 );
+                    [ x1, x2, x3, x4, x5 ] = QDTimesDD( b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2, a.v1, a.v2 );
                 elseif Nb >= FloorNc - 1
-                    [ x1, x2, x3, x4 ] = DDTimesDDAsQD( a.v1, a.v2, b.v1, b.v2 );
+                    [ x1, x2, x3, x4, x5 ] = DDTimesDDAsQD( a.v1, a.v2, b.v1, b.v2 );
                 else
-                    [ x1, x2, x3, x4 ] = DDTimesUnderlyingAsQD( a.v1, a.v2, b );
+                    [ x1, x2, x3, x4, x5 ] = DDTimesUnderlyingAsQD( a.v1, a.v2, b );
                 end
             else
                 if Nb == Nc
-                    [ x1, x2, x3, x4 ] = QDTimesUnderlying( b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2, a );
+                    [ x1, x2, x3, x4, x5 ] = QDTimesUnderlying( b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2, a );
                 elseif Nb >= FloorNc - 1
-                    [ x1, x2, x3, x4 ] = DDTimesUnderlyingAsQD( b.v1, b.v2, a );
+                    [ x1, x2, x3, x4, x5 ] = DDTimesUnderlyingAsQD( b.v1, b.v2, a );
                 else
                     [ x1, x2 ] = UnderlyingTimesUnderlying( a, b );
                     x3 = 0;
                     x4 = 0;
+                    x5 = 0;
                 end
             end
-            v = c.Make( c.v1.Make( x1, x2 ), c.v1.Make( x3, x4 ) );
+            v = c.Make( c.v1.Make( x1, x2 ), c.v1.Make( x3, x4 ), x5 );
         end
 
         function v = RDivide( a, b )
             [ a, b, c, Na, Nb, Nc, FloorNc ] = ED.BaseQuadDouble.JointPromotion( a, b );
             if Na == Nc
                 if Nb == Nc
-                    [ x1, x2, x3, x4 ] = QDDividedByQD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
+                    [ x1, x2, x3, x4, x5 ] = QDDividedByQD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
                 elseif Nb >= FloorNc - 1
-                    [ x1, x2, x3, x4 ] = QDDividedByDD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1, b.v2 );
+                    [ x1, x2, x3, x4, x5 ] = QDDividedByDD( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b.v1, b.v2 );
                 else
-                    [ x1, x2, x3, x4 ] = QDDividedByUnderlying( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b );
+                    [ x1, x2, x3, x4, x5 ] = QDDividedByUnderlying( a.v1.v1, a.v1.v2, a.v2.v1, a.v2.v2, b );
                 end
             elseif Na >= FloorNc - 1
                 if Nb == Nc
-                    [ x1, x2, x3, x4 ] = DDDividedByQD( a.v1, a.v2, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
+                    [ x1, x2, x3, x4, x5 ] = DDDividedByQD( a.v1, a.v2, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
                 elseif Nb >= FloorNc - 1
-                    [ x1, x2, x3, x4 ] = DDDividedByDDAsQD( a.v1, a.v2, b.v1, b.v2 );
+                    [ x1, x2, x3, x4, x5 ] = DDDividedByDDAsQD( a.v1, a.v2, b.v1, b.v2 );
                 else
-                    [ x1, x2, x3, x4 ] = DDDividedByUnderlyingAsQD( a.v1, a.v2, b );
+                    [ x1, x2, x3, x4, x5 ] = DDDividedByUnderlyingAsQD( a.v1, a.v2, b );
                 end
             else
                 if Nb == Nc
-                    [ x1, x2, x3, x4 ] = UnderlyingDividedByQD( a, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
+                    [ x1, x2, x3, x4, x5 ] = UnderlyingDividedByQD( a, b.v1.v1, b.v1.v2, b.v2.v1, b.v2.v2 );
                 elseif Nb >= FloorNc - 1
-                    [ x1, x2, x3, x4 ] = UnderlyingDividedByDDAsQD( a, b.v1, b.v2 );
+                    [ x1, x2, x3, x4, x5 ] = UnderlyingDividedByDDAsQD( a, b.v1, b.v2 );
                 else
-                    [ x1, x2, x3, x4 ] = UnderlyingDividedByUnderlyingAsQD( a, b );
+                    [ x1, x2, x3, x4, x5 ] = UnderlyingDividedByUnderlyingAsQD( a, b );
                 end
             end
-            v = c.Make( c.v1.Make( x1, x2 ), c.v1.Make( x3, x4 ) );
+            v = c.Make( c.v1.Make( x1, x2 ), c.v1.Make( x3, x4 ), x5 );
         end
 
         function v = Normalize( v )
@@ -104,6 +112,7 @@ classdef ( Abstract ) BaseQuadDouble < ED.BaseDoubleDouble
                 else
                     v.v2 = 0;
                 end
+                v.v3 = 0;
                 return
             end
             if all( v.v1.v2 == 0, 'all' )
@@ -116,7 +125,7 @@ classdef ( Abstract ) BaseQuadDouble < ED.BaseDoubleDouble
             v.v1.v2 = Normalize( v.v1.v2 );
             v.v2.v1 = Normalize( v.v2.v1 );
             v.v2.v2 = Normalize( v.v2.v2 );
-            [ v.v1.v1, v.v1.v2, v.v2.v1, v.v2.v2 ] = QDNormalize( v.v1.v1, v.v1.v2, v.v2.v1, v.v2.v2 );
+            [ v.v1.v1, v.v1.v2, v.v2.v1, v.v2.v2, v.v3 ] = QDNormalize( v.v1.v1, v.v1.v2, v.v2.v1, v.v2.v2 );
             if all( v.v1.v2 == 0, 'all' )
                 if isempty( v.v1.v1 )
                     v.v1.v2 = [];
@@ -137,6 +146,7 @@ classdef ( Abstract ) BaseQuadDouble < ED.BaseDoubleDouble
                 else
                     v.v2 = 0;
                 end
+                v.v3 = 0;
             end
         end
 

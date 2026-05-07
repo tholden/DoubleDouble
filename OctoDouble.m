@@ -79,7 +79,7 @@ classdef OctoDouble < ED.BaseDoubleDouble & ED.ExtDouble
 
     methods ( Access = protected )
 
-        function v = Make( ~, a1, a2 )
+        function v = Make( ~, a1, a2, ~ )
             v = OctoDouble.MakeStatic( a1, a2 );
         end
 
