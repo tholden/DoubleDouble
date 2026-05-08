@@ -1,4 +1,4 @@
-function [ s1, s2 ] = UnderlyingPlusUnderlying( a, b )
+function [ s1, s2 ] = UnderlyingPlusUnderlying( a, b ) % AKA two_sum
     s1 = a + b;
     bb = s1 - a;
     t11 = s1 - bb;
