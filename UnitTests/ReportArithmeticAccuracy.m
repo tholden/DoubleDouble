@@ -2,8 +2,13 @@ vpa_ = @( x ) vpa( x, 300, BoostPrecision = false );
 
 rng( 'default' );
 
-a = OctoDouble.rand(1000,1);
-b = OctoDouble.rand(1000,1);
+a = OctoDouble.rand(100000,1);
+b = OctoDouble.rand(100000,1);
+
+Indices = [ 6956, 9606, 15313, 41086, 57708, 66528, 69459, 84018, 87435, 95916 ];
+
+a = a(Indices);
+b = b(Indices);
 
 %% DoubleDouble addition test
 % Construct two dense DoubleDouble numbers with 8 doubles of significance
