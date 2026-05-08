@@ -42,21 +42,6 @@ classdef ( Abstract ) BaseDoubleDouble
 
         function v = Times( a, b )
             [ a, b, c, Na, Nb, Nc ] = ED.BaseDoubleDouble.JointPromotion( a, b );
-            if Nc == 3
-                % OctoDouble output: flatten both operands to 8 raw doubles.
-                aa = c.Promote( a );
-                bb = c.Promote( b );
-                C = cell( 1, 8 );
-                [ C{:} ] = ToSumOfDoubles( aa );
-                a0 = C{1}; a1_ = C{2}; a2 = C{3}; a3 = C{4}; a4 = C{5}; a5 = C{6}; a6 = C{7}; a7 = C{8};
-                [ C{:} ] = ToSumOfDoubles( bb );
-                b0 = C{1}; b1_ = C{2}; b2 = C{3}; b3 = C{4}; b4 = C{5}; b5 = C{6}; b6 = C{7}; b7 = C{8};
-                [ x0, x1, x2, x3, x4, x5, x6, x7 ] = ODTimesOD( a0, a1_, a2, a3, a4, a5, a6, a7, b0, b1_, b2, b3, b4, b5, b6, b7 );
-                v1 = c.v1.Make( c.v1.v1.Make( x0, x1 ), c.v1.v1.Make( x2, x3 ) );
-                v2 = c.v1.Make( c.v1.v1.Make( x4, x5 ), c.v1.v1.Make( x6, x7 ) );
-                v = c.Make( v1, v2 );
-                return
-            end
             if Na == Nc
                 if Nb == Nc
                     [ x1, x2 ] = DDTimesDD( a.v1, a.v2, b.v1, b.v2 );
