@@ -6,6 +6,7 @@ function [ p1, p2 ] = DDTimesDD( a1, a2, b1, b2 )
     [ p2, e1 ] = UnderlyingPlusUnderlying( p2, a1 .* b2 );
     [ p2, e2 ] = UnderlyingPlusUnderlying( p2, a2 .* b1 );
     [ p1, p2 ] = DDNormalize( p1, p2 );
-    p2 = p2 + (e1 + e2 + a2 .* b2);
+    tmp = e1 + e2 + a2 .* b2;
+    p2 = p2 + tmp;
     [ p1, p2 ] = DDNormalize( p1, p2 );
 end

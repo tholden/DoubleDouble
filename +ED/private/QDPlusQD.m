@@ -51,12 +51,18 @@ function [ x0, x1, x2, x3 ] = QDPlusQD( a0, a1, a2, a3, b0, b1, b2, b3 )
             % s = two_sum(b, c, b);
             s1 = va + ta;
             bb1 = s1 - va;
-            v_new = (va - (s1 - bb1)) + (ta - bb1);
+            tmp1 = s1 - bb1;
+            tmp2 = va - tmp1;
+            tmp3 = ta - bb1;
+            v_new = tmp2 + tmp3;
 
             % s = two_sum(a, s, a);
             s2 = ua + s1;
             bb2 = s2 - ua;
-            u_new = (ua - (s2 - bb2)) + (s1 - bb2);
+            tmp1 = s2 - bb2;
+            tmp2 = ua - tmp1;
+            tmp3 = s1 - bb2;
+            u_new = tmp2 + tmp3;
 
             za = u_new ~= 0;
             zb = v_new ~= 0;

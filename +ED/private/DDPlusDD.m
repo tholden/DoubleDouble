@@ -6,6 +6,7 @@ function [ s1, s2 ] = DDPlusDD( a1, a2, b1, b2 )
     [ t1, t2 ] = UnderlyingPlusUnderlying( a2, b2 );
     [ s2, e ] = UnderlyingPlusUnderlying( s2, t1 );    % C++ does sloppy s2 += t1
     [ s1, s2 ] = DDNormalize( s1, s2 );
-    s2 = s2 + (t2 + e);
+    tmp = t2 + e;
+    s2 = s2 + tmp;
     [ s1, s2 ] = DDNormalize( s1, s2 );
 end

@@ -24,7 +24,8 @@ function [ s0, s1, s2, s3 ] = QDTimesQD( a0, a1, a2, a3, b0, b1, b2, b3 )
     [ s1, t1 ] = UnderlyingPlusUnderlying( q1, p4 );
     s2 = q2 + p5;
     [ s1, t0 ] = UnderlyingPlusUnderlying( s1, t0 );
-    s2 = s2 + ( t0 + t1 );
+    tmp = t0 + t1;
+    s2 = s2 + tmp;
 
     % O(eps^3) order terms
     [ p6, q6 ] = UnderlyingTimesUnderlying( a0, b3 );
@@ -40,22 +41,27 @@ function [ s0, s1, s2, s3 ] = QDTimesQD( a0, a1, a2, a3, b0, b1, b2, b3 )
 
     % Compute (t0, t1) = (q0, q3) + (q4, q5).
     [ t0, t1 ] = UnderlyingPlusUnderlying( q0, q4 );
-    t1 = t1 + ( q3 + q5 );
+    tmp = q3 + q5;
+    t1 = t1 + tmp;
 
     % Compute (r0, r1) = (p6, p7) + (p8, p9).
     [ r0, r1 ] = UnderlyingPlusUnderlying( p6, p8 );
-    r1 = r1 + ( p7 + p9 );
+    tmp = p7 + p9;
+    r1 = r1 + tmp;
 
     % Compute (q3, q4) = (t0, t1) + (r0, r1).
     [ q3, q4 ] = UnderlyingPlusUnderlying( t0, r0 );
-    q4 = q4 + ( t1 + r1 );
+    tmp = t1 + r1;
+    q4 = q4 + tmp;
 
     % Compute (t0, t1) = (q3, q4) + s1.
     [ t0, t1 ] = UnderlyingPlusUnderlying( q3, s1 );
     t1 = t1 + q4;
 
     % O(eps^4) terms -- Nine-One-Sum (sloppy)
-    t1 = t1 + a1 .* b3 + a2 .* b2 + a3 .* b1 + q6 + q7 + q8 + q9 + s2;
+    tmp = a1 .* b3 + a2 .* b2 + a3 .* b1;
+    tmp = tmp + q6 + q7 + q8 + q9 + s2;
+    t1 = t1 + tmp;
 
     [ s0, s1, s2, s3 ] = Renorm5( p0, p1, s0, t0, t1 );
 end
