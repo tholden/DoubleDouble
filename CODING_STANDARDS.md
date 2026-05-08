@@ -1,5 +1,6 @@
 # Coding Standards
 
+* There should be at most one statement per line.
 * All functions should have an end statement.
 * Files should have at most one empty line in a row.
 * Multi-line comments should be surrounded by empty lines.
