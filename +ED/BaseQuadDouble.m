@@ -1,5 +1,49 @@
 classdef ( Abstract ) BaseQuadDouble < ED.BaseDoubleDouble
 
+    methods
+
+        function v = Normalize( v )
+            if all( v.v2 == 0, 'all' )
+                v.v1 = Normalize( v.v1 );
+                if isempty( v.v1 )
+                    v.v2 = [];
+                else
+                    v.v2 = 0;
+                end
+                return
+            end
+            if all( v.v1.v2 == 0, 'all' )
+                v.v1.v2 = 0;
+            end
+            if all( v.v2.v2 == 0, 'all' )
+                v.v2.v2 = 0;
+            end
+            [ v.v1.v1, v.v1.v2, v.v2.v1, v.v2.v2 ] = QDNormalize( v.v1.v1, v.v1.v2, v.v2.v1, v.v2.v2 );
+            if all( v.v1.v2 == 0, 'all' )
+                if isempty( v.v1.v1 )
+                    v.v1.v2 = [];
+                else
+                    v.v1.v2 = 0;
+                end
+            end
+            if all( v.v2.v2 == 0, 'all' )
+                if isempty( v.v2.v1 )
+                    v.v2.v2 = [];
+                else
+                    v.v2.v2 = 0;
+                end
+            end
+            if all( v.v2 == 0, 'all' )
+                if isempty( v.v1 )
+                    v.v2 = [];
+                else
+                    v.v2 = 0;
+                end
+            end
+        end
+
+    end
+
     methods ( Access = protected )
 
         function v = Plus( a, b )
@@ -94,50 +138,6 @@ classdef ( Abstract ) BaseQuadDouble < ED.BaseDoubleDouble
                 end
             end
             v = c.Make( c.v1.Make( x1, x2 ), c.v1.Make( x3, x4 ) );
-        end
-
-        function v = Normalize( v )
-            if all( v.v2 == 0, 'all' )
-                v.v1 = Normalize( v.v1 );
-                if isempty( v.v1 )
-                    v.v2 = [];
-                else
-                    v.v2 = 0;
-                end
-                return
-            end
-            if all( v.v1.v2 == 0, 'all' )
-                v.v1.v2 = 0;
-            end
-            if all( v.v2.v2 == 0, 'all' )
-                v.v2.v2 = 0;
-            end
-            v.v1.v1 = Normalize( v.v1.v1 );
-            v.v1.v2 = Normalize( v.v1.v2 );
-            v.v2.v1 = Normalize( v.v2.v1 );
-            v.v2.v2 = Normalize( v.v2.v2 );
-            [ v.v1.v1, v.v1.v2, v.v2.v1, v.v2.v2 ] = QDNormalize( v.v1.v1, v.v1.v2, v.v2.v1, v.v2.v2 );
-            if all( v.v1.v2 == 0, 'all' )
-                if isempty( v.v1.v1 )
-                    v.v1.v2 = [];
-                else
-                    v.v1.v2 = 0;
-                end
-            end
-            if all( v.v2.v2 == 0, 'all' )
-                if isempty( v.v2.v1 )
-                    v.v2.v2 = [];
-                else
-                    v.v2.v2 = 0;
-                end
-            end
-            if all( v.v2 == 0, 'all' )
-                if isempty( v.v1 )
-                    v.v2 = [];
-                else
-                    v.v2 = 0;
-                end
-            end
         end
 
     end

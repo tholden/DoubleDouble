@@ -10,6 +10,11 @@ function [ c0, c1, c2, c3 ] = QDNormalize( c0, c1, c2, c3 )
         return
     end
 
+    c0 = Normalize( c0 );
+    c1 = Normalize( c1 );
+    c2 = Normalize( c2 );
+    c3 = Normalize( c3 );
+
     [ c3, c4 ] = DDNormalize( c2, c3 );
     [ c2, c3 ] = DDNormalize( c1, c3 );
     [ c1, c2 ] = DDNormalize( c0, c2 );

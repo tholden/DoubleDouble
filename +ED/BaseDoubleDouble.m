@@ -20,6 +20,30 @@ classdef ( Abstract ) BaseDoubleDouble
 
     end
 
+    methods
+
+        function v = Normalize( v )
+            if all( v.v2 == 0, 'all' )
+                v.v1 = Normalize( v.v1 );
+                if isempty( v.v1 )
+                    v.v2 = [];
+                else
+                    v.v2 = 0;
+                end
+                return
+            end
+            [ v.v1, v.v2 ] = DDNormalize( v.v1, v.v2 );
+            if all( v.v2 == 0, 'all' )
+                if isempty( v.v1 )
+                    v.v2 = [];
+                else
+                    v.v2 = 0;
+                end
+            end
+        end
+
+    end
+
     methods ( Access = protected ) % Not sealed, overridden in QuadDouble.
 
         function v = Plus( a, b )
@@ -74,28 +98,6 @@ classdef ( Abstract ) BaseDoubleDouble
                 end
             end
             v = c.Make( x1, x2 );
-        end
-
-        function v = Normalize( v )
-            if all( v.v2 == 0, 'all' )
-                v.v1 = Normalize( v.v1 );
-                if isempty( v.v1 )
-                    v.v2 = [];
-                else
-                    v.v2 = 0;
-                end
-                return
-            end
-            v.v1 = Normalize( v.v1 );
-            v.v2 = Normalize( v.v2 );
-            [ v.v1, v.v2 ] = DDNormalize( v.v1, v.v2 );
-            if all( v.v2 == 0, 'all' )
-                if isempty( v.v1 )
-                    v.v2 = [];
-                else
-                    v.v2 = 0;
-                end
-            end
         end
 
     end

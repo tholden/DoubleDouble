@@ -11,6 +11,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
 
         v = Promote( a, v )
         n = PromotionOrder( v )
+        v = Normalize( v )
 
     end
 
@@ -20,7 +21,6 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
         v = Plus( a, b )
         v = Times( a, b )
         v = RDivide( a, b )
-        v = Normalize( v )
 
     end
 
