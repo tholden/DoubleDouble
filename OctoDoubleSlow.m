@@ -75,6 +75,26 @@ classdef OctoDoubleSlow < ED.BaseDoubleDouble & ED.ExtDouble
             n = 3;
         end
 
+        function [ a1, a2 ] = Split( a )
+
+            if isreal( a )
+                Select = ( a > 1.3656093558537941553e+244 ) | ( a < -1.3656093558537941553e+244 ); % 2^811
+                a = Assign( a, TimesPowerOf2( Index( a, Select ), 7.5964541966078389980e-65 ), Select ); % 2^( -213 )
+                t1 = 6582018229284824168619876730229402019930943462534319453394436097.0 * a; % 2^212 + 1
+                t2 = t1 - a;
+                a1 = t1 - t2;
+                a2 = a - a1;
+                a1 = Assign( a1, TimesPowerOf2( Index( a1, Select ), 13164036458569648337239753460458804039861886925068638906788872192.0 ), Select ); % 2^213
+                a2 = Assign( a2, TimesPowerOf2( Index( a2, Select ), 13164036458569648337239753460458804039861886925068638906788872192.0 ), Select ); % 2^213
+            else
+                [ r1, r2 ] = Split( real( a ) );
+                [ i1, i2 ] = Split( imag( a ) );
+                a1 = complex( r1, i1 );
+                a2 = complex( r2, i2 );
+            end
+
+        end
+
     end
 
     methods ( Access = protected )
