@@ -5,10 +5,10 @@ rng( 'default' );
 a = OctoDouble.rand(100000,1);
 b = OctoDouble.rand(100000,1);
 
-% Indices = [ 6956, 9046, 9606, 11026, 11125, 15313, 41086, 45919, 53079, 57708, 66528, 69459, 84018, 87435, 91179, 95916 ];
+Indices = [ 6956, 9046, 9606, 11026, 11125, 15313, 41086, 45919, 53079, 57708, 66528, 69459, 84018, 87435, 91179, 95916 ];
 
-% a = a(Indices);
-% b = b(Indices);
+a = a(Indices);
+b = b(Indices);
 
 %% double addition test
 % Construct two dense double numbers
