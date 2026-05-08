@@ -6,5 +6,9 @@ function [ s1, s2 ] = DDPlusUnderlying( a1, a2, b )
     [ s2, e ] = UnderlyingPlusUnderlying( s2, a2 );
     [ s1, s2 ] = DDNormalize( s1, s2 );
     s2 = s2 + e;
+    % Paranoid alternative to s2 = s2 + e:
+    % [ s2, e2 ] = UnderlyingPlusUnderlying( s2, e );
+    % [ s1, s2 ] = DDNormalize( s1, s2 );
+    % s2 = s2 + e2;
     [ s1, s2 ] = DDNormalize( s1, s2 );
 end
