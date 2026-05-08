@@ -2310,10 +2310,10 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             end
         end
 
-        % function [ a1, a2 ] = Split( a )
-        %     a1 = a.Make( a.v1, 0 );
-        %     a2 = a.Make( a.v2, 0 );
-        % end
+        function [ a1, a2 ] = Split( a )
+            a1 = a.Make( a.v1, 0 );
+            a2 = a.Make( a.v2, 0 );
+        end
 
         function v = vpa( v, Digits, varargin )
             w = cell( 1, 2 ^ floor( v.PromotionOrder ) );

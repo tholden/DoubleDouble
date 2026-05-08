@@ -11,7 +11,6 @@ classdef ( Abstract ) BaseDoubleDouble
 
         v = Promote( a, v )
         n = PromotionOrder( v )
-        [ a1, a2 ] = Split( a )
 
     end
 
