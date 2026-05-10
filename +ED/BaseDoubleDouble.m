@@ -44,7 +44,87 @@ classdef ( Abstract ) BaseDoubleDouble
 
     end
 
-    methods ( Access = protected ) % Not sealed, overridden in QuadDouble.
+    methods ( Hidden )
+
+        function [ s1, s2 ] = DDNormalize( a, b )
+            [ s1, s2 ] = UnderlyingPlusUnderlying( a, b );
+        end
+
+        function [ s1, s2 ] = UnderlyingPlusUnderlying( a, b )
+            [ a, b, c, Na, Nb, Nc ] = ED.BaseDoubleDouble.JointPromotion( a, b );
+            if Na == Nc
+                if Nb == Nc
+                    [ x1, x2, x3, x4 ] = DDPlusDDAsQD( a.v1, a.v2, b.v1, b.v2 );
+                else
+                    [ x1, x2, x3, x4 ] = DDPlusUnderlyingAsQD( a.v1, a.v2, b );
+                end
+            else
+                if Nb == Nc
+                    [ x1, x2, x3, x4 ] = DDPlusUnderlyingAsQD( b.v1, b.v2, a );
+                else
+                    [ x1, x2 ] = UnderlyingPlusUnderlying( a, b );
+                end
+            end
+            if exist('x3', 'var')
+                s1 = c.Make( x1, x2 );
+                s2 = c.Make( x3, x4 );
+            else
+                s1 = c.Make( x1, x2 );
+                s2 = c.zeros( size( s1 ) );
+            end
+        end
+
+        function [ p1, p2 ] = UnderlyingTimesUnderlying( a, b )
+            [ a, b, c, Na, Nb, Nc ] = ED.BaseDoubleDouble.JointPromotion( a, b );
+            if Na == Nc
+                if Nb == Nc
+                    [ x1, x2, x3, x4 ] = DDTimesDDAsQD( a.v1, a.v2, b.v1, b.v2 );
+                else
+                    [ x1, x2, x3, x4 ] = DDTimesUnderlyingAsQD( a.v1, a.v2, b );
+                end
+            else
+                if Nb == Nc
+                    [ x1, x2, x3, x4 ] = DDTimesUnderlyingAsQD( b.v1, b.v2, a );
+                else
+                    [ x1, x2 ] = UnderlyingTimesUnderlying( a, b );
+                end
+            end
+            if exist('x3', 'var')
+                p1 = c.Make( x1, x2 );
+                p2 = c.Make( x3, x4 );
+            else
+                p1 = c.Make( x1, x2 );
+                p2 = c.zeros( size( p1 ) );
+            end
+        end
+
+        function [ r1, r2 ] = UnderlyingDividedByUnderlying( a, b )
+            [ a, b, c, Na, Nb, Nc ] = ED.BaseDoubleDouble.JointPromotion( a, b );
+            if Na == Nc
+                if Nb == Nc
+                    [ x1, x2, x3, x4 ] = DDDividedByDDAsQD( a.v1, a.v2, b.v1, b.v2 );
+                else
+                    [ x1, x2, x3, x4 ] = DDDividedByUnderlyingAsQD( a.v1, a.v2, b );
+                end
+            else
+                if Nb == Nc
+                    [ x1, x2, x3, x4 ] = UnderlyingDividedByDDAsQD( a, b.v1, b.v2 );
+                else
+                    [ x1, x2 ] = UnderlyingDividedByUnderlying( a, b );
+                end
+            end
+            if exist('x3', 'var')
+                r1 = c.Make( x1, x2 );
+                r2 = c.Make( x3, x4 );
+            else
+                r1 = c.Make( x1, x2 );
+                r2 = c.zeros( size( r1 ) );
+            end
+        end
+
+    end
+
+    methods ( Access = protected )
 
         function v = Plus( a, b )
             [ a, b, c, Na, Nb, Nc ] = ED.BaseDoubleDouble.JointPromotion( a, b );
@@ -82,6 +162,10 @@ classdef ( Abstract ) BaseDoubleDouble
             v = c.Make( x1, x2 );
         end
 
+        function v = Minus( a, b )
+            v = Plus( a, -b );
+        end
+
         function v = RDivide( a, b )
             [ a, b, c, Na, Nb, Nc ] = ED.BaseDoubleDouble.JointPromotion( a, b );
             if Na == Nc
@@ -101,6 +185,8 @@ classdef ( Abstract ) BaseDoubleDouble
         end
 
     end
+
+
 
     methods ( Static, Access = protected )
 
