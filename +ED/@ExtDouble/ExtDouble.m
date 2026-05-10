@@ -698,11 +698,16 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             end
         end
 
-        function v = subsref( v, s )
+        function varargout = subsref( v, s )
             if strcmp( s( 1 ).type, '.' )
-                v = builtin( 'subsref', v, s );
+                [ varargout{ 1 : nargout } ] = builtin( 'subsref', v, s );
             else
-                v = Index( v, s.subs{:} );
+                if length( s ) > 1
+                    v = Index( v, s( 1 ).subs{:} );
+                    [ varargout{ 1 : nargout } ] = builtin( 'subsref', v, s( 2 : end ) );
+                else
+                    [ varargout{ 1 : nargout } ] = Index( v, s( 1 ).subs{:} );
+                end
             end
         end
 
@@ -2389,7 +2394,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
         function v = ToRand( v ) % Fills v with random values in place.
             Size = size( v.v1 );
             v.v1 = rand( Size, 'like', v.v1 );
-            v.v2 = v.tiny.v1 .* ( rand( Size, 'like', v.v1 ) - 0.5 );
+            v.v2 = Tiny( v.v1 ) .* ( rand( Size, 'like', v.v1 ) - 0.5 );
         end
 
         function v = ToRandn( v ) % Fills v with normal random values in place.
@@ -2461,6 +2466,10 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 t = sum( v.Index( j, ':' ) .* U.Index( k, j ).', 1 );
                 v = v.Assign( ( v.Index( k, ':' ) - t ) ./ U.Index( k, k ), k, ':' );
             end
+        end
+
+        function t = Tiny( v )
+            t = v.tiny;
         end
 
     end
