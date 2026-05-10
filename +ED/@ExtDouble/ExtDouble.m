@@ -2395,6 +2395,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             Size = size( v.v1 );
             v.v1 = rand( Size, 'like', v.v1 );
             v.v2 = Tiny( v.v1 ) .* ( rand( Size, 'like', v.v1 ) - 0.5 );
+            v = v.Normalize();
         end
 
         function v = ToRandn( v ) % Fills v with normal random values in place.
