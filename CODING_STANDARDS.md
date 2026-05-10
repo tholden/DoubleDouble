@@ -2,12 +2,15 @@
 
 * There should be at most one statement per line.
 * All functions should have an end statement.
+* Line breaks should be Unix style (LF).
 * Files should have at most one empty line in a row.
 * Multi-line comments should be surrounded by empty lines.
 * All functions and methods & properties blocks should be followed by an empty line.
 * Any block of any kind that contains an empty line should have an empty line before its first indented line, and after its last indented line.
 * Indenting should use steps of 4 spaces.
 * Any block in which the contents are indented by either one or two steps should have an empty line before the first indented line and after the last indented line. (For example, any classdef, methods and properties statements should always be followed by an empty line, and have an empty line before their end.)
+* If a block starts with an empty line, it should end with an empty line.
+* If a block starts and ends with empty lines, then there should also be empty lines before the statement that marks the start of the block (e.g. for), and after the statement that marks the end of the block (end).
 * Open brackets should be followed by space. Close brackets should be preceeded by space. Colons and other operators should be surrounded by spaces.
 * Any operations on the left or right side of a colon should be bracketed. I.e. ( a + 1 ) : b NOT a + 1 : b.
 * Variables should generally have PascalCase. One or two letter lower case variable names are acceptable, but if you want modified versions of them, then use camelCase for the rest of the modified name (e.g. v1Select as a modified version of v1). Underscores in variable names should be avoided unless removing them makes things unclear.
