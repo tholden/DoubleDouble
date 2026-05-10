@@ -11,9 +11,6 @@ function TestLogExp()
     testLog('DoubleDouble', vals);
     testLog('QuadDoubleSlow', vals);
     testLog('QuadDouble', vals);
-    testLog('OctoDouble', vals);
-    testLog('OctoDoubleAlt', vals);
-    testLog('OctoDoubleSlow', vals);
 
     disp('========================================');
     disp('==== Testing Exp ====');
@@ -21,9 +18,6 @@ function TestLogExp()
     testExp('DoubleDouble', vals);
     testExp('QuadDoubleSlow', vals);
     testExp('QuadDouble', vals);
-    testExp('OctoDouble', vals);
-    testExp('OctoDoubleAlt', vals);
-    testExp('OctoDoubleSlow', vals);
 end
 
 function testLog(className, vals)

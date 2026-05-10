@@ -34,33 +34,6 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
 
     methods ( Test )
 
-        function TestCrossValidationQuadDouble( TestCase )
-            % Verify that OctoDouble closely matches QuadDouble up to QuadDouble precision.
-            Data = [ 1.123, -2.456; 3.789, -4.012 ];
-
-            QD  = QuadDouble( Data );
-            OD = OctoDouble( Data );
-
-            % Test basic arithmetic operations
-            ResQD  = QD * QD + QD - ( QD / 2 );
-            ResOD = OD * OD + OD - ( OD / 2 );
-
-            [ v1, v2, v3, v4, ~, ~, ~, ~ ] = ToSumOfDoubles( ResOD );
-            [ q1, q2, q3, q4 ] = ToSumOfDoubles( ResQD );
-
-            TestCase.verifyEqual( v1, q1, 'AbsTol', TestCase.Tol );
-            TestCase.verifyEqual( v2, q2, 'AbsTol', TestCase.Tol );
-            TestCase.verifyEqual( v3, q3, 'AbsTol', TestCase.Tol );
-            TestCase.verifyEqual( v4, q4, 'AbsTol', TestCase.Tol );
-
-            % Test linear algebra routines ( LU decomposition )
-            [ L_QD, U_QD, ~ ] = lu( QD );
-            [ L_OD, U_OD, ~ ] = lu( OD );
-
-            TestCase.verifyEqual( double( L_OD - L_QD ), zeros( size( Data ) ), 'AbsTol', TestCase.Tol );
-            TestCase.verifyEqual( double( U_OD - U_QD ), zeros( size( Data ) ), 'AbsTol', TestCase.Tol );
-        end
-
         % Constructor tests
         function TestConstructorEmpty( TestCase )
             A = QuadDouble( );

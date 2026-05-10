@@ -1,17 +1,16 @@
 # Extended Precision Numerical Library
 
-A comprehensive MATLAB library for extended precision arithmetic, providing progressively higher precision tiers starting from double-double (~32 digits) up to oct-double (~128 digits) precision.
+A comprehensive MATLAB library for extended precision arithmetic, providing two precision tiers: double-double (~32 digits) and quad-double (~64 digits).
 
-This library was originally inspired by the QD library (<http://crd-legacy.lbl.gov/~dhbailey/mpdist/>), but has been modernized and expanded into a full polymorphic class hierarchy (`BaseExtDouble`) with native MATLAB integration, optimized recursive arithmetic, full array support, and experimental complex number capabilities.
+This library was originally inspired by the QD library (<http://crd-legacy.lbl.gov/~dhbailey/mpdist/>), but has been modernized and expanded into a full polymorphic class hierarchy (`BaseExtDouble`) with native MATLAB integration, optimized recursive arithmetic, full array support, and complex number capabilities.
 
 ## The Numerical Hierarchy
 
-The library provides four extended precision classes, each building upon the last to achieve higher precision bounds:
+The library provides three extended precision classes, each building upon the last to achieve higher precision bounds:
 
 1. **`DoubleDouble`**: The foundational class. Represents numbers as an unevaluated sum of two 53-bit `double` primitives, providing roughly 106 bits (~32 decimal digits) of precision.
 2. **`QuadDouble`**: The standard quad-double implementation. Provides 212 bits (~64 decimal digits) of precision using explicitly overloaded, optimized numerical kernels.
 3. **`QuadDoubleSlow`**: A mathematically equivalent pure-MATLAB fallback to `QuadDouble`. It achieves 212-bit precision by recursively executing Dekker's split/TwoProd algorithms using `DoubleDouble` objects as its underlying components rather than explicit scalar kernels.
-4. **`OctoDouble`**: The highest precision class available in the hierarchy. Provides 424 bits (~128 decimal digits) of precision by recursively leveraging `QuadDouble` objects as its fundamental underlying representation.
 
 ## Features
 
@@ -39,7 +38,6 @@ The suite thoroughly validates standard arithmetic, matrix decompositions, and t
 
 - `DoubleDouble`: Enforces strict accuracy to a `1e-30` absolute tolerance.
 - `QuadDouble` & `QuadDoubleSlow`: Enforces strict accuracy to a `1e-60` absolute tolerance.
-- `OctoDouble`: Enforces strict accuracy to a `1e-120` absolute tolerance.
 
 ## Development & Coding Standards
 
