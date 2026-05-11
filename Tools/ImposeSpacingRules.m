@@ -1,16 +1,16 @@
 function ImposeSpacingRules()
     % ImposeSpacingRules Enforces CODING_STANDARDS.md spacing rules on all .m files
 
-    scriptPath = fileparts( mfilename( 'fullpath' ));
+    scriptPath = fileparts( mfilename( 'fullpath' ) );
     targetDir = fullfile( scriptPath, '..' );
 
-    files = dir( fullfile( targetDir, '**', '*.m' ));
+    files = dir( fullfile( targetDir, '**', '*.m' ) );
 
     for k = 1 : numel( files )
         filePath = fullfile( files( k ).folder, files( k ).name );
 
         lines = readlines( filePath );
-        if isempty( lines ) || ( isscalar( lines ) && strlength( lines( 1 )) == 0 )
+        if isempty( lines ) || ( isscalar( lines ) && strlength( lines( 1 ) ) == 0 )
             continue;
         end
 
@@ -20,8 +20,8 @@ function ImposeSpacingRules()
         for i = 1 : numel( lines )
             line = lines( i );
 
-            if strlength( strtrim( line )) == 0
-                if i > 1 && strlength( strtrim( lines( i - 1 )) ) == 0
+            if strlength( strtrim( line ) ) == 0
+                if i > 1 && strlength( strtrim( lines( i - 1 ) ) ) == 0
                     continue; % At most one empty line in a row
                 end
                 newLines( end + 1, 1 ) = ""; %#ok<*AGROW>
@@ -39,7 +39,7 @@ function ImposeSpacingRules()
                 commentPart = "";
             end
 
-            if strlength( strtrim( codePart )) > 0
+            if strlength( strtrim( codePart ) ) > 0
                 % Pad codePart to simplify lookbehinds
                 codePart = " " + codePart;
 
@@ -109,7 +109,7 @@ function ImposeSpacingRules()
             % Rule: All functions, methods & properties blocks should be followed by an empty line
             match = regexp( newLines( i ), '^(\s*)(classdef|methods|properties|function)\b', 'tokens' );
             if ~isempty( match )
-                if i < numel( newLines ) && strlength( strtrim( newLines( i + 1 )) ) > 0
+                if i < numel( newLines ) && strlength( strtrim( newLines( i + 1 ) ) ) > 0
                     finalLines( end + 1, 1 ) = "";
                 end
             end
@@ -120,7 +120,7 @@ function ImposeSpacingRules()
             if ~isempty( endMatch )
                 indentSpaces = endMatch{ 1 }{ 1 };
                 if strlength( indentSpaces ) == 0 || strlength( indentSpaces ) == 4
-                    if numel( finalLines ) > 1 && strlength( strtrim( finalLines( end - 1 )) ) > 0
+                    if numel( finalLines ) > 1 && strlength( strtrim( finalLines( end - 1 ) ) ) > 0
                         temp = finalLines( end );
                         finalLines( end ) = "";
                         finalLines( end + 1, 1 ) = temp;
@@ -132,8 +132,8 @@ function ImposeSpacingRules()
         % Phase 3: Collapse any newly created double empty lines
         cleanLines = strings( 0, 1 );
         for i = 1 : numel( finalLines )
-            if strlength( strtrim( finalLines( i )) ) == 0
-                if i > 1 && strlength( strtrim( cleanLines( end )) ) == 0
+            if strlength( strtrim( finalLines( i ) ) ) == 0
+                if i > 1 && strlength( strtrim( cleanLines( end ) ) ) == 0
                     continue;
                 end
                 cleanLines( end + 1, 1 ) = "";

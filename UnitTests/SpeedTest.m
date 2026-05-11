@@ -12,4 +12,4 @@ c2 = a * b;
 toc;
 c1 = QuadDouble( c1 );
 disp( 'Result difference:' );
-disp( max( abs( c1( : ) - c2( : )) ));
+disp( max( abs( c1( : ) - c2( : ) ) ) );

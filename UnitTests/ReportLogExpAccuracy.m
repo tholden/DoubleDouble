@@ -29,7 +29,7 @@ function testLog( className, vals )
 
     v = feval( className, vals );
 
-    my_log = vpa( log( v ));
+    my_log = vpa( log( v ) );
 
     % Compute max RELATIVE error across all test values
     abs_err = abs( my_log - gt_log );
@@ -49,7 +49,7 @@ function testExp( className, vals )
 
     v = feval( className, vals );
 
-    my_e = vpa( exp( v ));
+    my_e = vpa( exp( v ) );
 
     % Compute max RELATIVE error across all test values
     abs_err = abs( my_e - gt_exp );
