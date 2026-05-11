@@ -52,39 +52,39 @@ classdef QuadDouble < ED.BaseQuadDouble & ED.ExtDouble & ED.QuadDoubleProperties
     methods ( Static )
 
         function v = ones( varargin )
-            v = QuadDouble.MakeStatic( DoubleDouble.ones( varargin{:} ), 0 );
+            v = QuadDouble.MakeStatic( DoubleDouble.ones( varargin{ : } ), 0 );
         end
 
         function v = empty( varargin )
-            v = QuadDouble.MakeStatic( DoubleDouble.empty( varargin{:} ), [] );
+            v = QuadDouble.MakeStatic( DoubleDouble.empty( varargin{ : } ), [] );
         end
 
         function v = zeros( varargin )
-            v = QuadDouble.MakeStatic( DoubleDouble.zeros( varargin{:} ), 0 );
+            v = QuadDouble.MakeStatic( DoubleDouble.zeros( varargin{ : } ), 0 );
         end
 
         function v = eye( varargin )
-            v = QuadDouble.MakeStatic( DoubleDouble.eye( varargin{:} ), 0 );
+            v = QuadDouble.MakeStatic( DoubleDouble.eye( varargin{ : } ), 0 );
         end
 
         function v = NaN( varargin )
-            v = QuadDouble.MakeStatic( DoubleDouble.NaN( varargin{:} ), 0 );
+            v = QuadDouble.MakeStatic( DoubleDouble.NaN( varargin{ : } ), 0 );
         end
 
         function v = Inf( varargin )
-            v = QuadDouble.MakeStatic( DoubleDouble.Inf( varargin{:} ), 0 );
+            v = QuadDouble.MakeStatic( DoubleDouble.Inf( varargin{ : } ), 0 );
         end
 
         function v = rand( varargin )
-            v = ToRand( QuadDouble.zeros( varargin{:} ) );
+            v = ToRand( QuadDouble.zeros( varargin{ : } ) );
         end
 
         function v = randn( varargin )
-            v = ToRandn( QuadDouble.zeros( varargin{:} ) );
+            v = ToRandn( QuadDouble.zeros( varargin{ : } ) );
         end
 
         function v = randi( imax, varargin )
-            v = QuadDouble.MakeStatic( DoubleDouble( randi( imax, varargin{:}, 'double' ) ), 0 );
+            v = QuadDouble.MakeStatic( DoubleDouble( randi( imax, varargin{ : }, 'double' ) ), 0 );
         end
 
     end

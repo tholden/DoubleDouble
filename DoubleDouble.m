@@ -77,39 +77,39 @@ classdef DoubleDouble < ED.BaseDoubleDouble & ED.ExtDouble
     methods ( Static )
 
         function v = ones( varargin )
-            v = DoubleDouble.MakeStatic( ones( varargin{:}, 'double' ), 0 );
+            v = DoubleDouble.MakeStatic( ones( varargin{ : }, 'double' ), 0 );
         end
 
         function v = empty( varargin )
-            v = DoubleDouble.MakeStatic( double.empty( varargin{:} ), [] );
+            v = DoubleDouble.MakeStatic( double.empty( varargin{ : } ), [] );
         end
 
         function v = zeros( varargin )
-            v = DoubleDouble.MakeStatic( zeros( varargin{:}, 'double' ), 0 );
+            v = DoubleDouble.MakeStatic( zeros( varargin{ : }, 'double' ), 0 );
         end
 
         function v = eye( varargin )
-            v = DoubleDouble.MakeStatic( eye( varargin{:}, 'double' ), 0 );
+            v = DoubleDouble.MakeStatic( eye( varargin{ : }, 'double' ), 0 );
         end
 
         function v = NaN( varargin )
-            v = DoubleDouble.MakeStatic( NaN( varargin{:}, 'double' ), 0 );
+            v = DoubleDouble.MakeStatic( NaN( varargin{ : }, 'double' ), 0 );
         end
 
         function v = Inf( varargin )
-            v = DoubleDouble.MakeStatic( Inf( varargin{:}, 'double' ), 0 );
+            v = DoubleDouble.MakeStatic( Inf( varargin{ : }, 'double' ), 0 );
         end
 
         function v = rand( varargin )
-            v = ToRand( DoubleDouble.zeros( varargin{:} ) );
+            v = ToRand( DoubleDouble.zeros( varargin{ : } ) );
         end
 
         function v = randn( varargin )
-            v = ToRandn( DoubleDouble.zeros( varargin{:} ) );
+            v = ToRandn( DoubleDouble.zeros( varargin{ : } ) );
         end
 
         function v = randi( imax, varargin )
-            v = DoubleDouble.MakeStatic( randi( imax, varargin{:}, 'double' ), 0 );
+            v = DoubleDouble.MakeStatic( randi( imax, varargin{ : }, 'double' ), 0 );
         end
 
     end

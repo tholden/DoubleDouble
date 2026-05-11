@@ -60,39 +60,39 @@ classdef QuadDoubleSlow < ED.BaseDoubleDouble & ED.ExtDouble & ED.QuadDoubleProp
     methods ( Static )
 
         function v = ones( varargin )
-            v = QuadDoubleSlow.MakeStatic( DoubleDouble( ones( varargin{:}, 'double' ) ), 0 );
+            v = QuadDoubleSlow.MakeStatic( DoubleDouble( ones( varargin{ : }, 'double' ) ), 0 );
         end
 
         function v = empty( varargin )
-            v = QuadDoubleSlow.MakeStatic( DoubleDouble( double.empty( varargin{:} ) ), [] );
+            v = QuadDoubleSlow.MakeStatic( DoubleDouble( double.empty( varargin{ : } ) ), [] );
         end
 
         function v = zeros( varargin )
-            v = QuadDoubleSlow.MakeStatic( DoubleDouble( zeros( varargin{:}, 'double' ) ), 0 );
+            v = QuadDoubleSlow.MakeStatic( DoubleDouble( zeros( varargin{ : }, 'double' ) ), 0 );
         end
 
         function v = eye( varargin )
-            v = QuadDoubleSlow.MakeStatic( DoubleDouble( eye( varargin{:}, 'double' ) ), 0 );
+            v = QuadDoubleSlow.MakeStatic( DoubleDouble( eye( varargin{ : }, 'double' ) ), 0 );
         end
 
         function v = NaN( varargin )
-            v = QuadDoubleSlow.MakeStatic( DoubleDouble.NaN( varargin{:} ), 0 );
+            v = QuadDoubleSlow.MakeStatic( DoubleDouble.NaN( varargin{ : } ), 0 );
         end
 
         function v = Inf( varargin )
-            v = QuadDoubleSlow.MakeStatic( DoubleDouble.Inf( varargin{:} ), 0 );
+            v = QuadDoubleSlow.MakeStatic( DoubleDouble.Inf( varargin{ : } ), 0 );
         end
 
         function v = randn( varargin )
-            v = ToRandn( QuadDoubleSlow.zeros( varargin{:} ) );
+            v = ToRandn( QuadDoubleSlow.zeros( varargin{ : } ) );
         end
 
         function v = rand( varargin )
-            v = ToRand( QuadDoubleSlow.zeros( varargin{:} ) );
+            v = ToRand( QuadDoubleSlow.zeros( varargin{ : } ) );
         end
 
         function v = randi( imax, varargin )
-            v = QuadDoubleSlow.MakeStatic( DoubleDouble( randi( imax, varargin{:}, 'double' ) ), 0 );
+            v = QuadDoubleSlow.MakeStatic( DoubleDouble( randi( imax, varargin{ : }, 'double' ) ), 0 );
         end
 
     end

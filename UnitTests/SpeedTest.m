@@ -1,16 +1,15 @@
-a=QuadDoubleSlow.rand(300,300);
-b=QuadDoubleSlow.rand(300,300);
+a = QuadDoubleSlow.rand( 300, 300 );
+b = QuadDoubleSlow.rand( 300, 300 );
 disp( 'QuadDoubleSlow:' );
 tic;
-c1=a*b;
+c1 = a * b;
 toc;
-a=QuadDouble(a);
-b=QuadDouble(b);
+a = QuadDouble( a );
+b = QuadDouble( b );
 disp( 'QuadDouble:' );
 tic;
-c2=a*b;
+c2 = a * b;
 toc;
-c1=QuadDouble(c1);
+c1 = QuadDouble( c1 );
 disp( 'Result difference:' );
-disp(max(abs(c1(:)-c2(:))));
-
+disp( max( abs( c1( : ) - c2( : )) ));

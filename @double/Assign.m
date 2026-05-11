@@ -1,5 +1,5 @@
 function v = Assign( v, Value, varargin )
 
-    v( varargin{:} ) = Value;
+    v( varargin{ : } ) = Value;
 
 end
