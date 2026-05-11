@@ -140,7 +140,6 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             TestCase.verifyLessThanOrEqual( double( max( err, [], 'all' ) ), TestCase.Tol );
         end
 
-
         % Array manipulation tests
         function TestReshape( TestCase )
             A = TestCase.MatrixValues;
@@ -185,7 +184,7 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             B = QuadDouble( [ 0.8, 5.5, -1.2 ] ) .* sqrt( QuadDouble( 2 ) );
             A_vpa = vpa( A );
             B_vpa = vpa( B );
-            
+
             C = A + B;
             expected = A_vpa + B_vpa;
             abs_err = abs( vpa( C ) - expected );
@@ -200,13 +199,12 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             TestCase.verifyLessThanOrEqual( double( max( errD, [], 'all' ) ), TestCase.Tol );
         end
 
-
         function TestMinus( TestCase )
             A = QuadDouble( [ 1.5, -2.7, 3.1 ] ) ./ 7 + exp( QuadDouble( 0.1 ) );
             B = QuadDouble( [ 0.8, 5.5, -1.2 ] ) .* sqrt( QuadDouble( 2 ) );
             A_vpa = vpa( A );
             B_vpa = vpa( B );
-            
+
             C = A - B;
             expected = A_vpa - B_vpa;
             abs_err = abs( vpa( C ) - expected );
@@ -221,7 +219,6 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             TestCase.verifyLessThanOrEqual( double( max( errD, [], 'all' ) ), TestCase.Tol );
         end
 
-
         function TestUminus( TestCase )
             A = QuadDouble( [ 1, 2, 3 ] );
             C = -A;
@@ -233,7 +230,7 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             B = QuadDouble( [ 0.8, 5.5, -1.2 ] ) .* sqrt( QuadDouble( 2 ) );
             A_vpa = vpa( A );
             B_vpa = vpa( B );
-            
+
             C = A .* B;
             expected = A_vpa .* B_vpa;
             abs_err = abs( vpa( C ) - expected );
@@ -248,13 +245,12 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             TestCase.verifyLessThanOrEqual( double( max( errD, [], 'all' ) ), TestCase.Tol );
         end
 
-
         function TestMtimes( TestCase )
             A = QuadDouble( [ 1.5, -2.7; 3.1, 0.4 ] ) ./ 7 + exp( QuadDouble( 0.1 ) );
             B = QuadDouble( [ 0.8, 5.5; -1.2, 2.3 ] ) .* sqrt( QuadDouble( 2 ) );
             A_vpa = vpa( A );
             B_vpa = vpa( B );
-            
+
             C = A * B;
             expected = A_vpa * B_vpa;
             abs_err = abs( vpa( C ) - expected );
@@ -269,13 +265,12 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             TestCase.verifyLessThanOrEqual( double( max( errD, [], 'all' ) ), TestCase.Tol );
         end
 
-
         function TestRdivide( TestCase )
             A = QuadDouble( [ 1.5, -2.7, 3.1 ] ) ./ 7 + exp( QuadDouble( 0.1 ) );
             B = QuadDouble( [ 0.8, 5.5, -1.2 ] ) .* sqrt( QuadDouble( 2 ) );
             A_vpa = vpa( A );
             B_vpa = vpa( B );
-            
+
             C = A ./ B;
             expected = A_vpa ./ B_vpa;
             abs_err = abs( vpa( C ) - expected );
@@ -289,7 +284,6 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             errD = abs_errD ./ max( 1, abs( expectedD ) );
             TestCase.verifyLessThanOrEqual( double( max( errD, [], 'all' ) ), TestCase.Tol );
         end
-
 
         function TestLdivide( TestCase )
             A = QuadDouble( 2 );
@@ -416,7 +410,7 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             TestCase.verifyEqual( double( B ), [ 1, 2, 3 ] );
 
             % Test with complex values
-            C = QuadDouble( [ 3+4i, 0, 1-1i ] );
+            C = QuadDouble( [ 3 + 4i, 0, 1 - 1i ] );
             D = abs( C );
             TestCase.verifyEqual( double( D ), [ 5, 0, sqrt( 2 ) ], 'RelTol', TestCase.Tol );
         end
@@ -462,7 +456,6 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             TestCase.verifyLessThanOrEqual( double( max( err, [], 'all' ) ), TestCase.Tol );
         end
 
-
         function TestRealsqrt( TestCase )
             A = QuadDouble( [ 4, 9, 16 ] ) ./ 7 + exp( QuadDouble( 0.1 ) );
             S = realsqrt( A );
@@ -473,18 +466,17 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
         end
 
         function TestExp( TestCase )
-            vals = [0.123, 1.2345, 10.567, 100.23, 0.99] / 10;
+            vals = [ 0.123, 1.2345, 10.567, 100.23, 0.99 ] / 10;
             A = QuadDouble( vals );
-            
+
             gt_v = vpa( vals, BoostPrecision = false );
             expected = exp( gt_v );
-            
+
             E = exp( A );
             abs_err = abs( vpa( E ) - expected );
             err = abs_err ./ max( 1, abs( expected ) );
             TestCase.verifyLessThanOrEqual( double( max( err, [], 'all' ) ), TestCase.Tol );
         end
-
 
         function TestExpm1( TestCase )
             A = QuadDouble( [ 0, 1e-10, 1 ] );
@@ -494,18 +486,17 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
         end
 
         function TestLog( TestCase )
-            vals = [0.123, 1.2345, 10.567, 100.23, 0.99];
+            vals = [ 0.123, 1.2345, 10.567, 100.23, 0.99 ];
             A = QuadDouble( vals );
-            
+
             gt_v = vpa( vals, BoostPrecision = false );
             expected = log( gt_v );
-            
+
             L = log( A );
             abs_err = abs( vpa( L ) - expected );
             err = abs_err ./ max( 1, abs( expected ) );
             TestCase.verifyLessThanOrEqual( double( max( err, [], 'all' ) ), TestCase.Tol );
         end
-
 
         function TestLog10( TestCase )
             A = QuadDouble( [ 1, 10, 100 ] );
@@ -529,7 +520,6 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             TestCase.verifyLessThanOrEqual( double( max( err, [], 'all' ) ), TestCase.Tol );
         end
 
-
         function TestCos( TestCase )
             A = [ 0, QuadDouble.pi / 6, QuadDouble.pi / 4, QuadDouble.pi / 3, QuadDouble.pi / 2 ];
             C = cos( A );
@@ -538,7 +528,6 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             err = abs_err ./ max( 1, abs( expected ) );
             TestCase.verifyLessThanOrEqual( double( max( err, [], 'all' ) ), TestCase.Tol );
         end
-
 
         function TestTan( TestCase )
             A = [ 0, QuadDouble.pi / 6, QuadDouble.pi / 4, QuadDouble.pi / 3 ];
@@ -549,7 +538,6 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             TestCase.verifyLessThanOrEqual( double( max( err, [], 'all' ) ), TestCase.Tol );
         end
 
-
         function TestAsin( TestCase )
             A = [ 0, 0.5, 1 / sqrt( QuadDouble( 2 ) ), sqrt( QuadDouble( 3 ) ) / 2, 1 ];
             As = asin( A );
@@ -558,7 +546,6 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             err = abs_err ./ max( 1, abs( expected ) );
             TestCase.verifyLessThanOrEqual( double( max( err, [], 'all' ) ), TestCase.Tol );
         end
-
 
         function TestAcos( TestCase )
             A = [ 1, sqrt( QuadDouble( 3 ) ) / 2, 1 / sqrt( QuadDouble( 2 ) ), 0.5, 0 ];
@@ -569,7 +556,6 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             TestCase.verifyLessThanOrEqual( double( max( err, [], 'all' ) ), TestCase.Tol );
         end
 
-
         function TestAtan( TestCase )
             A = [ 0, 1 / sqrt( QuadDouble( 3 ) ), 1, sqrt( QuadDouble( 3 ) ) ];
             At = atan( A );
@@ -578,7 +564,6 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             err = abs_err ./ max( 1, abs( expected ) );
             TestCase.verifyLessThanOrEqual( double( max( err, [], 'all' ) ), TestCase.Tol );
         end
-
 
         function TestAtan2( TestCase )
             Y = QuadDouble( [ 0, 1, 1, 1 ] );
@@ -590,7 +575,6 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             TestCase.verifyLessThanOrEqual( double( max( err, [], 'all' ) ), TestCase.Tol );
         end
 
-
         % Hyperbolic functions tests
         function TestSinh( TestCase )
             A = QuadDouble( [ 0, 1, 2 ] );
@@ -601,7 +585,6 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             TestCase.verifyLessThanOrEqual( double( max( err, [], 'all' ) ), TestCase.Tol );
         end
 
-
         function TestCosh( TestCase )
             A = QuadDouble( [ 0, 1, 2 ] );
             C = cosh( A );
@@ -610,7 +593,6 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             err = abs_err ./ max( 1, abs( expected ) );
             TestCase.verifyLessThanOrEqual( double( max( err, [], 'all' ) ), TestCase.Tol );
         end
-
 
         function TestTanh( TestCase )
             A = QuadDouble( [ 0, 1, 2 ] );
@@ -621,7 +603,6 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             TestCase.verifyLessThanOrEqual( double( max( err, [], 'all' ) ), TestCase.Tol );
         end
 
-
         function TestAsinh( TestCase )
             A = QuadDouble( [ 0, 1, 2 ] );
             As = asinh( A );
@@ -630,7 +611,6 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             err = abs_err ./ max( 1, abs( expected ) );
             TestCase.verifyLessThanOrEqual( double( max( err, [], 'all' ) ), TestCase.Tol );
         end
-
 
         function TestAcosh( TestCase )
             A = QuadDouble( [ 1, 2, 3 ] );
@@ -641,7 +621,6 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             TestCase.verifyLessThanOrEqual( double( max( err, [], 'all' ) ), TestCase.Tol );
         end
 
-
         function TestAtanh( TestCase )
             A = QuadDouble( [ 0, 0.5, 0.75 ] );
             At = atanh( A );
@@ -650,7 +629,6 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             err = abs_err ./ max( 1, abs( expected ) );
             TestCase.verifyLessThanOrEqual( double( max( err, [], 'all' ) ), TestCase.Tol );
         end
-
 
         % Remainder functions tests
         function TestMod( TestCase )
@@ -680,7 +658,6 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             TestCase.verifyLessThanOrEqual( double( max( err, [], 'all' ) ), TestCase.Tol );
         end
 
-
         function TestQR( TestCase )
             A = QuadDouble( [ 12, -51, 4; 6, 167, -68; -4, 24, -41 ] );
             [ Q, R ] = qr( A );
@@ -694,7 +671,6 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             err2 = abs_err2 ./ max( 1, abs( vpa( EyeVal ) ) );
             TestCase.verifyLessThanOrEqual( double( max( err2, [], 'all' ) ), TestCase.Tol );
         end
-
 
         function TestDet( TestCase )
             A = QuadDouble( [ 1, 2; 3, 4 ] );
@@ -712,7 +688,6 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             TestCase.verifyLessThanOrEqual( double( max( err2, [], 'all' ) ), TestCase.Tol );
         end
 
-
         function TestInv( TestCase )
             A = QuadDouble( [ 4, 7; 2, 6 ] );
             AInv = inv( A );
@@ -723,7 +698,6 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             TestCase.verifyLessThanOrEqual( double( max( err, [], 'all' ) ), TestCase.Tol );
         end
 
-
         function TestChol( TestCase )
             A = QuadDouble( [ 4, 12, -16; 12, 37, -43; -16, -43, 98 ] );
             R = chol( A );
@@ -732,7 +706,6 @@ classdef QuadDoubleTest < matlab.unittest.TestCase
             err = abs_err ./ max( 1, abs( vpa( A ) ) );
             TestCase.verifyLessThanOrEqual( double( max( err, [], 'all' ) ), TestCase.Tol );
         end
-
 
         function TestLDL( TestCase )
             A = QuadDouble( [ 4, 12, -16; 12, 37, -43; -16, -43, 98 ] );

@@ -24,12 +24,12 @@ function [ x0, x1, x2, x3 ] = QDPlusQD( a0, a1, a2, a3, b0, b1, b2, b3 )
     sz = size( z );
     zFlat = reshape( z, [], sz( end ) );
 
-    u = zFlat( :, 1 );
-    v = zFlat( :, 2 );
+    u = zFlat( : , 1 );
+    v = zFlat( : , 2 );
 
     % quick_two_sum(u, v, v)
     s_uv = u + v;
-    v = v - (s_uv - u);
+    v = v - ( s_uv - u );
     u = s_uv;
 
     x1 = zeros( size( u ), 'like', u );
@@ -40,7 +40,7 @@ function [ x0, x1, x2, x3 ] = QDPlusQD( a0, a1, a2, a3, b0, b1, b2, b3 )
     k = ones( size( u ), 'like', u );
 
     for i = 3 : 8
-        t = zFlat( :, i );
+        t = zFlat( : , i );
         Active = k <= 4;
 
         if any( Active )
@@ -88,10 +88,10 @@ function [ x0, x1, x2, x3 ] = QDPlusQD( a0, a1, a2, a3, b0, b1, b2, b3 )
 
             old_k = k;
 
-            idx1 = emit & (old_k == 1); x1( idx1 ) = s_full( idx1 ); k( idx1 ) = 2;
-            idx2 = emit & (old_k == 2); x2( idx2 ) = s_full( idx2 ); k( idx2 ) = 3;
-            idx3 = emit & (old_k == 3); x3( idx3 ) = s_full( idx3 ); k( idx3 ) = 4;
-            idx4 = emit & (old_k == 4); x4( idx4 ) = s_full( idx4 ); k( idx4 ) = 5;
+            idx1 = emit & ( old_k == 1 ); x1( idx1 ) = s_full( idx1 ); k( idx1 ) = 2;
+            idx2 = emit & ( old_k == 2 ); x2( idx2 ) = s_full( idx2 ); k( idx2 ) = 3;
+            idx3 = emit & ( old_k == 3 ); x3( idx3 ) = s_full( idx3 ); k( idx3 ) = 4;
+            idx4 = emit & ( old_k == 4 ); x4( idx4 ) = s_full( idx4 ); k( idx4 ) = 5;
         end
 
         inActive = ~Active;

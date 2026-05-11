@@ -12,7 +12,7 @@ function [ varargout ] = ExpandSingleton( varargin )
     s = max( ss, [], 1 );
     isZeroDim = any( ss == 0, 1 );
     if any( isZeroDim )
-        if any( any( ss( :, isZeroDim ) > 1 ) )
+        if any( any( ss( : , isZeroDim ) > 1 ) )
             error( 'Arrays have incompatible sizes for this operation.' );
         end
         s( isZeroDim ) = 0;

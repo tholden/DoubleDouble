@@ -79,9 +79,9 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
         end
 
         function v = Index( v, varargin )
-            v.v1 = Index( v.v1, varargin{:} );
+            v.v1 = Index( v.v1, varargin{ : } );
             if ~all( v.v2 == 0, 'all' )
-                v.v2 = Index( v.v2, varargin{:} );
+                v.v2 = Index( v.v2, varargin{ : } );
             end
         end
 
@@ -96,18 +96,18 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             elseif ~isa( Value, 'ED.ExtDouble' )
                 Value = v.Promote( Value );
             end
-            v.v1 = Assign( v.v1, Value.v1, varargin{:} );
+            v.v1 = Assign( v.v1, Value.v1, varargin{ : } );
             if ~all( v.v2 == 0, 'all' ) || ~all( Value.v2 == 0, 'all' )
                 v = FillV2( v );
                 Value = FillV2( Value );
-                v.v2 = Assign( v.v2, Value.v2, varargin{:} );
+                v.v2 = Assign( v.v2, Value.v2, varargin{ : } );
             end
         end
 
         function varargout = ToSumOfDoubles( v )
             varargout = cell( 1, nargout );
             if ~isempty( v.v1 )
-                [ varargout{:} ] = ToSumOfDoubles( v.v1 );
+                [ varargout{ : } ] = ToSumOfDoubles( v.v1 );
                 FirstEmpty = find( cellfun( @isempty, varargout, 'UniformOutput', true ), 1, 'first' );
                 if ~isempty( FirstEmpty )
                     if all( v.v2 == 0, 'all' )
@@ -201,18 +201,18 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
         end
 
         function v = any( v, varargin )
-            v = any( v ~= 0, varargin{:} );
+            v = any( v ~= 0, varargin{ : } );
         end
 
         function v = all( v, varargin )
-            v = all( v ~= 0, varargin{:} );
+            v = all( v ~= 0, varargin{ : } );
         end
 
         function varargout = find( v, varargin )
             if nargout == 1
-                varargout{ 1 } = find( v ~= 0, varargin{:} );
+                varargout{ 1 } = find( v ~= 0, varargin{ : } );
             elseif nargout >= 2
-                [ varargout{ 1 }, varargout{ 2 } ] = find( v ~= 0, varargin{:} );
+                [ varargout{ 1 }, varargout{ 2 } ] = find( v ~= 0, varargin{ : } );
                 if nargout >= 3
                     LinearIndex = sub2ind( size( v ), varargout{ 1 }, varargout{ 2 } );
                     varargout{ 3 } = v.Make( Index( v.v1, LinearIndex ), Index( v.v2, LinearIndex ) );
@@ -257,9 +257,9 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
         end
 
         function [ v, varargout ] = size( v, varargin )
-            v = size( v.v1, varargin{:} );
+            v = size( v.v1, varargin{ : } );
             if nargout > 1
-                varargout = num2cell( v( 2:end ) );
+                varargout = num2cell( v( 2 : end ) );
                 v = v( 1 );
             end
         end
@@ -294,16 +294,16 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
         end
 
         function v = repmat( v, varargin )
-            v.v1 = repmat( v.v1, varargin{:} );
+            v.v1 = repmat( v.v1, varargin{ : } );
             if ~all( v.v2 == 0, 'all' )
-                v.v2 = repmat( v.v2, varargin{:} );
+                v.v2 = repmat( v.v2, varargin{ : } );
             end
         end
 
         function v = reshape( v, varargin )
-            v.v1 = reshape( v.v1, varargin{:} );
+            v.v1 = reshape( v.v1, varargin{ : } );
             if ~all( v.v2 == 0, 'all' )
-                v.v2 = reshape( v.v2, varargin{:} );
+                v.v2 = reshape( v.v2, varargin{ : } );
             end
         end
 
@@ -319,7 +319,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                     if ~v
                         break
                     end
-                    v = v && isequal( a, varargin{i} );
+                    v = v && isequal( a, varargin{ i } );
                 end
             end
         end
@@ -487,7 +487,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             [ L, U, p ] = lu( a, 'vector' );
 
             % Permutation and forward elimination
-            v = Index( v, p, ':' );
+            v = Index( v, p, ' : ' );
             v = ForwardElimination( v, L );
 
             % Back substitution
@@ -537,11 +537,11 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 Binary = dec2bin( floor( b ) );
                 N = size( Binary, 2 );
                 Power = a;
-                Select = find( Binary( :, end ) == '1' );
+                Select = find( Binary( : , end ) == '1' );
                 vv =  vv.Assign( a.Index( Select ), Select );
                 for n = 2 : N
                     Power = Power .* Power;
-                    Select = find( Binary( :, end + 1 - n ) == '1' );
+                    Select = find( Binary( : , end + 1 - n ) == '1' );
                     vv =  vv.Assign( vv.Index( Select ) .* Power.Index( Select ), Select );
                 end
                 v =  v.Assign( vv, bHalfInteger );
@@ -703,10 +703,10 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 [ varargout{ 1 : nargout } ] = builtin( 'subsref', v, s );
             else
                 if length( s ) > 1
-                    v = Index( v, s( 1 ).subs{:} );
+                    v = Index( v, s( 1 ).subs{ : } );
                     [ varargout{ 1 : nargout } ] = builtin( 'subsref', v, s( 2 : end ) );
                 else
-                    [ varargout{ 1 : nargout } ] = Index( v, s( 1 ).subs{:} );
+                    [ varargout{ 1 : nargout } ] = Index( v, s( 1 ).subs{ : } );
                 end
             end
         end
@@ -725,7 +725,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 if ~isa( b, 'ED.ExtDouble' )
                     b = v.Promote( b );
                 end
-                v = Assign( v, b, s.subs{:} );
+                v = Assign( v, b, s.subs{ : } );
             end
         end
 
@@ -764,20 +764,20 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             end
             Blocks = arrayfun( @( x ) ones( x, 1 ), Size, 'UniformOutput', false );
             Blocks{ Dim } = Size( Dim );
-            xv1 = mat2cell( v.v1, Blocks{:} );
+            xv1 = mat2cell( v.v1, Blocks{ : } );
             v2Empty = all( v.v2 == 0, 'all' );
             if ~v2Empty
-                xv2 = mat2cell( v.v2, Blocks{:} );
+                xv2 = mat2cell( v.v2, Blocks{ : } );
             end
             Indices = cell( size( xv1 ) );
 
             if isreal( v )
                 if ( length( cm ) > 1 ) && strcmpi( cm( 1 : 2 ), 'ab' )
                     a = abs( v );
-                    xa1 = mat2cell( a.v1, Blocks{:} );
+                    xa1 = mat2cell( a.v1, Blocks{ : } );
                     a2Empty = all( a.v2 == 0, 'all' );
                     if ~a2Empty
-                        xa2 = mat2cell( a.v2, Blocks{:} );
+                        xa2 = mat2cell( a.v2, Blocks{ : } );
                     end
                 else
                     xa1 = xv1;
@@ -788,9 +788,9 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 end
                 for i = 1 : numel( xv1 )
                     if a2Empty
-                        [ ~, Indices{ i } ] = sort( xa1{ i }( : ), varargin{:} );
+                        [ ~, Indices{ i } ] = sort( xa1{ i }( : ), varargin{ : } );
                     else
-                        [ ~, Indices{ i } ] = sortrows( [ xa1{ i }( : ), xa2{ i }( : ) ], varargin{:} );
+                        [ ~, Indices{ i } ] = sortrows( [ xa1{ i }( : ), xa2{ i }( : ) ], varargin{ : } );
                     end
                     xv1{ i } = Index( xv1{ i }, Indices{ i } );
                     if ~v2Empty
@@ -805,15 +805,15 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                     a = abs( v );
                     b = angle( v );
                 end
-                xa1 = mat2cell( a.v1, Blocks{:} );
+                xa1 = mat2cell( a.v1, Blocks{ : } );
                 a2Empty = all( a.v2 == 0, 'all' );
                 if ~a2Empty
-                    xa2 = mat2cell( a.v2, Blocks{:} );
+                    xa2 = mat2cell( a.v2, Blocks{ : } );
                 end
-                xb1 = mat2cell( b.v1, Blocks{:} );
+                xb1 = mat2cell( b.v1, Blocks{ : } );
                 b2Empty = all( b.v2 == 0, 'all' );
                 if ~b2Empty
-                    xb2 = mat2cell( b.v2, Blocks{:} );
+                    xb2 = mat2cell( b.v2, Blocks{ : } );
                 end
                 for i = 1 : numel( xv1 )
                     ToSort = [ xa1{ i }( : ) ];
@@ -824,7 +824,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                     if ~b2Empty
                         ToSort = [ ToSort, xb2{ i }( : ) ]; %#ok<AGROW>
                     end
-                    [ ~, Indices{ i } ] = sortrows( ToSort, varargin{:} );
+                    [ ~, Indices{ i } ] = sortrows( ToSort, varargin{ : } );
                     xv1{ i } = Index( xv1{ i }, Indices{ i } );
                     if ~v2Empty
                         xv2{ i } = Index( xv2{ i }, Indices{ i } );
@@ -859,11 +859,11 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
-                x1 = mat2cell( v.v1, Blocks{:} );
+                x1 = mat2cell( v.v1, Blocks{ : } );
                 if all( v.v2 == 0, 'all' )
                     x2 = cell( size( x1 ) );
                 else
-                    x2 = mat2cell( v.v2, Blocks{:} );
+                    x2 = mat2cell( v.v2, Blocks{ : } );
                 end
                 s = v.Make( x1{ 1 }, x2{ 1 } );
                 for i = 2 : Length
@@ -885,7 +885,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
-                x = mat2cell( v, Blocks{:} );
+                x = mat2cell( v, Blocks{ : } );
                 s = x{ 1 };
                 for i = 2 : Length
                     s = s.Plus( x{ i } );
@@ -914,11 +914,11 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
-                x1 = mat2cell( v.v1, Blocks{:} );
+                x1 = mat2cell( v.v1, Blocks{ : } );
                 if all( v.v2 == 0, 'all' )
                     x2 = cell( size( x1 ) );
                 else
-                    x2 = mat2cell( v.v2, Blocks{:} );
+                    x2 = mat2cell( v.v2, Blocks{ : } );
                 end
                 s = v.Make( x1{ 1 }, x2{ 1 } );
                 for i = 2 : Length
@@ -940,7 +940,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
-                x = mat2cell( v, Blocks{:} );
+                x = mat2cell( v, Blocks{ : } );
                 s = x{ 1 };
                 for i = 2 : Length
                     s = s.Times( x{ i } );
@@ -973,11 +973,11 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                     Length = Size( Dim );
                     Blocks = num2cell( Size );
                     Blocks{ Dim } = ones( Length, 1 );
-                    x1 = mat2cell( a.v1, Blocks{:} );
+                    x1 = mat2cell( a.v1, Blocks{ : } );
                     if all( a.v2 == 0, 'all' )
                         x2 = cell( size( x1 ) );
                     else
-                        x2 = mat2cell( a.v2, Blocks{:} );
+                        x2 = mat2cell( a.v2, Blocks{ : } );
                     end
                     s = a.Make( x1{ 1 }, x2{ 1 } );
                     Size( Dim ) = 1;
@@ -997,7 +997,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                     Length = Size( Dim );
                     Blocks = num2cell( Size );
                     Blocks{ Dim } = ones( Length, 1 );
-                    x = mat2cell( a, Blocks{:} );
+                    x = mat2cell( a, Blocks{ : } );
                     s = x{ 1 };
                     for j = 2 : Length
                         s = max( s, x{ j } );
@@ -1048,11 +1048,11 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                     Length = Size( Dim );
                     Blocks = num2cell( Size );
                     Blocks{ Dim } = ones( Length, 1 );
-                    x1 = mat2cell( a.v1, Blocks{:} );
+                    x1 = mat2cell( a.v1, Blocks{ : } );
                     if all( a.v2 == 0, 'all' )
                         x2 = cell( size( x1 ) );
                     else
-                        x2 = mat2cell( a.v2, Blocks{:} );
+                        x2 = mat2cell( a.v2, Blocks{ : } );
                     end
                     s = a.Make( x1{ 1 }, x2{ 1 } );
                     Size( Dim ) = 1;
@@ -1072,7 +1072,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                     Length = Size( Dim );
                     Blocks = num2cell( Size );
                     Blocks{ Dim } = ones( Length, 1 );
-                    x = mat2cell( a, Blocks{:} );
+                    x = mat2cell( a, Blocks{ : } );
                     s = x{ 1 };
                     for j = 2 : Length
                         s = min( s, x{ j } );
@@ -1122,21 +1122,21 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
-                x1 = mat2cell( v.v1, Blocks{:} );
+                x1 = mat2cell( v.v1, Blocks{ : } );
                 if all( v.v2 == 0, 'all' )
                     x2 = cell( size( x1 ) );
                 else
-                    x2 = mat2cell( v.v2, Blocks{:} );
+                    x2 = mat2cell( v.v2, Blocks{ : } );
                 end
                 s = v.Make( x1{ 1 }, x2{ 1 } );
                 c1 = cell( size( x1 ) );
                 c2 = cell( size( x2 ) );
-                c1{1} = s.v1;
-                c2{1} = s.v2;
+                c1{ 1 } = s.v1;
+                c2{ 1 } = s.v2;
                 for i = 2 : Length
                     s = s.Plus( v.Make( x1{ i }, x2{ i } ) );
-                    c1{i} = s.v1;
-                    c2{i} = s.v2;
+                    c1{ i } = s.v1;
+                    c2{ i } = s.v2;
                 end
             else
                 if nargin < 2 || isempty( Dim )
@@ -1153,16 +1153,16 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
-                x = mat2cell( v, Blocks{:} );
+                x = mat2cell( v, Blocks{ : } );
                 s = x{ 1 };
                 c1 = cell( size( x ) );
                 c2 = cell( size( x ) );
-                c1{1} = s;
-                c2{1} = zeros( size( s ) );
+                c1{ 1 } = s;
+                c2{ 1 } = zeros( size( s ) );
                 for i = 2 : Length
                     s = s.Plus( x{ i } );
-                    c1{i} = s.v1;
-                    c2{i} = s.v2;
+                    c1{ i } = s.v1;
+                    c2{ i } = s.v2;
                 end
             end
             v = v.Make( cell2mat( c1 ), cell2mat( c2 ) );
@@ -1187,22 +1187,22 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
-                x1 = mat2cell( v.v1, Blocks{:} );
+                x1 = mat2cell( v.v1, Blocks{ : } );
                 if all( v.v2 == 0, 'all' )
                     x2 = cell( size( x1 ) );
                 else
-                    x2 = mat2cell( v.v2, Blocks{:} );
+                    x2 = mat2cell( v.v2, Blocks{ : } );
                 end
                 s = v.Make( x1{ 1 }, x2{ 1 } );
                 c1 = cell( size( x1 ) );
                 c2 = cell( size( x2 ) );
-                c1{1} = [];
-                c2{1} = [];
+                c1{ 1 } = [];
+                c2{ 1 } = [];
                 for i = 2 : Length
                     t = v.Make( x1{ i }, x2{ i } );
                     d = t.Minus( s );
-                    c1{i} = d.v1;
-                    c2{i} = d.v2;
+                    c1{ i } = d.v1;
+                    c2{ i } = d.v2;
                     s = t;
                 end
             else
@@ -1220,17 +1220,17 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
-                x = mat2cell( v, Blocks{:} );
+                x = mat2cell( v, Blocks{ : } );
                 s = x{ 1 };
                 c1 = cell( size( x ) );
                 c2 = cell( size( x ) );
-                c1{1} = [];
-                c2{1} = [];
+                c1{ 1 } = [];
+                c2{ 1 } = [];
                 for i = 2 : Length
                     t = x{ i };
                     d = t.Minus( s );
-                    c1{i} = d.v1;
-                    c2{i} = d.v2;
+                    c1{ i } = d.v1;
+                    c2{ i } = d.v2;
                     s = t;
                 end
             end
@@ -1256,21 +1256,21 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
-                x1 = mat2cell( v.v1, Blocks{:} );
+                x1 = mat2cell( v.v1, Blocks{ : } );
                 if all( v.v2 == 0, 'all' )
                     x2 = cell( size( x1 ) );
                 else
-                    x2 = mat2cell( v.v2, Blocks{:} );
+                    x2 = mat2cell( v.v2, Blocks{ : } );
                 end
                 s = v.Make( x1{ 1 }, x2{ 1 } );
                 c1 = cell( size( x1 ) );
                 c2 = cell( size( x2 ) );
-                c1{1} = s.v1;
-                c2{1} = s.v2;
+                c1{ 1 } = s.v1;
+                c2{ 1 } = s.v2;
                 for i = 2 : Length
                     s = s.Times( v.Make( x1{ i }, x2{ i } ) );
-                    c1{i} = s.v1;
-                    c2{i} = s.v2;
+                    c1{ i } = s.v1;
+                    c2{ i } = s.v2;
                 end
             else
                 if nargin < 2 || isempty( Dim )
@@ -1287,16 +1287,16 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
-                x = mat2cell( v, Blocks{:} );
+                x = mat2cell( v, Blocks{ : } );
                 s = x{ 1 };
                 c1 = cell( size( x ) );
                 c2 = cell( size( x ) );
-                c1{1} = s;
-                c2{1} = zeros( size( s ) );
+                c1{ 1 } = s;
+                c2{ 1 } = zeros( size( s ) );
                 for i = 2 : Length
                     s = s.Times( x{ i } );
-                    c1{i} = s.v1;
-                    c2{i} = s.v2;
+                    c1{ i } = s.v1;
+                    c2{ i } = s.v2;
                 end
             end
             v = v.Make( cell2mat( c1 ), cell2mat( c2 ) );
@@ -1321,21 +1321,21 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
-                x1 = mat2cell( v.v1, Blocks{:} );
+                x1 = mat2cell( v.v1, Blocks{ : } );
                 if all( v.v2 == 0, 'all' )
                     x2 = cell( size( x1 ) );
                 else
-                    x2 = mat2cell( v.v2, Blocks{:} );
+                    x2 = mat2cell( v.v2, Blocks{ : } );
                 end
                 s = v.Make( x1{ 1 }, x2{ 1 } );
                 c1 = cell( size( x1 ) );
                 c2 = cell( size( x2 ) );
-                c1{1} = s.v1;
-                c2{1} = s.v2;
+                c1{ 1 } = s.v1;
+                c2{ 1 } = s.v2;
                 for i = 2 : Length
                     s = s.max( v.Make( x1{ i }, x2{ i } ) );
-                    c1{i} = s.v1;
-                    c2{i} = s.v2;
+                    c1{ i } = s.v1;
+                    c2{ i } = s.v2;
                 end
             else
                 if nargin < 2 || isempty( Dim )
@@ -1352,16 +1352,16 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
-                x = mat2cell( v, Blocks{:} );
+                x = mat2cell( v, Blocks{ : } );
                 s = x{ 1 };
                 c1 = cell( size( x ) );
                 c2 = cell( size( x ) );
-                c1{1} = s;
-                c2{1} = zeros( size( s ) );
+                c1{ 1 } = s;
+                c2{ 1 } = zeros( size( s ) );
                 for i = 2 : Length
                     s = s.max( x{ i } );
-                    c1{i} = s.v1;
-                    c2{i} = s.v2;
+                    c1{ i } = s.v1;
+                    c2{ i } = s.v2;
                 end
             end
             v = v.Make( cell2mat( c1 ), cell2mat( c2 ) );
@@ -1386,21 +1386,21 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
-                x1 = mat2cell( v.v1, Blocks{:} );
+                x1 = mat2cell( v.v1, Blocks{ : } );
                 if all( v.v2 == 0, 'all' )
                     x2 = cell( size( x1 ) );
                 else
-                    x2 = mat2cell( v.v2, Blocks{:} );
+                    x2 = mat2cell( v.v2, Blocks{ : } );
                 end
                 s = v.Make( x1{ 1 }, x2{ 1 } );
                 c1 = cell( size( x1 ) );
                 c2 = cell( size( x2 ) );
-                c1{1} = s.v1;
-                c2{1} = s.v2;
+                c1{ 1 } = s.v1;
+                c2{ 1 } = s.v2;
                 for i = 2 : Length
                     s = s.min( v.Make( x1{ i }, x2{ i } ) );
-                    c1{i} = s.v1;
-                    c2{i} = s.v2;
+                    c1{ i } = s.v1;
+                    c2{ i } = s.v2;
                 end
             else
                 if nargin < 2 || isempty( Dim )
@@ -1417,16 +1417,16 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 end
                 Blocks = num2cell( Size );
                 Blocks{ Dim } = ones( Length, 1 );
-                x = mat2cell( v, Blocks{:} );
+                x = mat2cell( v, Blocks{ : } );
                 s = x{ 1 };
                 c1 = cell( size( x ) );
                 c2 = cell( size( x ) );
-                c1{1} = s;
-                c2{1} = zeros( size( s ) );
+                c1{ 1 } = s;
+                c2{ 1 } = zeros( size( s ) );
                 for i = 2 : Length
                     s = s.min( x{ i } );
-                    c1{i} = s.v1;
-                    c2{i} = s.v2;
+                    c1{ i } = s.v1;
+                    c2{ i } = s.v2;
                 end
             end
             v = v.Make( cell2mat( c1 ), cell2mat( c2 ) );
@@ -1640,7 +1640,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 s = s + t;
                 p = p .* r;
                 t = p .* v.InverseFactorial.Index( i );
-                if all( abs( Index( t.v1, ':' ) ) <= Threshold )
+                if all( abs( Index( t.v1, ' : ' ) ) <= Threshold )
                     break
                 end
             end
@@ -1813,7 +1813,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
         end
 
         function v = asin( v )
-            assert( all( abs( Index( v.v1, ':' ) ) <= 1 ) );
+            assert( all( abs( Index( v.v1, ' : ' ) ) <= 1 ) );
             v = atan2( v, sqrt( max( 1 - v .* v, 0 ) ) );
         end
 
@@ -1822,7 +1822,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
         end
 
         function v = acos( v )
-            assert( all( abs( Index( v.v1, ':' ) ) <= 1 ) );
+            assert( all( abs( Index( v.v1, ' : ' ) ) <= 1 ) );
             v = atan2( sqrt( max( 1 - v .* v, 0 ) ), v );
         end
 
@@ -1915,7 +1915,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             for k = 1 : min( m, n )
 
                 % Find index of largest element below diagonal in k-th column
-                [ ~, midx ] = max( abs( v.Index( k:m, k ) ) );
+                [ ~, midx ] = max( abs( v.Index( k : m, k ) ) );
                 midx = midx + k - 1;
 
                 % Skip elimination if column is zero
@@ -1923,7 +1923,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
 
                     % Swap pivot row
                     if midx ~= k
-                        v = v.Assign( v.Index( [ midx k ], ':' ), [ k midx ], ':' );
+                        v = v.Assign( v.Index( [ midx k ], ' : ' ), [ k midx ], ' : ' );
                         p( [ k midx ] ) = p( [ midx k ] );
                     end
 
@@ -1942,9 +1942,9 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 L = tril( v, -1 ) + eye( m, n, 'like', v );
                 U = triu( v );
                 if n > m
-                    L = L.Index( ':', 1:m );
+                    L = L.Index( ' : ', 1 : m );
                 elseif n < m
-                    U = U.Index( 1:n, ':' );
+                    U = U.Index( 1 : n, ' : ' );
                 end
                 v = L;
 
@@ -1956,7 +1956,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                     end
                 else
                     invp( p ) = 1 : m;
-                    v = v.Index( invp, ':' );
+                    v = v.Index( invp, ' : ' );
                 end
             end
         end
@@ -1967,16 +1967,16 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             R = zeros( n, n, 'like', A );
 
             for j = 1 : n
-                v = A.Index( ':', j );
+                v = A.Index( ' : ', j );
                 for i = 1 : ( j - 1 )
-                    R = R.Assign( sum( conj( Q.Index( ':', i ) ) .* v ), i, j );
-                    v = v - R.Index( i, j ) * Q.Index( ':', i );
+                    R = R.Assign( sum( conj( Q.Index( ' : ', i ) ) .* v ), i, j );
+                    v = v - R.Index( i, j ) * Q.Index( ' : ', i );
                 end
                 R = R.Assign( norm( v ), j, j );
                 if R.Index( j, j ) > 0
-                    Q = Q.Assign( v ./ R.Index( j, j ), ':', j );
+                    Q = Q.Assign( v ./ R.Index( j, j ), ' : ', j );
                 else
-                    Q = Q.Assign( v, ':', j );
+                    Q = Q.Assign( v, ' : ', j );
                 end
             end
         end
@@ -1984,7 +1984,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
         function v = det( v )
             [ m, n ] = size( v );
             if m ~= n
-                throw( MException( 'MATLAB:square', 'Matrix must be square.' ) );
+                throw( MException( 'MATLAB : square', 'Matrix must be square.' ) );
             end
             [ ~, u, P ] = lu( v );
             DetP = det( P );
@@ -2008,7 +2008,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             if any( d < 0 )
                 p = 1;
                 if nargout < 2
-                    error( 'MATLAB:posdef', 'Matrix must be positive definite.' );
+                    error( 'MATLAB : posdef', 'Matrix must be positive definite.' );
                 end
             else
                 p = 0;
@@ -2060,7 +2060,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
 
             for c = 1 : C
 
-                vi = v.Index( ':', c );
+                vi = v.Index( ' : ', c );
                 dii = d.Index( c, 1 );
                 err = Inf;
 
@@ -2087,7 +2087,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 end
 
                 d = d.Assign( dii, c, 1 );
-                v = v.Assign( vi, ':', c );
+                v = v.Assign( vi, ' : ', c );
 
             end
 
@@ -2138,13 +2138,13 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             Size = size( A );
             AOriginal = A;
             if all( A.v2 == 0, 'all' )
-                [ C, ia, ic ] = unique( A.v1, 'rows', varargin{:} );
+                [ C, ia, ic ] = unique( A.v1, 'rows', varargin{ : } );
                 C = AOriginal.Make( C, 0 );
             else
                 A = [ A.v1, A.v2 ];
-                [ C, ia, ic ] = unique( A, 'rows', varargin{:} );
+                [ C, ia, ic ] = unique( A, 'rows', varargin{ : } );
                 n = Size( 2 );
-                C = AOriginal.Make( Index( C, ':', 1:n ), Index( C, ':', ( n + 1 ) : ( 2 * n ) ) );
+                C = AOriginal.Make( Index( C, ' : ', 1 : n ), Index( C, ' : ', ( n + 1 ) : ( 2 * n ) ) );
             end
             if RowFlag
                 C = C.';
@@ -2192,19 +2192,19 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
 
             if mod( n, 2 ) == 1
                 Middle = ( n + 1 ) * 0.5;
-                v = v.Index( Middle, ':' );
+                v = v.Index( Middle, ' : ' );
             else
                 Middle1 = n * 0.5;
                 Middle2 = Middle1 + 1;
-                m1 = v.Index( Middle1, ':' );
-                m2 = v.Index( Middle2, ':' );
+                m1 = v.Index( Middle1, ' : ' );
+                m2 = v.Index( Middle2, ' : ' );
                 v = ( m1 + m2 ) * 0.5;
             end
             v = ipermute( reshape( v, [ ones( 1, numel( Dim ) ), Size( NotDim ) ] ), [ Dim, NotDim ] );
         end
 
         function v = std( v, varargin )
-            v = sqrt( var( v, varargin{:} ) );
+            v = sqrt( var( v, varargin{ : } ) );
         end
 
         function v = var( v, Flag, Dim )
@@ -2326,7 +2326,7 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
                 Digits = 32;
             end
             digits( max( [ Digits, 18 * numel( w ), digits ] ) );
-            [ w{:} ] = ToSumOfDoubles( v );
+            [ w{ : } ] = ToSumOfDoubles( v );
             try
                 w = cellfun( @( x ) vpa( x, BoostPrecision = false ), w, 'UniformOutput', false ); % Requires R2026a.
             catch
@@ -2361,26 +2361,26 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             v = zeros( R, C, 'like', a );
             if isa( b, 'ED.ExtDouble' )
                 for c = 1 : C
-                    t = sum( a .* b.Index( ':', c ).', 2 );
-                    v = v.Assign( t, ':', c );
+                    t = sum( a .* b.Index( ' : ', c ).', 2 );
+                    v = v.Assign( t, ' : ', c );
                 end
             else
                 for c = 1 : C
-                    t = sum( a .* b( :, c ).', 2 );
-                    v = v.Assign( t, ':', c );
+                    t = sum( a .* b( : , c ).', 2 );
+                    v = v.Assign( t, ' : ', c );
                 end
             end
         end
 
         function v = SinTaylor( v )
-            Threshold = 0.5 .* abs( Index( v.v1, ':' ) ) .* v.tiny.v1;
+            Threshold = 0.5 .* abs( Index( v.v1, ' : ' ) ) .* v.tiny.v1;
             x = - v .* v;
             r = v;
             for i = 1 : 2 : size( v.InverseFactorial, 1 )
                 r = r .* x;
                 t = r .* v.InverseFactorial.Index( i );
                 v = v + t;
-                if all( abs( Index( t.v1, ':' ) ) <= Threshold )
+                if all( abs( Index( t.v1, ' : ' ) ) <= Threshold )
                     break
                 end
             end
@@ -2412,13 +2412,13 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             H = 0.5 * N;
             v = reshape( v, H, 2 );
             v = ToRand( v );
-            U = Index( v, ':', 1 );
-            V = Index( v, ':', 2 );
+            U = Index( v, ' : ', 1 );
+            V = Index( v, ' : ', 2 );
             R = sqrt( -2 * log( U ) );
             Theta = 2 * v.pi * V;
             [ S, C ] = sincos( Theta );
-            v = Assign( v, R .* C, ':', 1 );
-            v = Assign( v, R .* S, ':', 2 );
+            v = Assign( v, R .* C, ' : ', 1 );
+            v = Assign( v, R .* S, ' : ', 2 );
             if Expanded
                 v = Assign( Vec( v ), [], N );
             end
@@ -2440,14 +2440,14 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             if vm < n
                 v = [ v; zeros( n - vm, vn, 'like', v ) ];
             elseif vm > n
-                v = v.Index( 1 : n, ':' );
+                v = v.Index( 1 : n, ' : ' );
             end
 
-            v = v.Assign( v.Index( 1, ':' ) ./ L.Index( 1, 1 ), 1, ':' );
+            v = v.Assign( v.Index( 1, ' : ' ) ./ L.Index( 1, 1 ), 1, ' : ' );
             for k = 2 : mn
                 j = 1 : ( k - 1 );
-                t = sum( v.Index( j, ':' ) .* L.Index( k, j ).', 1 );
-                v = v.Assign( ( v.Index( k, ':' ) - t ) ./ L.Index( k, k ), k, ':' );
+                t = sum( v.Index( j, ' : ' ) .* L.Index( k, j ).', 1 );
+                v = v.Assign( ( v.Index( k, ' : ' ) - t ) ./ L.Index( k, k ), k, ' : ' );
             end
         end
 
@@ -2458,14 +2458,14 @@ classdef ( Abstract ) ExtDouble < ED.BaseExtDoubleProperties
             if vm < n
                 v = [ v; zeros( n - vm, vn, 'like', v ) ];
             elseif vm > n
-                v = v.Index( 1 : n, ':' );
+                v = v.Index( 1 : n, ' : ' );
             end
 
-            v = v.Assign( v.Index( mn, ':' ) ./ U.Index( mn, mn ), mn, ':' );
+            v = v.Assign( v.Index( mn, ' : ' ) ./ U.Index( mn, mn ), mn, ' : ' );
             for k = ( mn - 1 ) : -1 : 1
                 j = ( k + 1 ) : n;
-                t = sum( v.Index( j, ':' ) .* U.Index( k, j ).', 1 );
-                v = v.Assign( ( v.Index( k, ':' ) - t ) ./ U.Index( k, k ), k, ':' );
+                t = sum( v.Index( j, ' : ' ) .* U.Index( k, j ).', 1 );
+                v = v.Assign( ( v.Index( k, ' : ' ) - t ) ./ U.Index( k, k ), k, ' : ' );
             end
         end
 

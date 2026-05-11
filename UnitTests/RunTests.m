@@ -36,16 +36,16 @@ function Results = RunTests( )
 
     % Display a summary
     disp( ' ' );
-    disp( 'Test Summary:' );
+    disp( 'Test Summary : ' );
     disp( [ '  ' num2str( sum( [ Results.Passed ] ) ) ' tests passed' ] );
     disp( [ '  ' num2str( sum( [ Results.Failed ] ) ) ' tests failed' ] );
     disp( [ '  ' num2str( sum( [ Results.Incomplete ] ) ) ' tests skipped' ] );
-    disp( [ '  Total time: ' num2str( sum( [ Results.Duration ] ) ) ' seconds' ] );
+    disp( [ '  Total time : ' num2str( sum( [ Results.Duration ] ) ) ' seconds' ] );
 
     % If any tests failed, display details
     if sum( [ Results.Failed ] ) > 0
         disp( ' ' );
-        disp( 'Failed Tests:' );
+        disp( 'Failed Tests : ' );
         FailedIdx = find( [ Results.Failed ] );
         for i = 1 : length( FailedIdx )
             TestIdx = FailedIdx( i );
